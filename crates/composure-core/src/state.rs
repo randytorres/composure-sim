@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 /// Simulation state at time `t`.
 ///
@@ -29,9 +30,28 @@ pub struct SimState {
 impl SimState {
     /// Create a new state with `n` dimensions, all initialized to the given values.
     pub fn new(z: Vec<f64>, m: Vec<f64>, u: Vec<f64>) -> Self {
-        assert_eq!(z.len(), m.len(), "z and m must have same dimensionality");
-        assert_eq!(z.len(), u.len(), "z and u must have same dimensionality");
-        Self { z, m, u, t: 0 }
+        Self::try_new(z, m, u).expect("invalid simulation state dimensions")
+    }
+
+    /// Create a new state, returning an error when vector dimensionality differs.
+    pub fn try_new(z: Vec<f64>, m: Vec<f64>, u: Vec<f64>) -> Result<Self, SimStateError> {
+        if z.len() != m.len() {
+            return Err(SimStateError::DimensionMismatch {
+                left: "z",
+                right: "m",
+                left_len: z.len(),
+                right_len: m.len(),
+            });
+        }
+        if z.len() != u.len() {
+            return Err(SimStateError::DimensionMismatch {
+                left: "z",
+                right: "u",
+                left_len: z.len(),
+                right_len: u.len(),
+            });
+        }
+        Ok(Self { z, m, u, t: 0 })
     }
 
     /// Create a zero-initialized state with `n` dimensions.
@@ -106,6 +126,17 @@ impl Default for Action {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+pub enum SimStateError {
+    #[error("{left} and {right} must have same dimensionality (got {left_len} and {right_len})")]
+    DimensionMismatch {
+        left: &'static str,
+        right: &'static str,
+        left_len: usize,
+        right_len: usize,
+    },
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -132,7 +163,21 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "z and m must have same dimensionality")]
+    fn test_try_new_returns_error() {
+        let err = SimState::try_new(vec![0.5], vec![0.0, 0.0], vec![0.5]).unwrap_err();
+        assert_eq!(
+            err,
+            SimStateError::DimensionMismatch {
+                left: "z",
+                right: "m",
+                left_len: 1,
+                right_len: 2,
+            }
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid simulation state dimensions")]
     fn test_mismatched_dimensions() {
         SimState::new(vec![0.5], vec![0.0, 0.0], vec![0.5]);
     }

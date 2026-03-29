@@ -1,16 +1,27 @@
 //! Python bindings for composure-core.
 //!
 //! Exposes Monte Carlo engine, Composure Curve analysis, and core types to Python.
+#![allow(clippy::useless_conversion)]
 
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
 use composure_core::composure;
-use composure_core::monte_carlo::{MonteCarloConfig, self as mc};
+use composure_core::monte_carlo::{self as mc, MonteCarloConfig};
 use composure_core::state::SimState;
 use composure_core::Simulator;
 
 struct DefaultSimulator;
+
+fn build_state(
+    initial_z: Vec<f64>,
+    initial_m: Vec<f64>,
+    initial_u: Vec<f64>,
+) -> PyResult<SimState> {
+    SimState::try_new(initial_z, initial_m, initial_u)
+        .map_err(|err| PyValueError::new_err(err.to_string()))
+}
 
 impl Simulator for DefaultSimulator {
     fn step(
@@ -50,11 +61,12 @@ fn run_monte_carlo<'py>(
     time_steps: usize,
     seed: u64,
 ) -> PyResult<Bound<'py, PyDict>> {
-    let state = SimState::new(initial_z, initial_m, initial_u);
+    let state = build_state(initial_z, initial_m, initial_u)?;
     let config = MonteCarloConfig::with_seed(num_paths, time_steps, seed);
     let sim = DefaultSimulator;
 
-    let result = mc::run_monte_carlo(&sim, &state, &[], &config, false);
+    let result = mc::run_monte_carlo_checked(&sim, &state, &[], &config, false)
+        .map_err(|err| PyValueError::new_err(err.to_string()))?;
 
     let dict = PyDict::new_bound(py);
     dict.set_item("mean_trajectory", &result.mean_trajectory)?;
@@ -82,7 +94,8 @@ fn analyze_composure<'py>(
     values: Vec<f64>,
     threshold: f64,
 ) -> PyResult<Bound<'py, PyDict>> {
-    let result = composure::analyze_composure(&values, threshold);
+    let result = composure::analyze_composure_checked(&values, threshold)
+        .map_err(|err| PyValueError::new_err(err.to_string()))?;
 
     let dict = PyDict::new_bound(py);
     dict.set_item("archetype", result.archetype.label())?;

@@ -9,7 +9,7 @@ description = "Python bindings for composure-core simulation engine"
 
 [lib]
 name = "composure_py"
-crate-type = ["rlib"]
+crate-type = ["cdylib", "rlib"]
 
 [features]
 default = []

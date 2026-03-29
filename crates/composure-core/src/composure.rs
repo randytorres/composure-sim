@@ -5,6 +5,7 @@
 //! degrades under stress and recovers after stress removal.
 
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 /// A point on the composure curve.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -62,11 +63,17 @@ impl Archetype {
     pub fn description(&self) -> &'static str {
         match self {
             Self::Steady => "Consistent performance under pressure. Reliable and predictable.",
-            Self::CliffFaller => "Strong initial performance that collapses under sustained stress.",
+            Self::CliffFaller => {
+                "Strong initial performance that collapses under sustained stress."
+            }
             Self::Phoenix => "Performance drops under stress but recovers strongly. Resilient.",
             Self::Oscillator => "Alternating highs and lows. Inconsistent under pressure.",
-            Self::Plateau => "Flat performance regardless of conditions. Neither improving nor degrading.",
-            Self::Surge => "Performance improves under pressure. Thrives in challenging conditions.",
+            Self::Plateau => {
+                "Flat performance regardless of conditions. Neither improving nor degrading."
+            }
+            Self::Surge => {
+                "Performance improves under pressure. Thrives in challenging conditions."
+            }
         }
     }
 }
@@ -106,6 +113,19 @@ pub struct ComposureCurve {
 /// This is the main entry point. Takes a sequence of scalar health index values
 /// (from Monte Carlo mean trajectory or a single path) and returns full analysis.
 pub fn analyze_composure(values: &[f64], failure_threshold: f64) -> ComposureCurve {
+    analyze_composure_checked(values, failure_threshold)
+        .expect("composure analysis requires at least one value")
+}
+
+/// Checked variant of [`analyze_composure`] that rejects empty trajectories.
+pub fn analyze_composure_checked(
+    values: &[f64],
+    failure_threshold: f64,
+) -> Result<ComposureCurve, ComposureError> {
+    if values.is_empty() {
+        return Err(ComposureError::EmptyTrajectory);
+    }
+
     let timeline: Vec<ComposurePoint> = values
         .iter()
         .enumerate()
@@ -136,11 +156,11 @@ pub fn analyze_composure(values: &[f64], failure_threshold: f64) -> ComposureCur
         break_point,
     };
 
-    ComposureCurve {
+    Ok(ComposureCurve {
         timeline,
         archetype,
         metrics,
-    }
+    })
 }
 
 /// Classify archetype from a raw trajectory.
@@ -217,7 +237,8 @@ fn has_recovery_surge(values: &[f64]) -> bool {
         // Check: does the trough occur in a concentrated region (not spread out)?
         // Count how many points are below the mean — if >40%, it's oscillating, not Phoenix.
         let mean = average(values);
-        let below_mean_ratio = values.iter().filter(|&&v| v < mean).count() as f64 / values.len() as f64;
+        let below_mean_ratio =
+            values.iter().filter(|&&v| v < mean).count() as f64 / values.len() as f64;
         if below_mean_ratio > 0.45 {
             return false;
         }
@@ -251,7 +272,10 @@ fn has_recovery_surge(values: &[f64]) -> bool {
 
     // Check recovery: post-trough values must recover significantly
     let post_trough = &values[trough_idx..];
-    let recovery_peak = post_trough.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+    let recovery_peak = post_trough
+        .iter()
+        .cloned()
+        .fold(f64::NEG_INFINITY, f64::max);
     let recovery = recovery_peak - trough_val;
 
     recovery > drop * 0.6
@@ -354,6 +378,12 @@ fn compute_residual_damage(values: &[f64]) -> f64 {
     (initial - final_level).max(0.0)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+pub enum ComposureError {
+    #[error("composure analysis requires at least one value")]
+    EmptyTrajectory,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -363,8 +393,11 @@ mod tests {
         // Truly flat line — zero slope, zero variance
         let values: Vec<f64> = (0..50).map(|_| 0.5).collect();
         let arch = classify_archetype(&values);
-        assert!(arch == Archetype::Steady || arch == Archetype::Plateau,
-            "Expected Steady or Plateau for flat line, got {:?}", arch);
+        assert!(
+            arch == Archetype::Steady || arch == Archetype::Plateau,
+            "Expected Steady or Plateau for flat line, got {:?}",
+            arch
+        );
     }
 
     #[test]
@@ -377,19 +410,23 @@ mod tests {
     #[test]
     fn test_phoenix_classification() {
         // Start high, sharp drop, strong recovery
-        let mut values = Vec::new();
-        for _ in 0..10 { values.push(0.9); }             // Stable at 0.9
-        for i in 0..10 { values.push(0.9 - i as f64 * 0.05); } // Drop to 0.4
-        for i in 0..30 { values.push(0.4 + i as f64 * 0.018); } // Recover to ~0.94
+        let mut values = vec![0.9; 10]; // Stable at 0.9
+        for i in 0..10 {
+            values.push(0.9 - i as f64 * 0.05);
+        } // Drop to 0.4
+        for i in 0..30 {
+            values.push(0.4 + i as f64 * 0.018);
+        } // Recover to ~0.94
         assert_eq!(classify_archetype(&values), Archetype::Phoenix);
     }
 
     #[test]
     fn test_cliff_faller_classification() {
         // Very stable first half, dramatic collapse second half
-        let mut values = Vec::new();
-        for _ in 0..25 { values.push(0.9); }              // Rock stable at 0.9
-        for i in 0..25 { values.push(0.9 - i as f64 * 0.03); } // Collapse to 0.15
+        let mut values = vec![0.9; 25]; // Rock stable at 0.9
+        for i in 0..25 {
+            values.push(0.9 - i as f64 * 0.03);
+        } // Collapse to 0.15
         assert_eq!(classify_archetype(&values), Archetype::CliffFaller);
     }
 
@@ -422,12 +459,18 @@ mod tests {
     }
 
     #[test]
+    fn test_empty_series_rejected() {
+        let err = analyze_composure_checked(&[], 0.3).unwrap_err();
+        assert_eq!(err, ComposureError::EmptyTrajectory);
+    }
+
+    #[test]
     fn test_oscillator_classification() {
         // High variance with no clear drop-then-recover shape
         // Use a sine-like pattern that oscillates without a single trough
-        let values: Vec<f64> = (0..50).map(|i| {
-            0.5 + 0.3 * (i as f64 * 0.5).sin()
-        }).collect();
+        let values: Vec<f64> = (0..50)
+            .map(|i| 0.5 + 0.3 * (i as f64 * 0.5).sin())
+            .collect();
         assert_eq!(classify_archetype(&values), Archetype::Oscillator);
     }
 }

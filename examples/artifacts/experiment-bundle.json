@@ -1,0 +1,74 @@
+{
+  "spec": {
+    "id": "exp-1",
+    "name": "Baseline",
+    "description": "Example experiment bundle artifact",
+    "scenario": {
+      "id": "baseline",
+      "name": "Baseline",
+      "initial_state": {
+        "z": [0.8],
+        "m": [0.0],
+        "u": [0.2],
+        "t": 0
+      },
+      "actions": [],
+      "time_steps": 3,
+      "failure_threshold": 0.5,
+      "metadata": null
+    },
+    "default_monte_carlo": {
+      "num_paths": 10,
+      "time_steps": 3,
+      "seed_base": 42
+    },
+    "tags": ["example"],
+    "metadata": null,
+    "created_at_unix_s": 1700000000
+  },
+  "parameter_sets": [
+    {
+      "id": "variant-a",
+      "name": "Variant A",
+      "scenario": {
+        "id": "variant-a",
+        "name": "Variant A",
+        "initial_state": {
+          "z": [0.8],
+          "m": [0.0],
+          "u": [0.2],
+          "t": 0
+        },
+        "actions": [],
+        "time_steps": 3,
+        "failure_threshold": 0.5,
+        "metadata": null
+      },
+      "monte_carlo": {
+        "num_paths": 10,
+        "time_steps": 3,
+        "seed_base": 7
+      },
+      "notes": null,
+      "metadata": null
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run-1",
+      "parameter_set_id": "variant-a",
+      "status": "Completed",
+      "seed": 7,
+      "started_at_unix_s": 1700000000,
+      "completed_at_unix_s": 1700000001,
+      "outcome": {
+        "monte_carlo": null,
+        "composure": null,
+        "replay": null,
+        "metadata": null
+      },
+      "error": null,
+      "metadata": null
+    }
+  ]
+}
