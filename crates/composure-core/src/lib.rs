@@ -19,19 +19,22 @@
 //! - `wargame-engine` — Event-sourced replay, deterministic seeding
 //! - `sim` ProfileBuilder.ts — Composure Curve archetype classification
 
-pub mod state;
-pub mod simulator;
-pub mod monte_carlo;
 pub mod composure;
+pub mod monte_carlo;
 pub mod replay;
 pub mod scenario;
+pub mod simulator;
+pub mod state;
 
-pub use state::{SimState, Action, ActionType};
-pub use simulator::Simulator;
-pub use monte_carlo::{MonteCarloConfig, MonteCarloResult, PathResult, run_monte_carlo};
 pub use composure::{
-    ComposureCurve, ComposurePoint, Archetype, ComposureMetrics,
-    analyze_composure, classify_archetype,
+    analyze_composure, analyze_composure_checked, classify_archetype, Archetype, ComposureCurve,
+    ComposureError, ComposureMetrics, ComposurePoint,
 };
-pub use replay::{ReplayRun, EventLog, EventEntry, EventKind, StateSnapshot};
+pub use monte_carlo::{
+    run_monte_carlo, run_monte_carlo_checked, MonteCarloConfig, MonteCarloError, MonteCarloResult,
+    PathResult,
+};
+pub use replay::{EventEntry, EventKind, EventLog, ReplayRun, StateSnapshot};
 pub use scenario::{Scenario, ScenarioError};
+pub use simulator::Simulator;
+pub use state::{Action, ActionType, SimState, SimStateError};

@@ -31,7 +31,12 @@ pub struct Scenario {
 }
 
 impl Scenario {
-    pub fn new(id: impl Into<String>, name: impl Into<String>, initial_state: SimState, time_steps: usize) -> Self {
+    pub fn new(
+        id: impl Into<String>,
+        name: impl Into<String>,
+        initial_state: SimState,
+        time_steps: usize,
+    ) -> Self {
         Self {
             id: id.into(),
             name: name.into(),
@@ -57,6 +62,19 @@ impl Scenario {
         if self.initial_state.dimensions() == 0 {
             return Err(ScenarioError::ZeroDimensions);
         }
+        let dims = self.initial_state.dimensions();
+        if let Some((action_index, dimension)) = self
+            .actions
+            .iter()
+            .enumerate()
+            .find_map(|(idx, action)| action.dimension.filter(|&d| d >= dims).map(|d| (idx, d)))
+        {
+            return Err(ScenarioError::InvalidActionDimension {
+                action_index,
+                dimension,
+                dimensions: dims,
+            });
+        }
         if let Some(threshold) = self.failure_threshold {
             if !(0.0..=1.0).contains(&threshold) {
                 return Err(ScenarioError::InvalidThreshold(threshold));
@@ -76,6 +94,12 @@ pub enum ScenarioError {
     ZeroTimeSteps,
     #[error("initial state must have at least 1 dimension")]
     ZeroDimensions,
+    #[error("action {action_index} targets dimension {dimension}, but state has {dimensions} dimensions")]
+    InvalidActionDimension {
+        action_index: usize,
+        dimension: usize,
+        dimensions: usize,
+    },
     #[error("failure threshold must be in [0, 1], got {0}")]
     InvalidThreshold(f64),
 }
@@ -100,5 +124,25 @@ mod tests {
     fn test_zero_steps() {
         let s = Scenario::new("test", "Test", SimState::zeros(3), 0);
         assert!(matches!(s.validate(), Err(ScenarioError::ZeroTimeSteps)));
+    }
+
+    #[test]
+    fn test_invalid_action_dimension() {
+        let mut s = Scenario::new("test", "Test", SimState::zeros(3), 10);
+        s.actions.push(Action {
+            dimension: Some(3),
+            magnitude: 1.0,
+            action_type: crate::state::ActionType::Intervention,
+            metadata: None,
+        });
+
+        assert!(matches!(
+            s.validate(),
+            Err(ScenarioError::InvalidActionDimension {
+                action_index: 0,
+                dimension: 3,
+                dimensions: 3,
+            })
+        ));
     }
 }

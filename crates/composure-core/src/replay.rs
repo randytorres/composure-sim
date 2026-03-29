@@ -58,10 +58,7 @@ impl EventLog {
 
     /// Filter events by kind.
     pub fn filter_kind(&self, kind: &EventKind) -> Vec<&EventEntry> {
-        self.entries
-            .iter()
-            .filter(|e| std::mem::discriminant(&e.kind) == std::mem::discriminant(kind))
-            .collect()
+        self.entries.iter().filter(|e| &e.kind == kind).collect()
     }
 }
 
@@ -186,12 +183,53 @@ mod tests {
     #[test]
     fn test_event_filter() {
         let mut log = EventLog::new();
-        log.push(EventEntry { sequence: 0, t: 0, kind: EventKind::RunStarted, metadata: None });
-        log.push(EventEntry { sequence: 1, t: 0, kind: EventKind::ActionApplied, metadata: None });
-        log.push(EventEntry { sequence: 2, t: 1, kind: EventKind::ActionApplied, metadata: None });
-        log.push(EventEntry { sequence: 3, t: 1, kind: EventKind::RunCompleted, metadata: None });
+        log.push(EventEntry {
+            sequence: 0,
+            t: 0,
+            kind: EventKind::RunStarted,
+            metadata: None,
+        });
+        log.push(EventEntry {
+            sequence: 1,
+            t: 0,
+            kind: EventKind::ActionApplied,
+            metadata: None,
+        });
+        log.push(EventEntry {
+            sequence: 2,
+            t: 1,
+            kind: EventKind::ActionApplied,
+            metadata: None,
+        });
+        log.push(EventEntry {
+            sequence: 3,
+            t: 1,
+            kind: EventKind::RunCompleted,
+            metadata: None,
+        });
 
         let actions = log.filter_kind(&EventKind::ActionApplied);
         assert_eq!(actions.len(), 2);
+    }
+
+    #[test]
+    fn test_event_filter_matches_full_variant() {
+        let mut log = EventLog::new();
+        log.push(EventEntry {
+            sequence: 0,
+            t: 0,
+            kind: EventKind::Custom("foo".into()),
+            metadata: None,
+        });
+        log.push(EventEntry {
+            sequence: 1,
+            t: 0,
+            kind: EventKind::Custom("bar".into()),
+            metadata: None,
+        });
+
+        let events = log.filter_kind(&EventKind::Custom("foo".into()));
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].kind, EventKind::Custom("foo".into()));
     }
 }

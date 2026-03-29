@@ -49,7 +49,7 @@ Runs N parallel paths (rayon) with seeded determinism:
 use composure_core::{run_monte_carlo, MonteCarloConfig, SimState};
 
 let config = MonteCarloConfig::with_seed(10_000, 180, 42);
-let result = run_monte_carlo(&my_sim, &initial_state, &actions, &config, false);
+let result = run_monte_carlo_checked(&my_sim, &initial_state, &actions, &config, false)?;
 
 println!("Mean trajectory: {:?}", result.mean_trajectory);
 println!("P10-P90 bands: {:?}", result.percentiles);
@@ -69,9 +69,9 @@ Analyzes a trajectory into degradation/recovery metrics and classifies an archet
 | Surge | Improving under pressure. |
 
 ```rust
-use composure_core::{analyze_composure, classify_archetype};
+use composure_core::{analyze_composure_checked, classify_archetype};
 
-let curve = analyze_composure(&health_indices, 0.3);
+let curve = analyze_composure_checked(&health_indices, 0.3)?;
 println!("Archetype: {}", curve.archetype.label());
 println!("Slope: {}", curve.metrics.slope);
 println!("Recovery half-life: {:?}", curve.metrics.recovery_half_life);
@@ -83,6 +83,7 @@ Deterministic, replayable simulation runs with full state snapshots and event lo
 
 ```rust
 use composure_core::replay::ReplayBuilder;
+use composure_core::EventKind;
 
 let mut replay = ReplayBuilder::new("run-001", seed);
 // During simulation:

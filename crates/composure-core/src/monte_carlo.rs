@@ -2,6 +2,7 @@ use rand::rngs::StdRng;
 use rand::SeedableRng;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 use crate::simulator::Simulator;
 use crate::state::{Action, SimState};
@@ -32,6 +33,13 @@ impl MonteCarloConfig {
             time_steps,
             seed_base: seed,
         }
+    }
+
+    pub fn validate(&self) -> Result<(), MonteCarloError> {
+        if self.num_paths == 0 {
+            return Err(MonteCarloError::ZeroPaths);
+        }
+        Ok(())
     }
 }
 
@@ -92,6 +100,20 @@ pub fn run_monte_carlo<S: Simulator>(
     config: &MonteCarloConfig,
     retain_paths: bool,
 ) -> MonteCarloResult {
+    run_monte_carlo_checked(sim, initial_state, actions, config, retain_paths)
+        .expect("invalid Monte Carlo configuration")
+}
+
+/// Checked variant of [`run_monte_carlo`] that returns configuration errors.
+pub fn run_monte_carlo_checked<S: Simulator>(
+    sim: &S,
+    initial_state: &SimState,
+    actions: &[Action],
+    config: &MonteCarloConfig,
+    retain_paths: bool,
+) -> Result<MonteCarloResult, MonteCarloError> {
+    config.validate()?;
+
     // Run all paths in parallel
     let path_results: Vec<PathResult> = (0..config.num_paths)
         .into_par_iter()
@@ -142,12 +164,12 @@ pub fn run_monte_carlo<S: Simulator>(
         p90: columns.iter().map(|c| percentile(c, 0.90)).collect(),
     };
 
-    MonteCarloResult {
+    Ok(MonteCarloResult {
         paths: if retain_paths { path_results } else { vec![] },
         percentiles,
         mean_trajectory,
         config: config.clone(),
-    }
+    })
 }
 
 /// Compute the p-th percentile from a sorted slice.
@@ -157,6 +179,12 @@ fn percentile(sorted: &[f64], p: f64) -> f64 {
     }
     let idx = (p * (sorted.len() - 1) as f64).round() as usize;
     sorted[idx.min(sorted.len() - 1)]
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+pub enum MonteCarloError {
+    #[error("num_paths must be greater than zero")]
+    ZeroPaths,
 }
 
 #[cfg(test)]
@@ -221,6 +249,16 @@ mod tests {
 
         assert_eq!(result.paths.len(), 10);
         assert_eq!(result.paths[0].health_indices.len(), 5);
+    }
+
+    #[test]
+    fn test_zero_paths_rejected() {
+        let sim = DriftSim;
+        let initial = SimState::new(vec![0.5], vec![0.0], vec![0.5]);
+        let config = MonteCarloConfig::with_seed(0, 5, 0);
+
+        let err = run_monte_carlo_checked(&sim, &initial, &[], &config, false).unwrap_err();
+        assert_eq!(err, MonteCarloError::ZeroPaths);
     }
 
     #[test]
