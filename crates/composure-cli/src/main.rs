@@ -1,8 +1,9 @@
 use std::{env, fs};
 
 use composure_core::{
-    compare_monte_carlo_results, ComparisonConfig, ExperimentBundle, ExperimentRunStatus,
-    MonteCarloResult, RunSummary, SensitivityKind, SweepExecutionResult, TrajectoryComparison,
+    compare_monte_carlo_results, summarize_run, ComparisonConfig, ExperimentBundle,
+    ExperimentRunStatus, MonteCarloResult, RunSummary, SensitivityKind, SweepExecutionResult,
+    TrajectoryComparison,
 };
 use thiserror::Error;
 
@@ -38,16 +39,43 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let summary = read_json::<RunSummary>(path)?;
             Ok(format_summary(&summary))
         }
+        [_bin, command, path] if command == "summarize-monte-carlo" => {
+            let result = read_json::<MonteCarloResult>(path)?;
+            let summary = summarize_run(Some(&result), None);
+            serde_json::to_string_pretty(&summary).map_err(CliError::SerializeJson)
+        }
         [_bin, command, path] if command == "inspect-compare" => {
             let comparison = read_json::<TrajectoryComparison>(path)?;
             Ok(format_comparison(&comparison))
         }
-        [_bin, command, baseline_path, candidate_path] if command == "compare-monte-carlo" => {
+        [_bin, command, bundle_path, run_id] if command == "summarize-bundle-run" => {
+            let bundle = read_json::<ExperimentBundle>(bundle_path)?;
+            let run = bundle
+                .runs
+                .iter()
+                .find(|run| run.run_id == *run_id)
+                .ok_or_else(|| CliError::RunNotFound {
+                    bundle_path: bundle_path.clone(),
+                    run_id: run_id.clone(),
+                })?;
+            let outcome = run
+                .outcome
+                .as_ref()
+                .ok_or_else(|| CliError::MissingRunOutcome {
+                    bundle_path: bundle_path.clone(),
+                    run_id: run_id.clone(),
+                })?;
+            let summary = summarize_run(outcome.monte_carlo.as_ref(), outcome.composure.as_ref());
+            serde_json::to_string_pretty(&summary).map_err(CliError::SerializeJson)
+        }
+        [_bin, command, baseline_path, candidate_path, tail @ ..]
+            if command == "compare-monte-carlo" =>
+        {
             let baseline = read_json::<MonteCarloResult>(baseline_path)?;
             let candidate = read_json::<MonteCarloResult>(candidate_path)?;
-            let comparison =
-                compare_monte_carlo_results(&baseline, &candidate, &ComparisonConfig::default())
-                    .map_err(CliError::Compare)?;
+            let config = parse_compare_config(tail)?;
+            let comparison = compare_monte_carlo_results(&baseline, &candidate, &config)
+                .map_err(CliError::Compare)?;
             serde_json::to_string_pretty(&comparison).map_err(CliError::SerializeJson)
         }
         [_bin, ..] => Err(CliError::UnknownCommand { usage: usage() }),
@@ -61,15 +89,25 @@ fn usage() -> String {
         "  composure inspect-bundle <path>",
         "  composure inspect-sweep <path>",
         "  composure inspect-summary <path>",
+        "  composure summarize-monte-carlo <path>",
+        "  composure summarize-bundle-run <bundle-path> <run-id>",
         "  composure inspect-compare <path>",
-        "  composure compare-monte-carlo <baseline-path> <candidate-path>",
+        "  composure compare-monte-carlo <baseline-path> <candidate-path> [flags]",
         "",
         "Commands:",
         "  inspect-bundle   Read an ExperimentBundle JSON artifact and print a summary",
         "  inspect-sweep    Read a SweepExecutionResult JSON artifact and print a summary",
         "  inspect-summary  Read a RunSummary JSON artifact and print a summary",
+        "  summarize-monte-carlo  Convert a MonteCarloResult JSON artifact into a RunSummary JSON artifact",
+        "  summarize-bundle-run   Extract and summarize one run from an ExperimentBundle JSON artifact",
         "  inspect-compare  Read a TrajectoryComparison JSON artifact and print a summary",
         "  compare-monte-carlo  Compare two MonteCarloResult JSON artifacts and emit JSON",
+        "",
+        "Compare flags:",
+        "  --divergence-threshold <float>",
+        "  --sustained-steps <usize>",
+        "  --equality-epsilon <float>",
+        "  --failure-threshold <float>",
     ]
     .join("\n")
 }
@@ -85,6 +123,49 @@ where
     serde_json::from_str(&raw).map_err(|source| CliError::ParseJson {
         path: path.into(),
         source,
+    })
+}
+
+fn parse_compare_config(args: &[String]) -> Result<ComparisonConfig, CliError> {
+    let mut config = ComparisonConfig::default();
+    let mut index = 0;
+
+    while index < args.len() {
+        let flag = &args[index];
+        let value = args
+            .get(index + 1)
+            .ok_or_else(|| CliError::MissingFlagValue(flag.clone()))?;
+
+        match flag.as_str() {
+            "--divergence-threshold" => {
+                config.divergence_threshold = parse_flag(value, flag)?;
+            }
+            "--sustained-steps" => {
+                config.sustained_steps = parse_flag(value, flag)?;
+            }
+            "--equality-epsilon" => {
+                config.equality_epsilon = parse_flag(value, flag)?;
+            }
+            "--failure-threshold" => {
+                config.failure_threshold = Some(parse_flag(value, flag)?);
+            }
+            _ => return Err(CliError::UnknownFlag(flag.clone())),
+        }
+
+        index += 2;
+    }
+
+    config.validate().map_err(CliError::Compare)?;
+    Ok(config)
+}
+
+fn parse_flag<T>(value: &str, flag: &str) -> Result<T, CliError>
+where
+    T: std::str::FromStr,
+{
+    value.parse::<T>().map_err(|_| CliError::InvalidFlagValue {
+        flag: flag.into(),
+        value: value.into(),
     })
 }
 
@@ -259,6 +340,16 @@ enum CliError {
         #[source]
         source: serde_json::Error,
     },
+    #[error("run {run_id} was not found in bundle {bundle_path}")]
+    RunNotFound { bundle_path: String, run_id: String },
+    #[error("run {run_id} in bundle {bundle_path} does not have an outcome")]
+    MissingRunOutcome { bundle_path: String, run_id: String },
+    #[error("missing value for flag {0}")]
+    MissingFlagValue(String),
+    #[error("unknown flag {0}")]
+    UnknownFlag(String),
+    #[error("invalid value {value} for flag {flag}")]
+    InvalidFlagValue { flag: String, value: String },
     #[error("comparison failed: {0}")]
     Compare(composure_core::CompareError),
     #[error("failed to serialize JSON output: {0}")]
@@ -441,6 +532,7 @@ mod tests {
     #[test]
     fn test_run_help() {
         let output = run(&["composure".into(), "help".into()]).unwrap();
+        assert!(output.contains("summarize-bundle-run"));
         assert!(output.contains("compare-monte-carlo"));
     }
 
@@ -459,6 +551,32 @@ mod tests {
         let output = format_comparison(&comparison);
         assert!(output.contains("Series length: 3"));
         assert!(output.contains("Failure comparison:"));
+    }
+
+    #[test]
+    fn test_parse_compare_config_overrides_defaults() {
+        let config = parse_compare_config(&[
+            "--divergence-threshold".into(),
+            "0.2".into(),
+            "--sustained-steps".into(),
+            "3".into(),
+            "--equality-epsilon".into(),
+            "0.01".into(),
+            "--failure-threshold".into(),
+            "0.4".into(),
+        ])
+        .unwrap();
+
+        assert_eq!(config.divergence_threshold, 0.2);
+        assert_eq!(config.sustained_steps, 3);
+        assert_eq!(config.equality_epsilon, 0.01);
+        assert_eq!(config.failure_threshold, Some(0.4));
+    }
+
+    #[test]
+    fn test_parse_compare_config_rejects_unknown_flag() {
+        let err = parse_compare_config(&["--unknown".into(), "1".into()]).unwrap_err();
+        assert!(matches!(err, CliError::UnknownFlag(flag) if flag == "--unknown"));
     }
 
     #[test]
@@ -509,5 +627,62 @@ mod tests {
 
         let _ = fs::remove_file(baseline_path);
         let _ = fs::remove_file(candidate_path);
+    }
+
+    #[test]
+    fn test_run_summarize_monte_carlo_outputs_summary_json() {
+        let temp_dir = std::env::temp_dir();
+        let path = temp_dir.join("composure-cli-summary-monte-carlo.json");
+
+        let result = MonteCarloResult {
+            paths: vec![],
+            percentiles: PercentileBands {
+                p10: vec![0.8, 0.7, 0.6],
+                p25: vec![0.82, 0.72, 0.62],
+                p50: vec![0.84, 0.74, 0.64],
+                p75: vec![0.86, 0.76, 0.66],
+                p90: vec![0.88, 0.78, 0.68],
+            },
+            mean_trajectory: vec![0.84, 0.74, 0.64],
+            config: MonteCarloConfig::with_seed(10, 3, 1),
+        };
+
+        fs::write(&path, serde_json::to_string(&result).unwrap()).unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "summarize-monte-carlo".into(),
+            path.display().to_string(),
+        ])
+        .unwrap();
+
+        let summary: RunSummary = serde_json::from_str(&output).unwrap();
+        assert_eq!(summary.monte_carlo.as_ref().unwrap().time_steps, 3);
+        assert!(summary.composure.is_none());
+
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_run_summarize_bundle_run_outputs_summary_json() {
+        let temp_dir = std::env::temp_dir();
+        let path = temp_dir.join("composure-cli-bundle.json");
+        let bundle = sample_bundle();
+
+        fs::write(&path, serde_json::to_string(&bundle).unwrap()).unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "summarize-bundle-run".into(),
+            path.display().to_string(),
+            "run-1".into(),
+        ])
+        .unwrap();
+
+        let summary: RunSummary = serde_json::from_str(&output).unwrap();
+        assert!(summary.monte_carlo.is_none());
+        assert!(summary.composure.is_none());
+
+        let _ = fs::remove_file(path);
     }
 }

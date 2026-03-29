@@ -8,7 +8,7 @@ Use this to simulate any system that degrades and recovers under stress — heal
 
 | Crate | Purpose |
 |---|---|
-| `composure-cli` | Minimal CLI for inspecting experiment bundles, sweep results, and run summaries |
+| `composure-cli` | Minimal CLI for inspecting, summarizing, and comparing saved simulation artifacts |
 | `composure-core` | Core library: SimState, Simulator trait, Monte Carlo (rayon parallel), Composure Curve (archetype classification), event-sourced replay, comparison, experiment bundles, execution, sweep runner, sensitivity, run summaries |
 | `composure-py` | PyO3 Python bindings |
 | `composure-wasm` | WASM bindings for browser |
@@ -197,12 +197,21 @@ The `composure` CLI can inspect saved artifacts and compare saved Monte Carlo re
 
 ```bash
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
+cargo run -p composure-cli -- summarize-monte-carlo examples/artifacts/candidate-monte-carlo.json
 cargo run -p composure-cli -- inspect-bundle examples/artifacts/experiment-bundle.json
+cargo run -p composure-cli -- summarize-bundle-run \
+  examples/artifacts/experiment-bundle-with-output.json \
+  run-1
 cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
 cargo run -p composure-cli -- compare-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   examples/artifacts/candidate-monte-carlo.json
+cargo run -p composure-cli -- compare-monte-carlo \
+  examples/artifacts/baseline-monte-carlo.json \
+  examples/artifacts/candidate-monte-carlo.json \
+  --divergence-threshold 0.02 \
+  --sustained-steps 2
 ```
 
 Sample artifacts live under [`examples/artifacts`](/Users/randytorres/Projects/composure-sim/examples/artifacts/README.md).
@@ -364,6 +373,8 @@ cargo test
 cargo run -p composure-cli -- inspect-sweep path/to/sweep-result.json
 cargo run -p composure-cli -- inspect-bundle path/to/experiment-bundle.json
 cargo run -p composure-cli -- inspect-compare path/to/comparison.json
+cargo run -p composure-cli -- summarize-monte-carlo path/to/monte-carlo.json
+cargo run -p composure-cli -- summarize-bundle-run path/to/bundle.json run-id
 cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json
 
 # Python bindings (requires maturin)

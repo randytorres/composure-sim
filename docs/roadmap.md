@@ -176,6 +176,8 @@ Current progress in repo:
 - CLI artifact inspection for run summaries
 - CLI artifact inspection for trajectory comparisons
 - CLI comparison command for saved Monte Carlo result artifacts
+- CLI summary extraction from saved Monte Carlo result artifacts
+- CLI summary extraction from bundle run records
 
 These should consume the experiment and comparison artifacts rather than inventing their own data formats.
 
