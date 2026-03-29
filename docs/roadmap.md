@@ -111,6 +111,7 @@ Current progress in core:
 
 - grid case generation
 - end-to-end sweep execution with caller-supplied parameter mapping
+- experiment-backed sweep execution with bundle recording and failure collection
 - scalar objective extraction from deterministic run summaries
 - ranked numeric/categorical sensitivity summaries
 

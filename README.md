@@ -234,7 +234,51 @@ let results = execute_sweep(
 )?;
 
 println!("Executed {} cases", results.executed_cases.len());
-println!("Top sensitivity: {}", results.sensitivity.rankings[0].parameter);
+println!(
+    "Top sensitivity: {}",
+    results.sensitivity.as_ref().unwrap().rankings[0].parameter
+);
+```
+
+For experiment-driven workflows, use `execute_experiment_sweep` to inherit
+`ExperimentSpec.default_monte_carlo`, persist successful cases into an `ExperimentBundle`,
+and optionally continue past per-case failures:
+
+```rust
+use composure_core::{
+    execute_experiment_sweep, ExperimentSpec, SweepFailureMode, SweepRunnerConfig,
+};
+
+let mut spec = ExperimentSpec::new(
+    "exp-001",
+    "Recovery Sweep",
+    Scenario::new("baseline", "Baseline", SimState::zeros(3), 100),
+);
+spec.default_monte_carlo = Some(MonteCarloConfig::with_seed(1_000, 100, 42));
+
+let results = execute_experiment_sweep(
+    &my_sim,
+    &spec,
+    &sweep,
+    &SweepRunnerConfig {
+        failure_mode: SweepFailureMode::Continue,
+        ..SweepRunnerConfig::default()
+    },
+    |spec, case| {
+        let mut parameter_set = ExperimentParameterSet::new(
+            format!("ps-{}", case.case_id),
+            format!("Case {}", case.case_id),
+            spec.scenario.clone(),
+        );
+        parameter_set.scenario.id = format!("scenario-{}", case.case_id);
+        parameter_set.scenario.name = format!("Scenario {}", case.case_id);
+        Ok(parameter_set)
+    },
+    |_, _, _, summary| Ok(summary.monte_carlo.as_ref().and_then(|m| m.end)),
+)?;
+
+println!("Bundle runs: {}", results.bundle.as_ref().unwrap().runs.len());
+println!("Case failures: {}", results.failures.len());
 ```
 
 ### Run Summaries

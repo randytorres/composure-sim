@@ -73,5 +73,6 @@ pub use sensitivity::{
 pub use simulator::Simulator;
 pub use state::{Action, ActionType, SimState, SimStateError};
 pub use sweep_runner::{
-    execute_sweep, ExecutedSweepCase, SweepExecutionResult, SweepRunnerConfig, SweepRunnerError,
+    execute_experiment_sweep, execute_sweep, ExecutedSweepCase, SweepCaseFailure,
+    SweepExecutionResult, SweepFailureMode, SweepRunnerConfig, SweepRunnerError,
 };
