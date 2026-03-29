@@ -178,6 +178,7 @@ Current progress in repo:
 - CLI comparison command for saved Monte Carlo result artifacts
 - CLI summary extraction from saved Monte Carlo result artifacts
 - CLI summary extraction from bundle run records
+- CLI artifact transforms with file output for pipeline use
 
 These should consume the experiment and comparison artifacts rather than inventing their own data formats.
 
