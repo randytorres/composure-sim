@@ -191,6 +191,22 @@ println!("Top parameter: {}", report.rankings[0].parameter);
 `SweepStrategy::LatinHypercube` generate deterministic sampled cases when `sample_count`
 and an optional `seed` are set on `SweepDefinition`.
 
+### CLI Artifacts
+
+The `composure` CLI can inspect saved artifacts and compare saved Monte Carlo results:
+
+```bash
+cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
+cargo run -p composure-cli -- inspect-bundle examples/artifacts/experiment-bundle.json
+cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
+cargo run -p composure-cli -- compare-monte-carlo \
+  examples/artifacts/baseline-monte-carlo.json \
+  examples/artifacts/candidate-monte-carlo.json
+```
+
+Sample artifacts live under [`examples/artifacts`](/Users/randytorres/Projects/composure-sim/examples/artifacts/README.md).
+
 ### Sweep Runner
 
 Execute a generated sweep end-to-end by mapping each `SweepCase` into an `ExperimentParameterSet`
@@ -347,6 +363,8 @@ cargo test
 # Inspect saved artifacts
 cargo run -p composure-cli -- inspect-sweep path/to/sweep-result.json
 cargo run -p composure-cli -- inspect-bundle path/to/experiment-bundle.json
+cargo run -p composure-cli -- inspect-compare path/to/comparison.json
+cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json
 
 # Python bindings (requires maturin)
 cd crates/composure-py && maturin develop --features python-module

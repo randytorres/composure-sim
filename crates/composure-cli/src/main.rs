@@ -1,7 +1,8 @@
 use std::{env, fs};
 
 use composure_core::{
-    ExperimentBundle, ExperimentRunStatus, RunSummary, SensitivityKind, SweepExecutionResult,
+    compare_monte_carlo_results, ComparisonConfig, ExperimentBundle, ExperimentRunStatus,
+    MonteCarloResult, RunSummary, SensitivityKind, SweepExecutionResult, TrajectoryComparison,
 };
 use thiserror::Error;
 
@@ -37,10 +38,19 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let summary = read_json::<RunSummary>(path)?;
             Ok(format_summary(&summary))
         }
-        [bin, ..] => Err(CliError::UnknownCommand {
-            bin: bin.clone(),
-            usage: usage(),
-        }),
+        [_bin, command, path] if command == "inspect-compare" => {
+            let comparison = read_json::<TrajectoryComparison>(path)?;
+            Ok(format_comparison(&comparison))
+        }
+        [_bin, command, baseline_path, candidate_path] if command == "compare-monte-carlo" => {
+            let baseline = read_json::<MonteCarloResult>(baseline_path)?;
+            let candidate = read_json::<MonteCarloResult>(candidate_path)?;
+            let comparison =
+                compare_monte_carlo_results(&baseline, &candidate, &ComparisonConfig::default())
+                    .map_err(CliError::Compare)?;
+            serde_json::to_string_pretty(&comparison).map_err(CliError::SerializeJson)
+        }
+        [_bin, ..] => Err(CliError::UnknownCommand { usage: usage() }),
         [] => Err(CliError::Usage(usage())),
     }
 }
@@ -51,11 +61,15 @@ fn usage() -> String {
         "  composure inspect-bundle <path>",
         "  composure inspect-sweep <path>",
         "  composure inspect-summary <path>",
+        "  composure inspect-compare <path>",
+        "  composure compare-monte-carlo <baseline-path> <candidate-path>",
         "",
         "Commands:",
         "  inspect-bundle   Read an ExperimentBundle JSON artifact and print a summary",
         "  inspect-sweep    Read a SweepExecutionResult JSON artifact and print a summary",
         "  inspect-summary  Read a RunSummary JSON artifact and print a summary",
+        "  inspect-compare  Read a TrajectoryComparison JSON artifact and print a summary",
+        "  compare-monte-carlo  Compare two MonteCarloResult JSON artifacts and emit JSON",
     ]
     .join("\n")
 }
@@ -184,12 +198,55 @@ fn format_summary(summary: &RunSummary) -> String {
     lines.join("\n")
 }
 
+fn format_comparison(comparison: &TrajectoryComparison) -> String {
+    let failure = comparison
+        .metrics
+        .failure
+        .as_ref()
+        .map(|failure| {
+            format!(
+                "{:?} (baseline={:?}, candidate={:?}, shift={:?})",
+                failure.outcome, failure.baseline_break_t, failure.candidate_break_t, failure.shift
+            )
+        })
+        .unwrap_or_else(|| "none".into());
+    let divergence = comparison
+        .divergence
+        .as_ref()
+        .map(|divergence| {
+            format!(
+                "start={}, end={}, len={}, peak_abs_delta={:.4}",
+                divergence.start_t, divergence.end_t, divergence.length, divergence.peak_abs_delta
+            )
+        })
+        .unwrap_or_else(|| "none".into());
+
+    [
+        format!("Series length: {}", comparison.series_len),
+        format!("Mean delta: {:.4}", comparison.metrics.mean_delta),
+        format!("Mean abs delta: {:.4}", comparison.metrics.mean_abs_delta),
+        format!("RMSE: {:.4}", comparison.metrics.rmse),
+        format!("End delta: {:.4}", comparison.metrics.end_delta),
+        format!("Divergence: {divergence}"),
+        format!("Failure comparison: {failure}"),
+        format!(
+            "Best improvement: t={} delta={:.4}",
+            comparison.metrics.max_improvement.t, comparison.metrics.max_improvement.delta
+        ),
+        format!(
+            "Worst regression: t={} delta={:.4}",
+            comparison.metrics.max_regression.t, comparison.metrics.max_regression.delta
+        ),
+    ]
+    .join("\n")
+}
+
 #[derive(Debug, Error)]
 enum CliError {
     #[error("{0}")]
     Usage(String),
     #[error("unknown command\n\n{usage}")]
-    UnknownCommand { bin: String, usage: String },
+    UnknownCommand { usage: String },
     #[error("failed to read {path}: {source}")]
     ReadFile {
         path: String,
@@ -202,10 +259,15 @@ enum CliError {
         #[source]
         source: serde_json::Error,
     },
+    #[error("comparison failed: {0}")]
+    Compare(composure_core::CompareError),
+    #[error("failed to serialize JSON output: {0}")]
+    SerializeJson(serde_json::Error),
 }
 
 #[cfg(test)]
 mod tests {
+    use composure_core::monte_carlo::PercentileBands;
     use composure_core::{
         ComposureSummary, ExperimentExecutionConfig, ExperimentParameterSet, ExperimentSpec,
         MonteCarloConfig, MonteCarloSummary, Scenario, SensitivityConfig, SensitivityDirection,
@@ -379,6 +441,73 @@ mod tests {
     #[test]
     fn test_run_help() {
         let output = run(&["composure".into(), "help".into()]).unwrap();
-        assert!(output.contains("inspect-bundle"));
+        assert!(output.contains("compare-monte-carlo"));
+    }
+
+    #[test]
+    fn test_format_comparison() {
+        let comparison = composure_core::compare_trajectories(
+            &[0.9, 0.8, 0.7],
+            &[0.9, 0.82, 0.6],
+            &composure_core::ComparisonConfig {
+                failure_threshold: Some(0.65),
+                ..composure_core::ComparisonConfig::default()
+            },
+        )
+        .unwrap();
+
+        let output = format_comparison(&comparison);
+        assert!(output.contains("Series length: 3"));
+        assert!(output.contains("Failure comparison:"));
+    }
+
+    #[test]
+    fn test_run_compare_monte_carlo_outputs_json() {
+        let temp_dir = std::env::temp_dir();
+        let baseline_path = temp_dir.join("composure-cli-baseline.json");
+        let candidate_path = temp_dir.join("composure-cli-candidate.json");
+
+        let baseline = MonteCarloResult {
+            paths: vec![],
+            percentiles: PercentileBands {
+                p10: vec![0.8, 0.7, 0.6],
+                p25: vec![0.82, 0.72, 0.62],
+                p50: vec![0.84, 0.74, 0.64],
+                p75: vec![0.86, 0.76, 0.66],
+                p90: vec![0.88, 0.78, 0.68],
+            },
+            mean_trajectory: vec![0.84, 0.74, 0.64],
+            config: MonteCarloConfig::with_seed(10, 3, 1),
+        };
+        let candidate = MonteCarloResult {
+            paths: vec![],
+            percentiles: PercentileBands {
+                p10: vec![0.82, 0.73, 0.65],
+                p25: vec![0.84, 0.75, 0.67],
+                p50: vec![0.86, 0.77, 0.69],
+                p75: vec![0.88, 0.79, 0.71],
+                p90: vec![0.9, 0.81, 0.73],
+            },
+            mean_trajectory: vec![0.86, 0.77, 0.69],
+            config: MonteCarloConfig::with_seed(10, 3, 2),
+        };
+
+        fs::write(&baseline_path, serde_json::to_string(&baseline).unwrap()).unwrap();
+        fs::write(&candidate_path, serde_json::to_string(&candidate).unwrap()).unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "compare-monte-carlo".into(),
+            baseline_path.display().to_string(),
+            candidate_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let comparison: TrajectoryComparison = serde_json::from_str(&output).unwrap();
+        assert_eq!(comparison.series_len, 3);
+        assert!(comparison.metrics.mean_delta > 0.0);
+
+        let _ = fs::remove_file(baseline_path);
+        let _ = fs::remove_file(candidate_path);
     }
 }

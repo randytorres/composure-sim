@@ -1,0 +1,134 @@
+{
+  "definition": {
+    "id": "sweep-1",
+    "name": "Example Sweep",
+    "parameters": [
+      {
+        "name": "dose",
+        "values": [{"Int": 1}, {"Int": 2}, {"Int": 3}]
+      }
+    ],
+    "strategy": "Random",
+    "sample_count": 3,
+    "seed": 7,
+    "metadata": null
+  },
+  "bundle": null,
+  "executed_cases": [
+    {
+      "case": {
+        "case_id": "sweep-1-1",
+        "parameters": {
+          "dose": {"Int": 2}
+        }
+      },
+      "parameter_set": {
+        "id": "variant-a",
+        "name": "Variant A",
+        "scenario": {
+          "id": "variant-a",
+          "name": "Variant A",
+          "initial_state": {
+            "z": [0.8],
+            "m": [0.0],
+            "u": [0.2],
+            "t": 0
+          },
+          "actions": [],
+          "time_steps": 3,
+          "failure_threshold": 0.5,
+          "metadata": null
+        },
+        "monte_carlo": {
+          "num_paths": 10,
+          "time_steps": 3,
+          "seed_base": 7
+        },
+        "notes": null,
+        "metadata": null
+      },
+      "run": {
+        "run_id": "run-1",
+        "parameter_set_id": "variant-a",
+        "status": "Completed",
+        "seed": 7,
+        "started_at_unix_s": 1700000000,
+        "completed_at_unix_s": 1700000001,
+        "outcome": {
+          "monte_carlo": null,
+          "composure": null,
+          "replay": null,
+          "metadata": null
+        },
+        "error": null,
+        "metadata": null
+      },
+      "summary": {
+        "monte_carlo": null,
+        "composure": null
+      },
+      "sample": {
+        "case_id": "sweep-1-1",
+        "parameters": {
+          "dose": {"Int": 2}
+        },
+        "objective": 0.69,
+        "metadata": {
+          "run_id": "run-1",
+          "parameter_set_id": "variant-a"
+        }
+      }
+    }
+  ],
+  "failures": [],
+  "samples": [
+    {
+      "case_id": "sweep-1-1",
+      "parameters": {
+        "dose": {"Int": 2}
+      },
+      "objective": 0.69,
+      "metadata": {
+        "run_id": "run-1",
+        "parameter_set_id": "variant-a"
+      }
+    }
+  ],
+  "sensitivity": {
+    "sample_count": 1,
+    "objective": {
+      "min": 0.69,
+      "max": 0.69,
+      "mean": 0.69,
+      "best_case_id": "sweep-1-1",
+      "worst_case_id": "sweep-1-1"
+    },
+    "rankings": [
+      {
+        "parameter": "dose",
+        "score": 0.0,
+        "direction": "Neutral",
+        "kind": {
+          "Numeric": {
+            "correlation": 0.0,
+            "slope": 0.0
+          }
+        }
+      }
+    ],
+    "config": {
+      "epsilon": 1e-9
+    }
+  },
+  "config": {
+    "run_id_prefix": "run",
+    "execution": {
+      "retain_paths": false,
+      "analyze_composure": true
+    },
+    "sensitivity": {
+      "epsilon": 1e-9
+    },
+    "failure_mode": "Continue"
+  }
+}

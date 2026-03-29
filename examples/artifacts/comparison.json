@@ -1,0 +1,56 @@
+{
+  "series_len": 3,
+  "deltas": [
+    {
+      "t": 0,
+      "baseline": 0.84,
+      "candidate": 0.86,
+      "delta": 0.02,
+      "abs_delta": 0.02
+    },
+    {
+      "t": 1,
+      "baseline": 0.74,
+      "candidate": 0.77,
+      "delta": 0.03,
+      "abs_delta": 0.03
+    },
+    {
+      "t": 2,
+      "baseline": 0.64,
+      "candidate": 0.69,
+      "delta": 0.05,
+      "abs_delta": 0.05
+    }
+  ],
+  "metrics": {
+    "cumulative_delta": 0.1,
+    "mean_delta": 0.03333333333333333,
+    "mean_abs_delta": 0.03333333333333333,
+    "rmse": 0.03559026084010437,
+    "end_delta": 0.05,
+    "improved_steps": 3,
+    "regressed_steps": 0,
+    "unchanged_steps": 0,
+    "max_improvement": {
+      "t": 2,
+      "baseline": 0.64,
+      "candidate": 0.69,
+      "delta": 0.05
+    },
+    "max_regression": {
+      "t": 0,
+      "baseline": 0.84,
+      "candidate": 0.86,
+      "delta": 0.02
+    },
+    "failure": null
+  },
+  "divergence": null,
+  "config": {
+    "divergence_threshold": 0.1,
+    "sustained_steps": 1,
+    "equality_epsilon": 1e-9,
+    "failure_threshold": null
+  }
+}
