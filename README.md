@@ -1,6 +1,6 @@
 # composure-sim
 
-Domain-agnostic simulation engine: Monte Carlo, Composure Curve, event-sourced replay.
+Domain-agnostic simulation engine: Monte Carlo, Composure Curve, event-sourced replay, trajectory comparison, experiment artifacts, sweep execution and sensitivity analysis, and deterministic run summaries.
 
 Use this to simulate any system that degrades and recovers under stress — health protocols, biological organisms, marketing campaigns, wargames, whatever.
 
@@ -8,9 +8,11 @@ Use this to simulate any system that degrades and recovers under stress — heal
 
 | Crate | Purpose |
 |---|---|
-| `composure-core` | Core library: SimState, Simulator trait, Monte Carlo (rayon parallel), Composure Curve (archetype classification), event-sourced replay |
+| `composure-core` | Core library: SimState, Simulator trait, Monte Carlo (rayon parallel), Composure Curve (archetype classification), event-sourced replay, comparison, experiment bundles, execution, sweep runner, sensitivity, run summaries |
 | `composure-py` | PyO3 Python bindings |
 | `composure-wasm` | WASM bindings for browser |
+
+Roadmap and next-step feature plan: [docs/roadmap.md](/Users/randytorres/Projects/composure-sim/docs/roadmap.md)
 
 ## Core Concepts
 
@@ -92,6 +94,161 @@ replay.emit(t, EventKind::ActionApplied, None);
 // After:
 let run = replay.finish(final_state);
 // run.event_log, run.state_snapshots are serializable
+```
+
+### Trajectory Comparison
+
+Compare a baseline and candidate trajectory with divergence detection:
+
+```rust
+use composure_core::{compare_trajectories, ComparisonConfig};
+
+let comparison = compare_trajectories(
+    &baseline_health,
+    &candidate_health,
+    &ComparisonConfig::default(),
+)?;
+
+println!("Mean delta: {}", comparison.metrics.mean_delta);
+println!("First divergence: {:?}", comparison.divergence);
+```
+
+### Experiment Bundles
+
+Store reusable experiment specs, variants, and run artifacts:
+
+```rust
+use composure_core::{ExperimentBundle, ExperimentSpec, Scenario, SimState};
+
+let scenario = Scenario::new("baseline", "Baseline", SimState::zeros(3), 100);
+let spec = ExperimentSpec::new("exp-001", "Recovery Sweep", scenario);
+let bundle = ExperimentBundle::new(spec);
+
+println!("Bundle ready with {} runs", bundle.runs.len());
+```
+
+### Experiment Execution
+
+Execute a validated experiment parameter set and record portable outputs:
+
+```rust
+use composure_core::{
+    execute_parameter_set, ExperimentExecutionConfig, ExperimentParameterSet,
+    MonteCarloConfig, Scenario, SimState,
+};
+
+let mut parameter_set =
+    ExperimentParameterSet::new("variant-a", "Variant A", Scenario::new("baseline", "Baseline", SimState::zeros(3), 100));
+parameter_set.monte_carlo = Some(MonteCarloConfig::with_seed(1_000, 100, 42));
+
+let run = execute_parameter_set(
+    "run-variant-a",
+    &my_sim,
+    &parameter_set,
+    &ExperimentExecutionConfig::default(),
+)?;
+
+println!("Run status: {:?}", run.status);
+```
+
+### Sensitivity Analysis
+
+Define sweep cases and rank parameter influence against a scalar objective:
+
+```rust
+use composure_core::{
+    analyze_sensitivity, generate_sweep_cases, ParameterValue, SensitivityConfig,
+    SweepDefinition, SweepParameter, SweepSample,
+};
+use std::collections::BTreeMap;
+
+let mut sweep = SweepDefinition::new("dose-sweep", "Dose Sweep");
+sweep.parameters.push(SweepParameter {
+    name: "dose".into(),
+    values: vec![ParameterValue::Int(1), ParameterValue::Int(2), ParameterValue::Int(3)],
+});
+
+let cases = generate_sweep_cases(&sweep)?;
+let samples: Vec<SweepSample> = cases
+    .into_iter()
+    .map(|case| SweepSample {
+        case_id: case.case_id,
+        objective: 0.0,
+        parameters: case.parameters,
+        metadata: None,
+    })
+    .collect();
+
+let report = analyze_sensitivity(&samples, &SensitivityConfig::default())?;
+println!("Top parameter: {}", report.rankings[0].parameter);
+```
+
+### Sweep Runner
+
+Execute a generated sweep end-to-end by mapping each `SweepCase` into an `ExperimentParameterSet`
+and then extracting a scalar objective from the resulting `RunSummary`:
+
+```rust
+use composure_core::{
+    execute_sweep, ExperimentParameterSet, MonteCarloConfig, ParameterValue, Scenario,
+    SimState, SweepDefinition, SweepParameter, SweepRunnerConfig,
+};
+
+let mut sweep = SweepDefinition::new("dose-sweep", "Dose Sweep");
+sweep.parameters.push(SweepParameter {
+    name: "dose".into(),
+    values: vec![ParameterValue::Int(1), ParameterValue::Int(2), ParameterValue::Int(3)],
+});
+
+let results = execute_sweep(
+    &my_sim,
+    &sweep,
+    &SweepRunnerConfig::default(),
+    |case| {
+        let dose = match case.parameters.get("dose") {
+            Some(ParameterValue::Int(value)) => *value as f64,
+            _ => return Err("dose must be present".into()),
+        };
+
+        let mut parameter_set = ExperimentParameterSet::new(
+            format!("ps-{}", case.case_id),
+            format!("Case {}", case.case_id),
+            Scenario::new("baseline", "Baseline", SimState::zeros(3), 100),
+        );
+        parameter_set.monte_carlo = Some(MonteCarloConfig::with_seed(1_000, 100, 42));
+        parameter_set.scenario.actions.push(composure_core::Action {
+            dimension: Some(0),
+            magnitude: dose,
+            action_type: composure_core::ActionType::Intervention,
+            metadata: None,
+        });
+        Ok(parameter_set)
+    },
+    |_, _, _, summary| {
+        summary
+            .monte_carlo
+            .as_ref()
+            .and_then(|monte_carlo| monte_carlo.end)
+            .ok_or_else(|| "missing final mean".into())
+    },
+)?;
+
+println!("Executed {} cases", results.executed_cases.len());
+println!("Top sensitivity: {}", results.sensitivity.rankings[0].parameter);
+```
+
+### Run Summaries
+
+Extract compact deterministic metrics for reports and sweep objectives:
+
+```rust
+use composure_core::{summarize_composure, summarize_monte_carlo};
+
+let mc_summary = summarize_monte_carlo(&result);
+let curve_summary = summarize_composure(&curve);
+
+println!("Final mean: {:?}", mc_summary.end);
+println!("Archetype: {:?}", curve_summary.archetype);
 ```
 
 ## Python Usage
