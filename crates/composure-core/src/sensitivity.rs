@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -38,6 +39,8 @@ pub struct SweepParameter {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum SweepStrategy {
     Grid,
+    Random,
+    LatinHypercube,
 }
 
 /// Serializable sweep definition that downstream tooling can expand into concrete cases.
@@ -47,6 +50,8 @@ pub struct SweepDefinition {
     pub name: String,
     pub parameters: Vec<SweepParameter>,
     pub strategy: SweepStrategy,
+    pub sample_count: Option<usize>,
+    pub seed: Option<u64>,
     pub metadata: Option<serde_json::Value>,
 }
 
@@ -57,6 +62,8 @@ impl SweepDefinition {
             name: name.into(),
             parameters: Vec::new(),
             strategy: SweepStrategy::Grid,
+            sample_count: None,
+            seed: None,
             metadata: None,
         }
     }
@@ -87,6 +94,20 @@ impl SweepDefinition {
             }
         }
 
+        match self.strategy {
+            SweepStrategy::Grid => {}
+            SweepStrategy::Random | SweepStrategy::LatinHypercube => {
+                let sample_count =
+                    self.sample_count
+                        .ok_or(SensitivityError::MissingSampleCount {
+                            strategy: self.strategy.label(),
+                        })?;
+                if sample_count == 0 {
+                    return Err(SensitivityError::InvalidSampleCount(0));
+                }
+            }
+        }
+
         Ok(())
     }
 }
@@ -105,31 +126,128 @@ pub fn generate_sweep_cases(
     definition.validate()?;
 
     match definition.strategy {
-        SweepStrategy::Grid => {
-            let mut cases = vec![BTreeMap::new()];
-
-            for parameter in &definition.parameters {
-                let mut next = Vec::with_capacity(cases.len() * parameter.values.len());
-                for existing in &cases {
-                    for value in &parameter.values {
-                        let mut map = existing.clone();
-                        map.insert(parameter.name.clone(), value.clone());
-                        next.push(map);
-                    }
-                }
-                cases = next;
-            }
-
-            Ok(cases
-                .into_iter()
-                .enumerate()
-                .map(|(idx, parameters)| SweepCase {
-                    case_id: format!("{}-{}", definition.id, idx + 1),
-                    parameters,
-                })
-                .collect())
-        }
+        SweepStrategy::Grid => Ok(to_sweep_cases(
+            &definition.id,
+            generate_grid_cases(&definition.parameters),
+        )),
+        SweepStrategy::Random => Ok(to_sweep_cases(
+            &definition.id,
+            generate_random_cases(
+                &definition.parameters,
+                definition
+                    .sample_count
+                    .expect("validated random sample count"),
+                definition.seed.unwrap_or(42),
+            ),
+        )),
+        SweepStrategy::LatinHypercube => Ok(to_sweep_cases(
+            &definition.id,
+            generate_latin_hypercube_cases(
+                &definition.parameters,
+                definition.sample_count.expect("validated LHS sample count"),
+                definition.seed.unwrap_or(42),
+            ),
+        )),
     }
+}
+
+fn generate_grid_cases(parameters: &[SweepParameter]) -> Vec<BTreeMap<String, ParameterValue>> {
+    let mut cases = vec![BTreeMap::new()];
+
+    for parameter in parameters {
+        let mut next = Vec::with_capacity(cases.len() * parameter.values.len());
+        for existing in &cases {
+            for value in &parameter.values {
+                let mut map = existing.clone();
+                map.insert(parameter.name.clone(), value.clone());
+                next.push(map);
+            }
+        }
+        cases = next;
+    }
+
+    cases
+}
+
+fn generate_random_cases(
+    parameters: &[SweepParameter],
+    sample_count: usize,
+    seed: u64,
+) -> Vec<BTreeMap<String, ParameterValue>> {
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut cases = Vec::with_capacity(sample_count);
+
+    for _ in 0..sample_count {
+        let mut case = BTreeMap::new();
+        for parameter in parameters {
+            let index = rng.gen_range(0..parameter.values.len());
+            case.insert(parameter.name.clone(), parameter.values[index].clone());
+        }
+        cases.push(case);
+    }
+
+    cases
+}
+
+fn generate_latin_hypercube_cases(
+    parameters: &[SweepParameter],
+    sample_count: usize,
+    seed: u64,
+) -> Vec<BTreeMap<String, ParameterValue>> {
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut per_parameter_values = Vec::with_capacity(parameters.len());
+
+    for parameter in parameters {
+        let mut assignments = Vec::with_capacity(sample_count);
+        for stratum in 0..sample_count {
+            let index =
+                latin_hypercube_index(parameter.values.len(), sample_count, stratum, &mut rng);
+            assignments.push(parameter.values[index].clone());
+        }
+        assignments.shuffle(&mut rng);
+        per_parameter_values.push(assignments);
+    }
+
+    let mut cases = Vec::with_capacity(sample_count);
+    for case_idx in 0..sample_count {
+        let mut case = BTreeMap::new();
+        for (parameter, assignments) in parameters.iter().zip(per_parameter_values.iter()) {
+            case.insert(parameter.name.clone(), assignments[case_idx].clone());
+        }
+        cases.push(case);
+    }
+
+    cases
+}
+
+fn latin_hypercube_index(
+    value_count: usize,
+    sample_count: usize,
+    stratum: usize,
+    rng: &mut StdRng,
+) -> usize {
+    let start = stratum * value_count / sample_count;
+    let end = ((stratum + 1) * value_count).div_ceil(sample_count);
+    if start >= value_count {
+        return value_count.saturating_sub(1);
+    }
+    let bounded_end = end.max(start + 1).min(value_count);
+    if bounded_end <= start + 1 {
+        start
+    } else {
+        rng.gen_range(start..bounded_end)
+    }
+}
+
+fn to_sweep_cases(id: &str, cases: Vec<BTreeMap<String, ParameterValue>>) -> Vec<SweepCase> {
+    cases
+        .into_iter()
+        .enumerate()
+        .map(|(idx, parameters)| SweepCase {
+            case_id: format!("{id}-{}", idx + 1),
+            parameters,
+        })
+        .collect()
 }
 
 /// One evaluated sweep sample with a scalar objective.
@@ -160,6 +278,16 @@ impl SensitivityConfig {
             return Err(SensitivityError::InvalidEpsilon(self.epsilon));
         }
         Ok(())
+    }
+}
+
+impl SweepStrategy {
+    fn label(&self) -> &'static str {
+        match self {
+            Self::Grid => "grid",
+            Self::Random => "random",
+            Self::LatinHypercube => "latin_hypercube",
+        }
     }
 }
 
@@ -462,6 +590,10 @@ pub enum SensitivityError {
     DuplicateParameter(String),
     #[error("invalid float parameter value: {0}")]
     InvalidFloatValue(String),
+    #[error("sweep strategy {strategy} requires a positive sample_count")]
+    MissingSampleCount { strategy: &'static str },
+    #[error("sample_count must be greater than zero, got {0}")]
+    InvalidSampleCount(usize),
     #[error("epsilon must be finite and >= 0, got {0}")]
     InvalidEpsilon(f64),
     #[error("cannot analyze an empty sample set")]
@@ -505,6 +637,123 @@ mod tests {
             .iter()
             .all(|case| case.parameters.contains_key("dose")
                 && case.parameters.contains_key("protocol")));
+    }
+
+    #[test]
+    fn test_generate_random_sweep_cases_is_deterministic() {
+        let mut definition = SweepDefinition::new("random", "Random Sweep");
+        definition.strategy = SweepStrategy::Random;
+        definition.sample_count = Some(5);
+        definition.seed = Some(7);
+        definition.parameters.push(SweepParameter {
+            name: "dose".into(),
+            values: vec![ParameterValue::Int(1), ParameterValue::Int(2)],
+        });
+        definition.parameters.push(SweepParameter {
+            name: "protocol".into(),
+            values: vec![
+                ParameterValue::Text("a".into()),
+                ParameterValue::Text("b".into()),
+            ],
+        });
+
+        let first = generate_sweep_cases(&definition).unwrap();
+        let second = generate_sweep_cases(&definition).unwrap();
+
+        assert_eq!(first.len(), 5);
+        assert_eq!(
+            first
+                .iter()
+                .map(|case| &case.parameters)
+                .collect::<Vec<_>>(),
+            second
+                .iter()
+                .map(|case| &case.parameters)
+                .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn test_generate_latin_hypercube_cases_covers_each_value_once_when_aligned() {
+        let mut definition = SweepDefinition::new("lhs", "Latin Hypercube");
+        definition.strategy = SweepStrategy::LatinHypercube;
+        definition.sample_count = Some(4);
+        definition.seed = Some(11);
+        definition.parameters.push(SweepParameter {
+            name: "dose".into(),
+            values: vec![
+                ParameterValue::Int(1),
+                ParameterValue::Int(2),
+                ParameterValue::Int(3),
+                ParameterValue::Int(4),
+            ],
+        });
+        definition.parameters.push(SweepParameter {
+            name: "protocol".into(),
+            values: vec![
+                ParameterValue::Text("a".into()),
+                ParameterValue::Text("b".into()),
+                ParameterValue::Text("c".into()),
+                ParameterValue::Text("d".into()),
+            ],
+        });
+
+        let cases = generate_sweep_cases(&definition).unwrap();
+
+        assert_eq!(cases.len(), 4);
+
+        let doses = cases
+            .iter()
+            .map(|case| case.parameters.get("dose").unwrap().clone())
+            .collect::<BTreeSet<_>>();
+        let protocols = cases
+            .iter()
+            .map(|case| case.parameters.get("protocol").unwrap().clone())
+            .collect::<BTreeSet<_>>();
+
+        assert_eq!(
+            doses,
+            BTreeSet::from([
+                ParameterValue::Int(1),
+                ParameterValue::Int(2),
+                ParameterValue::Int(3),
+                ParameterValue::Int(4),
+            ])
+        );
+        assert_eq!(
+            protocols,
+            BTreeSet::from([
+                ParameterValue::Text("a".into()),
+                ParameterValue::Text("b".into()),
+                ParameterValue::Text("c".into()),
+                ParameterValue::Text("d".into()),
+            ])
+        );
+    }
+
+    #[test]
+    fn test_random_and_lhs_require_sample_count() {
+        let mut definition = SweepDefinition::new("random", "Random Sweep");
+        definition.strategy = SweepStrategy::Random;
+        definition.parameters.push(SweepParameter {
+            name: "dose".into(),
+            values: vec![ParameterValue::Int(1)],
+        });
+
+        let random_err = generate_sweep_cases(&definition).unwrap_err();
+        assert!(matches!(
+            random_err,
+            SensitivityError::MissingSampleCount { strategy: "random" }
+        ));
+
+        definition.strategy = SweepStrategy::LatinHypercube;
+        let lhs_err = generate_sweep_cases(&definition).unwrap_err();
+        assert!(matches!(
+            lhs_err,
+            SensitivityError::MissingSampleCount {
+                strategy: "latin_hypercube"
+            }
+        ));
     }
 
     #[test]

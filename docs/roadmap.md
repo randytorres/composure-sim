@@ -114,6 +114,7 @@ Current progress in core:
 - experiment-backed sweep execution with bundle recording and failure collection
 - scalar objective extraction from deterministic run summaries
 - ranked numeric/categorical sensitivity summaries
+- deterministic random and Latin hypercube sampling strategies
 
 This should likely become a dedicated crate such as `composure-sensitivity`.
 
@@ -159,7 +160,7 @@ This should stay optional so `composure-core` remains lightweight.
 
 ### 7. Tooling surfaces
 
-Status: planned
+Status: started
 
 Add:
 
@@ -167,6 +168,12 @@ Add:
 - artifact inspection commands
 - comparison commands
 - a minimal browser replay inspector
+
+Current progress in repo:
+
+- CLI artifact inspection for experiment bundles
+- CLI artifact inspection for sweep execution results
+- CLI artifact inspection for run summaries
 
 These should consume the experiment and comparison artifacts rather than inventing their own data formats.
 

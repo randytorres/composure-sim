@@ -8,6 +8,7 @@ Use this to simulate any system that degrades and recovers under stress — heal
 
 | Crate | Purpose |
 |---|---|
+| `composure-cli` | Minimal CLI for inspecting experiment bundles, sweep results, and run summaries |
 | `composure-core` | Core library: SimState, Simulator trait, Monte Carlo (rayon parallel), Composure Curve (archetype classification), event-sourced replay, comparison, experiment bundles, execution, sweep runner, sensitivity, run summaries |
 | `composure-py` | PyO3 Python bindings |
 | `composure-wasm` | WASM bindings for browser |
@@ -163,6 +164,9 @@ use composure_core::{
 use std::collections::BTreeMap;
 
 let mut sweep = SweepDefinition::new("dose-sweep", "Dose Sweep");
+sweep.strategy = composure_core::SweepStrategy::LatinHypercube;
+sweep.sample_count = Some(12);
+sweep.seed = Some(42);
 sweep.parameters.push(SweepParameter {
     name: "dose".into(),
     values: vec![ParameterValue::Int(1), ParameterValue::Int(2), ParameterValue::Int(3)],
@@ -182,6 +186,10 @@ let samples: Vec<SweepSample> = cases
 let report = analyze_sensitivity(&samples, &SensitivityConfig::default())?;
 println!("Top parameter: {}", report.rankings[0].parameter);
 ```
+
+`SweepStrategy::Grid` enumerates every combination. `SweepStrategy::Random` and
+`SweepStrategy::LatinHypercube` generate deterministic sampled cases when `sample_count`
+and an optional `seed` are set on `SweepDefinition`.
 
 ### Sweep Runner
 
@@ -335,6 +343,10 @@ cargo build --release
 
 # Run tests
 cargo test
+
+# Inspect saved artifacts
+cargo run -p composure-cli -- inspect-sweep path/to/sweep-result.json
+cargo run -p composure-cli -- inspect-bundle path/to/experiment-bundle.json
 
 # Python bindings (requires maturin)
 cd crates/composure-py && maturin develop --features python-module
