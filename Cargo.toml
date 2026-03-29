@@ -1,0 +1,27 @@
+[workspace]
+members = ["crates/composure-core", "crates/composure-py", "crates/composure-wasm"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+version = "0.1.0"
+authors = ["Randy Torres"]
+rust-version = "1.80"
+repository = "https://github.com/randytorres/composure-sim"
+description = "Domain-agnostic simulation engine: Monte Carlo, Composure Curve, event-sourced replay"
+
+[workspace.dependencies]
+rand = "0.8"
+rayon = "1.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+pyo3 = { version = "0.22", features = ["abi3-py39"] }
+wasm-bindgen = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
