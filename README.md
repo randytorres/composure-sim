@@ -12,6 +12,7 @@ Use this to simulate any system that degrades and recovers under stress — heal
 | `composure-cli` | Minimal CLI for inspecting, summarizing, and comparing saved simulation artifacts |
 | `composure-core` | Core library: SimState, Simulator trait, Monte Carlo (rayon parallel), Composure Curve (archetype classification), event-sourced replay, comparison, experiment bundles, execution, sweep runner, sensitivity, run summaries |
 | `composure-py` | PyO3 Python bindings |
+| `composure-runtime` | Pack manifests, cross-artifact validation, and runtime foundations for executable packs |
 | `composure-wasm` | WASM bindings for browser |
 
 Roadmap and next-step feature plan: [docs/roadmap.md](/Users/randytorres/Projects/composure-sim/docs/roadmap.md)
@@ -197,6 +198,8 @@ and an optional `seed` are set on `SweepDefinition`.
 The `composure` CLI can inspect saved artifacts, transform them into summaries, and compare saved Monte Carlo results:
 
 ```bash
+cargo run -p composure-cli -- validate-pack examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- inspect-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
 cargo run -p composure-cli -- inspect-report examples/artifacts/report.json
 cargo run -p composure-cli -- export-report-markdown examples/artifacts/report.json
@@ -268,9 +271,17 @@ Typed input packs for multiple domains live under [`examples/packs`](/Users/rand
 - [`campaign-fatigue`](/Users/randytorres/Projects/composure-sim/examples/packs/campaign-fatigue/README.md)
 - [`supply-chain-disruption`](/Users/randytorres/Projects/composure-sim/examples/packs/supply-chain-disruption/README.md)
 
-These are input-first packs: `scenario`, `experiment-spec`, `sweep-definition`, and
-`observed-trajectory` examples that plug into your domain-specific `Simulator`
-implementation and feed the same downstream artifact pipeline.
+Each pack now includes a `pack.json` manifest that the CLI can validate and
+compile into a pack summary:
+
+```bash
+cargo run -p composure-cli -- validate-pack examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- inspect-pack examples/packs/health-recovery/pack.json
+```
+
+Execution is still input-first: the pack artifacts plug into your
+domain-specific `Simulator` implementation and feed the same downstream
+artifact pipeline.
 
 ### Deterministic Reports
 

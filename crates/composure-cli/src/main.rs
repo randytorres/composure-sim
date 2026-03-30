@@ -8,6 +8,7 @@ use composure_core::{
     DeterministicReport, ExperimentBundle, MonteCarloResult, RunSummary, SweepExecutionResult,
     TrajectoryComparison,
 };
+use composure_runtime::load_pack;
 use render::{
     format_bundle, format_calibration, format_comparison, format_report, format_summary,
     format_sweep, render_bundle_markdown, render_calibration_csv, render_calibration_markdown,
@@ -34,6 +35,17 @@ fn run(args: &[String]) -> Result<String, CliError> {
         [_bin] => Err(CliError::Usage(usage())),
         [_bin, command] if command == "help" || command == "--help" || command == "-h" => {
             Ok(usage())
+        }
+        [_bin, command, path] if command == "inspect-pack" => {
+            let pack = load_pack(path).map_err(CliError::Pack)?;
+            Ok(pack.summary())
+        }
+        [_bin, command, path] if command == "validate-pack" => {
+            let pack = load_pack(path).map_err(CliError::Pack)?;
+            Ok(format!(
+                "Pack valid: {} ({})",
+                pack.definition.name, pack.definition.id
+            ))
         }
         [_bin, command, path] if command == "inspect-bundle" => {
             let bundle = read_json::<ExperimentBundle>(path)?;
@@ -158,6 +170,8 @@ fn run(args: &[String]) -> Result<String, CliError> {
 fn usage() -> String {
     [
         "Usage:",
+        "  composure inspect-pack <path>",
+        "  composure validate-pack <path>",
         "  composure inspect-bundle <path>",
         "  composure export-bundle-markdown <path> [--output <path>]",
         "  composure inspect-sweep <path>",
@@ -177,6 +191,8 @@ fn usage() -> String {
         "  composure build-report <baseline-summary-path> <candidate-summary-path> [--comparison <path>] [--output <path>]",
         "",
         "Commands:",
+        "  inspect-pack   Read a pack directory or manifest and print a compiled summary",
+        "  validate-pack  Validate a pack directory or manifest and its referenced artifacts",
         "  inspect-bundle   Read an ExperimentBundle JSON artifact and print a summary",
         "  export-bundle-markdown  Convert an ExperimentBundle JSON artifact into markdown",
         "  inspect-sweep    Read a SweepExecutionResult JSON artifact and print a summary",
@@ -370,13 +386,18 @@ enum CliError {
     InvalidFlagValue { flag: String, value: String },
     #[error("comparison failed: {0}")]
     Compare(composure_core::CompareError),
+    #[error("pack error: {0}")]
+    Pack(composure_runtime::PackError),
     #[error("failed to serialize JSON output: {0}")]
     SerializeJson(serde_json::Error),
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
+    use std::{
+        collections::BTreeMap,
+        time::{SystemTime, UNIX_EPOCH},
+    };
 
     use composure_calibration::{
         CalibrationCandidate, CalibrationCaseFailure, CalibrationConfig, CalibrationFailureMode,
@@ -842,6 +863,8 @@ mod tests {
     #[test]
     fn test_run_help() {
         let output = run(&["composure".into(), "help".into()]).unwrap();
+        assert!(output.contains("inspect-pack"));
+        assert!(output.contains("validate-pack"));
         assert!(output.contains("inspect-report"));
         assert!(output.contains("inspect-calibration"));
         assert!(output.contains("export-bundle-markdown"));
@@ -1110,6 +1133,110 @@ mod tests {
 
         let _ = fs::remove_file(input_path);
         let _ = fs::remove_file(output_path);
+    }
+
+    fn temp_pack_dir(name: &str) -> std::path::PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!("composure-cli-{name}-{nanos}"));
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    fn write_sample_pack(dir: &std::path::Path) -> std::path::PathBuf {
+        let mut scenario = Scenario::new(
+            "pack-scenario",
+            "Pack Scenario",
+            composure_core::SimState::zeros(2),
+            4,
+        );
+        scenario.initial_state =
+            composure_core::SimState::new(vec![0.4, 0.5], vec![0.1, 0.2], vec![0.2, 0.2]);
+        scenario.failure_threshold = Some(0.45);
+        scenario.metadata = Some(serde_json::json!({
+            "dimension_labels": ["sleep", "readiness"]
+        }));
+
+        let mut spec = ExperimentSpec::new("pack-exp", "Pack Experiment", scenario.clone());
+        spec.default_monte_carlo = Some(MonteCarloConfig::with_seed(8, 4, 7));
+
+        let observed = ObservedTrajectory::new("obs-1", "Observed", vec![0.4, 0.45, 0.5, 0.55]);
+
+        let mut sweep = SweepDefinition::new("sweep-1", "Sweep");
+        sweep.parameters.push(SweepParameter {
+            name: "dose".into(),
+            values: vec![ParameterValue::Int(1)],
+        });
+
+        fs::write(
+            dir.join("scenario.json"),
+            serde_json::to_string_pretty(&scenario).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            dir.join("experiment-spec.json"),
+            serde_json::to_string_pretty(&spec).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            dir.join("sweep-definition.json"),
+            serde_json::to_string_pretty(&sweep).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            dir.join("observed-trajectory.json"),
+            serde_json::to_string_pretty(&observed).unwrap(),
+        )
+        .unwrap();
+        let manifest_path = dir.join("pack.json");
+        fs::write(
+            &manifest_path,
+            serde_json::to_string_pretty(&serde_json::json!({
+                "id": "health-pack",
+                "name": "Health Pack",
+                "scenario": "scenario.json",
+                "experiment_spec": "experiment-spec.json",
+                "sweep_definition": "sweep-definition.json",
+                "observed_trajectory": "observed-trajectory.json"
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+        manifest_path
+    }
+
+    #[test]
+    fn test_run_inspect_pack_outputs_summary() {
+        let dir = temp_pack_dir("inspect-pack");
+        let manifest_path = write_sample_pack(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "inspect-pack".into(),
+            manifest_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Pack: Health Pack (health-pack)"));
+        assert!(output.contains("Scenario: Pack Scenario (pack-scenario)"));
+        assert!(output.contains("Experiment spec: yes"));
+    }
+
+    #[test]
+    fn test_run_validate_pack_outputs_success() {
+        let dir = temp_pack_dir("validate-pack");
+        let manifest_path = write_sample_pack(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "validate-pack".into(),
+            manifest_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert_eq!(output, "Pack valid: Health Pack (health-pack)");
     }
 
     #[test]

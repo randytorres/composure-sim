@@ -4,6 +4,7 @@ members = [
     "crates/composure-cli",
     "crates/composure-core",
     "crates/composure-py",
+    "crates/composure-runtime",
     "crates/composure-wasm",
 ]
 resolver = "2"

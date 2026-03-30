@@ -16,6 +16,7 @@ Primary levers in the sweep:
 
 Files:
 
+- [`pack.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/pack.json)
 - [`scenario.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/scenario.json)
 - [`experiment-spec.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/experiment-spec.json)
 - [`sweep-definition.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/sweep-definition.json)
@@ -23,8 +24,9 @@ Files:
 
 Suggested workflow:
 
-1. Deserialize the spec and sweep into `ExperimentSpec` and `SweepDefinition`.
-2. Implement a health-specific `Simulator` that interprets the three dimensions.
-3. Use `execute_experiment_sweep` to rank intervention mixes by end-state recovery.
-4. Use `calibrate_experiment` against the observed trajectory to find the closest parameter set.
-5. Build a `DeterministicReport` from baseline and candidate summaries, then inspect it with the CLI.
+1. Validate the manifest with `composure validate-pack examples/packs/health-recovery/pack.json`.
+2. Inspect the compiled pack with `composure inspect-pack examples/packs/health-recovery/pack.json`.
+3. Implement a health-specific `Simulator` that interprets the three dimensions.
+4. Use `execute_experiment_sweep` to rank intervention mixes by end-state recovery.
+5. Use `calibrate_experiment` against the observed trajectory to find the closest parameter set.
+6. Build a `DeterministicReport` from baseline and candidate summaries, then inspect it with the CLI.

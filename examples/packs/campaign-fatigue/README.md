@@ -16,6 +16,7 @@ Primary levers in the sweep:
 
 Files:
 
+- [`pack.json`](/Users/randytorres/Projects/composure-sim/examples/packs/campaign-fatigue/pack.json)
 - [`scenario.json`](/Users/randytorres/Projects/composure-sim/examples/packs/campaign-fatigue/scenario.json)
 - [`experiment-spec.json`](/Users/randytorres/Projects/composure-sim/examples/packs/campaign-fatigue/experiment-spec.json)
 - [`sweep-definition.json`](/Users/randytorres/Projects/composure-sim/examples/packs/campaign-fatigue/sweep-definition.json)
@@ -23,8 +24,9 @@ Files:
 
 Suggested workflow:
 
-1. Treat the scenario as a baseline media plan.
-2. Map the sweep parameters into campaign-specific interventions inside your `Simulator`.
-3. Run a sweep to score candidate plans by end-of-flight conversion intent or area under the response curve.
-4. Calibrate against observed weekly response to infer the most plausible fatigue settings.
-5. Export sweep and calibration results as CSV/markdown for planning reviews.
+1. Validate the manifest with `composure validate-pack examples/packs/campaign-fatigue/pack.json`.
+2. Inspect the compiled pack with `composure inspect-pack examples/packs/campaign-fatigue/pack.json`.
+3. Map the sweep parameters into campaign-specific interventions inside your `Simulator`.
+4. Run a sweep to score candidate plans by end-of-flight conversion intent or area under the response curve.
+5. Calibrate against observed weekly response to infer the most plausible fatigue settings.
+6. Export sweep and calibration results as CSV/markdown for planning reviews.
