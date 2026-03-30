@@ -1,0 +1,2 @@
+case_id,is_best,objective,run_id,parameter_set_id,dose
+sweep-1-1,true,0.690000000000,run-1,variant-a,2

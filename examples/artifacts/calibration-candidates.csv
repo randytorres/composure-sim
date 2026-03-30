@@ -1,0 +1,2 @@
+rank,is_best,case_id,parameter_set_id,run_id,score,rmse,mean_abs_delta,end_delta,divergence_start_t,divergence_end_t,failure_shift,dose
+1,true,dose-sweep-1,ps-dose-sweep-1,calibration-run-1,0.035590260840,0.035590260840,0.033333333333,0.050000000000,,,,3

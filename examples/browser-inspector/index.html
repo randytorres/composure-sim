@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Composure Artifact Inspector</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">Static Browser Inspector</p>
+        <h1>Composure Artifact Inspector</h1>
+        <p class="intro">
+          Open this page directly in a browser, then load one or more JSON artifacts to inspect
+          compact summaries for supported result types.
+        </p>
+      </header>
+
+      <section class="panel controls">
+        <label class="file-picker">
+          <span>Select JSON files</span>
+          <input id="file-input" type="file" accept=".json,application/json" multiple>
+        </label>
+        <p class="hint">
+          Supported artifacts: <code>RunSummary</code>, <code>TrajectoryComparison</code>,
+          <code>DeterministicReport</code>, <code>CalibrationResult</code>,
+          <code>ExperimentBundle</code>, and <code>SweepExecutionResult</code>.
+        </p>
+      </section>
+
+      <section id="status" class="status" aria-live="polite">
+        No files loaded.
+      </section>
+
+      <section id="results" class="results" aria-live="polite"></section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

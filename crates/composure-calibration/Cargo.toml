@@ -1,20 +1,16 @@
 [package]
-name = "composure-cli"
+name = "composure-calibration"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
 rust-version.workspace = true
 repository.workspace = true
-description = "CLI for inspecting composure-sim experiment and sweep artifacts"
-
-[[bin]]
-name = "composure"
-path = "src/main.rs"
+description = "Deterministic calibration and fitting utilities for composure-sim"
 
 [dependencies]
-composure-calibration = { path = "../composure-calibration" }
 composure-core = { path = "../composure-core" }
+rand.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

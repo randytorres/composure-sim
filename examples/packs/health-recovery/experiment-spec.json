@@ -1,0 +1,65 @@
+{
+  "id": "health-recovery-exp",
+  "name": "Athlete Recovery Program",
+  "description": "Recovery intervention baseline for post-overload training block.",
+  "scenario": {
+    "id": "health-recovery-baseline",
+    "name": "Health Recovery Baseline",
+    "initial_state": {
+      "z": [0.46, 0.42, 0.5],
+      "m": [0.38, 0.44, 0.36],
+      "u": [0.18, 0.22, 0.2],
+      "t": 0
+    },
+    "actions": [
+      {
+        "dimension": null,
+        "magnitude": -0.3,
+        "action_type": "StressorOnset",
+        "metadata": {
+          "label": "competition block"
+        }
+      },
+      {
+        "dimension": 0,
+        "magnitude": 0.22,
+        "action_type": "Intervention",
+        "metadata": {
+          "label": "sleep extension"
+        }
+      },
+      {
+        "dimension": 1,
+        "magnitude": 0.28,
+        "action_type": "Intervention",
+        "metadata": {
+          "label": "mobility and tissue work"
+        }
+      },
+      {
+        "dimension": 2,
+        "magnitude": 0.18,
+        "action_type": "Intervention",
+        "metadata": {
+          "label": "deload session"
+        }
+      }
+    ],
+    "time_steps": 12,
+    "failure_threshold": 0.45,
+    "metadata": {
+      "domain": "health",
+      "dimension_labels": ["sleep_quality", "tissue_readiness", "training_capacity"]
+    }
+  },
+  "default_monte_carlo": {
+    "num_paths": 500,
+    "time_steps": 12,
+    "seed_base": 101
+  },
+  "tags": ["health", "recovery", "athlete"],
+  "metadata": {
+    "owner": "example-pack"
+  },
+  "created_at_unix_s": 1700000100
+}

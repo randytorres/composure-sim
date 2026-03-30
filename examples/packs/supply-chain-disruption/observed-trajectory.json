@@ -1,0 +1,10 @@
+{
+  "id": "supply-chain-observed",
+  "name": "Observed Fill Rate Recovery",
+  "values": [0.7, 0.64, 0.58, 0.56, 0.59, 0.63, 0.68, 0.72, 0.77],
+  "failure_threshold": 0.58,
+  "metadata": {
+    "domain": "supply_chain",
+    "source": "ops dashboard"
+  }
+}

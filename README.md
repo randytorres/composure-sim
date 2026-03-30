@@ -8,6 +8,7 @@ Use this to simulate any system that degrades and recovers under stress — heal
 
 | Crate | Purpose |
 |---|---|
+| `composure-calibration` | Deterministic fitting utilities that score sweep candidates against observed trajectories |
 | `composure-cli` | Minimal CLI for inspecting, summarizing, and comparing saved simulation artifacts |
 | `composure-core` | Core library: SimState, Simulator trait, Monte Carlo (rayon parallel), Composure Curve (archetype classification), event-sourced replay, comparison, experiment bundles, execution, sweep runner, sensitivity, run summaries |
 | `composure-py` | PyO3 Python bindings |
@@ -197,11 +198,23 @@ The `composure` CLI can inspect saved artifacts, transform them into summaries, 
 
 ```bash
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
+cargo run -p composure-cli -- inspect-report examples/artifacts/report.json
+cargo run -p composure-cli -- export-report-markdown examples/artifacts/report.json
 cargo run -p composure-cli -- summarize-monte-carlo examples/artifacts/candidate-monte-carlo.json
 cargo run -p composure-cli -- summarize-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   --output /tmp/run-summary.json
+cargo run -p composure-cli -- build-report \
+  examples/artifacts/baseline-run-summary.json \
+  examples/artifacts/run-summary.json \
+  --comparison examples/artifacts/comparison.json
+cargo run -p composure-cli -- build-report \
+  examples/artifacts/baseline-run-summary.json \
+  examples/artifacts/run-summary.json \
+  --comparison examples/artifacts/comparison.json \
+  --output /tmp/report.json
 cargo run -p composure-cli -- inspect-bundle examples/artifacts/experiment-bundle.json
+cargo run -p composure-cli -- export-bundle-markdown examples/artifacts/experiment-bundle-with-output.json
 cargo run -p composure-cli -- summarize-bundle-run \
   examples/artifacts/experiment-bundle-with-output.json \
   run-1
@@ -210,7 +223,13 @@ cargo run -p composure-cli -- summarize-bundle-run \
   run-1 \
   --output /tmp/bundle-run-summary.json
 cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-summary-markdown examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples-markdown examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
+cargo run -p composure-cli -- inspect-calibration examples/artifacts/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates examples/artifacts/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates-markdown examples/artifacts/calibration-result.json
 cargo run -p composure-cli -- compare-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   examples/artifacts/candidate-monte-carlo.json
@@ -223,6 +242,73 @@ cargo run -p composure-cli -- compare-monte-carlo \
 ```
 
 Sample artifacts live under [`examples/artifacts`](/Users/randytorres/Projects/composure-sim/examples/artifacts/README.md).
+
+### Browser Inspector
+
+A minimal static inspector is available under [`examples/browser-inspector`](/Users/randytorres/Projects/composure-sim/examples/browser-inspector/README.md):
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://127.0.0.1:8000/examples/browser-inspector/` and load saved JSON artifacts.
+
+For an automated browser smoke pass that serves the repo locally and validates
+the interactive inspector with Playwright CLI:
+
+```bash
+./scripts/browser-inspector-smoke.sh
+```
+
+### Domain Packs
+
+Typed input packs for multiple domains live under [`examples/packs`](/Users/randytorres/Projects/composure-sim/examples/packs/README.md):
+
+- [`health-recovery`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/README.md)
+- [`campaign-fatigue`](/Users/randytorres/Projects/composure-sim/examples/packs/campaign-fatigue/README.md)
+- [`supply-chain-disruption`](/Users/randytorres/Projects/composure-sim/examples/packs/supply-chain-disruption/README.md)
+
+These are input-first packs: `scenario`, `experiment-spec`, `sweep-definition`, and
+`observed-trajectory` examples that plug into your domain-specific `Simulator`
+implementation and feed the same downstream artifact pipeline.
+
+### Deterministic Reports
+
+Build a compact JSON-first report from two run summaries and an optional trajectory comparison:
+
+```rust
+use composure_core::{build_deterministic_report, compare_trajectories, ComparisonConfig};
+
+let comparison = compare_trajectories(
+    &baseline.mean_trajectory,
+    &candidate.mean_trajectory,
+    &ComparisonConfig::default(),
+)?;
+
+let report = build_deterministic_report(
+    &baseline_summary,
+    &candidate_summary,
+    Some(&comparison),
+);
+
+println!("Archetype changed: {}", report.archetype_change.changed);
+println!("Band change: {:?}", report.percentile_band_change.direction);
+```
+
+The CLI can also build the same artifact from saved summaries:
+
+```bash
+cargo run -p composure-cli -- build-report \
+  examples/artifacts/baseline-run-summary.json \
+  examples/artifacts/run-summary.json \
+  --comparison examples/artifacts/comparison.json
+```
+
+For PRs and docs, the same artifact can be exported to markdown:
+
+```bash
+cargo run -p composure-cli -- export-report-markdown examples/artifacts/report.json
+```
 
 ### Sweep Runner
 
@@ -322,6 +408,75 @@ println!("Bundle runs: {}", results.bundle.as_ref().unwrap().runs.len());
 println!("Case failures: {}", results.failures.len());
 ```
 
+### Calibration / Fitting
+
+Use `composure-calibration` to score sweep candidates against an observed trajectory:
+
+```rust
+use composure_calibration::{calibrate_experiment, CalibrationConfig, ObservedTrajectory};
+use composure_core::{ExperimentParameterSet, ExperimentSpec, MonteCarloConfig, Scenario, SimState};
+
+let mut spec = ExperimentSpec::new(
+    "exp-001",
+    "Dose Fit",
+    Scenario::new("baseline", "Baseline", SimState::zeros(1), 4),
+);
+spec.default_monte_carlo = Some(MonteCarloConfig::with_seed(100, 4, 42));
+
+let observed = ObservedTrajectory::new(
+    "obs-1",
+    "Observed Recovery",
+    vec![0.45, 0.52, 0.6, 0.7],
+);
+
+let result = calibrate_experiment(
+    &my_sim,
+    &spec,
+    &observed,
+    &sweep,
+    &CalibrationConfig::default(),
+    |spec, case| {
+        let mut parameter_set = ExperimentParameterSet::new(
+            format!("ps-{}", case.case_id),
+            format!("Case {}", case.case_id),
+            spec.scenario.clone(),
+        );
+        Ok(parameter_set)
+    },
+)?;
+
+println!("Best case: {:?}", result.best_case_id);
+println!("Best score: {:?}", result.best_score);
+```
+
+The checked-in example artifact can be inspected directly:
+
+```bash
+cargo run -p composure-cli -- inspect-calibration examples/artifacts/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates examples/artifacts/calibration-result.json
+```
+
+Bundle and sweep artifacts can also be exported as markdown summaries:
+
+```bash
+cargo run -p composure-cli -- export-bundle-markdown examples/artifacts/experiment-bundle-with-output.json
+cargo run -p composure-cli -- export-sweep-summary-markdown examples/artifacts/sweep-result.json
+```
+
+Sweep samples can also be exported as a flat CSV or markdown table:
+
+```bash
+cargo run -p composure-cli -- export-sweep-samples examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples-markdown examples/artifacts/sweep-result.json
+```
+
+Calibration candidate rankings can be exported in CSV or markdown:
+
+```bash
+cargo run -p composure-cli -- export-calibration-candidates examples/artifacts/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates-markdown examples/artifacts/calibration-result.json
+```
+
 ### Run Summaries
 
 Extract compact deterministic metrics for reports and sweep objectives:
@@ -380,13 +535,31 @@ cargo test
 # Inspect saved artifacts
 cargo run -p composure-cli -- inspect-sweep path/to/sweep-result.json
 cargo run -p composure-cli -- inspect-bundle path/to/experiment-bundle.json
+cargo run -p composure-cli -- inspect-report path/to/report.json
 cargo run -p composure-cli -- inspect-compare path/to/comparison.json
+cargo run -p composure-cli -- inspect-calibration path/to/calibration-result.json
+cargo run -p composure-cli -- export-bundle-markdown path/to/bundle.json
+cargo run -p composure-cli -- export-report-markdown path/to/report.json
+cargo run -p composure-cli -- export-sweep-summary-markdown path/to/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples path/to/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples-markdown path/to/sweep-result.json
+cargo run -p composure-cli -- export-calibration-candidates path/to/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates-markdown path/to/calibration-result.json
 cargo run -p composure-cli -- summarize-monte-carlo path/to/monte-carlo.json
 cargo run -p composure-cli -- summarize-bundle-run path/to/bundle.json run-id
 cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json
+cargo run -p composure-cli -- build-report baseline-summary.json candidate-summary.json
 cargo run -p composure-cli -- summarize-monte-carlo path/to/monte-carlo.json --output run-summary.json
 cargo run -p composure-cli -- summarize-bundle-run path/to/bundle.json run-id --output run-summary.json
 cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json --output comparison.json
+cargo run -p composure-cli -- build-report baseline-summary.json candidate-summary.json --comparison comparison.json --output report.json
+cargo run -p composure-cli -- export-bundle-markdown path/to/bundle.json --output bundle.md
+cargo run -p composure-cli -- export-report-markdown path/to/report.json --output report.md
+cargo run -p composure-cli -- export-sweep-summary-markdown path/to/sweep-result.json --output sweep-summary.md
+cargo run -p composure-cli -- export-sweep-samples path/to/sweep-result.json --output sweep-samples.csv
+cargo run -p composure-cli -- export-sweep-samples-markdown path/to/sweep-result.json --output sweep-samples.md
+cargo run -p composure-cli -- export-calibration-candidates path/to/calibration-result.json --output calibration-candidates.csv
+cargo run -p composure-cli -- export-calibration-candidates-markdown path/to/calibration-result.json --output calibration-candidates.md
 
 # Python bindings (requires maturin)
 cd crates/composure-py && maturin develop --features python-module

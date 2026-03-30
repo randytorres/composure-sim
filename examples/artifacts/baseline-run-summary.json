@@ -1,0 +1,26 @@
+{
+  "monte_carlo": {
+    "time_steps": 3,
+    "num_paths": 10,
+    "start": 0.84,
+    "end": 0.64,
+    "min": 0.64,
+    "max": 0.84,
+    "mean": 0.74,
+    "auc": 1.48,
+    "p10_end": 0.6,
+    "p50_end": 0.64,
+    "p90_end": 0.68,
+    "final_band_width": 0.08
+  },
+  "composure": {
+    "archetype": "CliffFaller",
+    "slope": -0.1,
+    "variance": 0.01,
+    "peak": 0.84,
+    "trough": 0.64,
+    "recovery_half_life": 2,
+    "residual_damage": 0.2,
+    "break_point": 1
+  }
+}

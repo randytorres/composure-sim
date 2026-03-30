@@ -1,0 +1,42 @@
+{
+  "id": "campaign-fatigue-baseline",
+  "name": "Campaign Fatigue Baseline",
+  "initial_state": {
+    "z": [0.62, 0.57, 0.49],
+    "m": [0.18, 0.24, 0.22],
+    "u": [0.16, 0.18, 0.2],
+    "t": 0
+  },
+  "actions": [
+    {
+      "dimension": 1,
+      "magnitude": -0.24,
+      "action_type": "StressorOnset",
+      "metadata": {
+        "label": "heavy weekly frequency"
+      }
+    },
+    {
+      "dimension": 0,
+      "magnitude": 0.19,
+      "action_type": "Intervention",
+      "metadata": {
+        "label": "new creative flight"
+      }
+    },
+    {
+      "dimension": 2,
+      "magnitude": 0.14,
+      "action_type": "Intervention",
+      "metadata": {
+        "label": "limited time offer"
+      }
+    }
+  ],
+  "time_steps": 10,
+  "failure_threshold": 0.4,
+  "metadata": {
+    "domain": "marketing",
+    "dimension_labels": ["awareness", "engagement", "conversion_intent"]
+  }
+}
