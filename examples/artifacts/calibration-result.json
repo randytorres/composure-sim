@@ -1,0 +1,311 @@
+{
+  "definition": {
+    "id": "dose-sweep",
+    "name": "Dose Sweep",
+    "parameters": [
+      {
+        "name": "dose",
+        "values": [
+          {
+            "Int": 1
+          },
+          {
+            "Int": 2
+          },
+          {
+            "Int": 3
+          }
+        ]
+      }
+    ],
+    "strategy": "Grid",
+    "sample_count": null,
+    "seed": null,
+    "metadata": null
+  },
+  "observed": {
+    "id": "obs-1",
+    "name": "Observed Recovery",
+    "values": [
+      0.84,
+      0.74,
+      0.64
+    ],
+    "failure_threshold": null,
+    "metadata": null
+  },
+  "observed_summary": {
+    "monte_carlo": {
+      "time_steps": 3,
+      "num_paths": 1,
+      "start": 0.84,
+      "end": 0.64,
+      "min": 0.64,
+      "max": 0.84,
+      "mean": 0.74,
+      "auc": 1.48,
+      "p10_end": null,
+      "p50_end": null,
+      "p90_end": null,
+      "final_band_width": null
+    },
+    "composure": null
+  },
+  "bundle": null,
+  "candidates": [
+    {
+      "case": {
+        "case_id": "dose-sweep-1",
+        "parameters": {
+          "dose": {
+            "Int": 3
+          }
+        }
+      },
+      "parameter_set": {
+        "id": "ps-dose-sweep-1",
+        "name": "Dose Sweep 1",
+        "scenario": {
+          "id": "scenario-dose-sweep-1",
+          "name": "Scenario Dose Sweep 1",
+          "initial_state": {
+            "z": [
+              0.0
+            ],
+            "m": [
+              0.0
+            ],
+            "u": [
+              0.0
+            ],
+            "t": 0
+          },
+          "actions": [],
+          "time_steps": 3,
+          "failure_threshold": null,
+          "metadata": null
+        },
+        "monte_carlo": {
+          "num_paths": 10,
+          "time_steps": 3,
+          "seed_base": 7
+        },
+        "notes": null,
+        "metadata": null
+      },
+      "run": {
+        "run_id": "calibration-run-1",
+        "parameter_set_id": "ps-dose-sweep-1",
+        "status": "Completed",
+        "seed": 7,
+        "started_at_unix_s": 1700000000,
+        "completed_at_unix_s": 1700000001,
+        "outcome": {
+          "monte_carlo": {
+            "paths": [],
+            "percentiles": {
+              "p10": [
+                0.82,
+                0.73,
+                0.65
+              ],
+              "p25": [
+                0.84,
+                0.75,
+                0.67
+              ],
+              "p50": [
+                0.86,
+                0.77,
+                0.69
+              ],
+              "p75": [
+                0.88,
+                0.79,
+                0.71
+              ],
+              "p90": [
+                0.9,
+                0.81,
+                0.73
+              ]
+            },
+            "mean_trajectory": [
+              0.86,
+              0.77,
+              0.69
+            ],
+            "config": {
+              "num_paths": 10,
+              "time_steps": 3,
+              "seed_base": 7
+            }
+          },
+          "composure": null,
+          "replay": null,
+          "metadata": null
+        },
+        "error": null,
+        "metadata": null
+      },
+      "summary": {
+        "monte_carlo": {
+          "time_steps": 3,
+          "num_paths": 10,
+          "start": 0.86,
+          "end": 0.69,
+          "min": 0.69,
+          "max": 0.86,
+          "mean": 0.7733333333333333,
+          "auc": 1.545,
+          "p10_end": 0.65,
+          "p50_end": 0.69,
+          "p90_end": 0.73,
+          "final_band_width": 0.08
+        },
+        "composure": null
+      },
+      "comparison": {
+        "series_len": 3,
+        "deltas": [
+          {
+            "t": 0,
+            "baseline": 0.84,
+            "candidate": 0.86,
+            "delta": 0.02,
+            "abs_delta": 0.02
+          },
+          {
+            "t": 1,
+            "baseline": 0.74,
+            "candidate": 0.77,
+            "delta": 0.03,
+            "abs_delta": 0.03
+          },
+          {
+            "t": 2,
+            "baseline": 0.64,
+            "candidate": 0.69,
+            "delta": 0.05,
+            "abs_delta": 0.05
+          }
+        ],
+        "metrics": {
+          "cumulative_delta": 0.1,
+          "mean_delta": 0.03333333333333333,
+          "mean_abs_delta": 0.03333333333333333,
+          "rmse": 0.03559026084010437,
+          "end_delta": 0.05,
+          "improved_steps": 3,
+          "regressed_steps": 0,
+          "unchanged_steps": 0,
+          "max_improvement": {
+            "t": 2,
+            "baseline": 0.64,
+            "candidate": 0.69,
+            "delta": 0.05
+          },
+          "max_regression": {
+            "t": 0,
+            "baseline": 0.84,
+            "candidate": 0.86,
+            "delta": 0.02
+          },
+          "failure": null
+        },
+        "divergence": null,
+        "config": {
+          "divergence_threshold": 0.1,
+          "sustained_steps": 1,
+          "equality_epsilon": 1e-9,
+          "failure_threshold": null
+        }
+      },
+      "report": {
+        "start_delta": {
+          "baseline": 0.84,
+          "candidate": 0.86,
+          "delta": 0.020000000000000018
+        },
+        "end_delta": {
+          "baseline": 0.64,
+          "candidate": 0.69,
+          "delta": 0.04999999999999993
+        },
+        "auc_delta": {
+          "baseline": 1.48,
+          "candidate": 1.545,
+          "delta": 0.06499999999999995
+        },
+        "residual_damage_delta": {
+          "baseline": null,
+          "candidate": null,
+          "delta": null
+        },
+        "archetype_change": {
+          "baseline": null,
+          "candidate": null,
+          "changed": false
+        },
+        "break_point_shift": {
+          "baseline": null,
+          "candidate": null,
+          "shift": null
+        },
+        "recovery_shift": {
+          "baseline": null,
+          "candidate": null,
+          "shift": null
+        },
+        "percentile_band_change": {
+          "baseline": null,
+          "candidate": 0.08,
+          "delta": null,
+          "direction": "Unknown"
+        },
+        "comparison": {
+          "mean_delta": 0.03333333333333333,
+          "mean_abs_delta": 0.03333333333333333,
+          "rmse": 0.03559026084010437,
+          "end_delta": 0.05,
+          "divergence_start_t": null,
+          "divergence_end_t": null,
+          "failure_shift": null
+        }
+      },
+      "score": 0.03559026084010437
+    }
+  ],
+  "failures": [
+    {
+      "case": {
+        "case_id": "dose-sweep-2",
+        "parameters": {
+          "dose": {
+            "Int": 2
+          }
+        }
+      },
+      "parameter_set_id": "ps-dose-sweep-2",
+      "error": "dose rejected"
+    }
+  ],
+  "best_case_id": "dose-sweep-1",
+  "best_parameter_set_id": "ps-dose-sweep-1",
+  "best_score": 0.03559026084010437,
+  "config": {
+    "run_id_prefix": "calibration-run",
+    "execution": {
+      "retain_paths": false,
+      "analyze_composure": false
+    },
+    "comparison": {
+      "divergence_threshold": 0.1,
+      "sustained_steps": 1,
+      "equality_epsilon": 1e-9,
+      "failure_threshold": null
+    },
+    "objective": "Rmse",
+    "failure_mode": "Continue"
+  }
+}

@@ -1,9 +1,10 @@
 use std::{env, fs};
 
+use composure_calibration::CalibrationResult;
 use composure_core::{
-    compare_monte_carlo_results, summarize_run, ComparisonConfig, ExperimentBundle,
-    ExperimentRunStatus, MonteCarloResult, RunSummary, SensitivityKind, SweepExecutionResult,
-    TrajectoryComparison,
+    build_deterministic_report, compare_monte_carlo_results, summarize_run, ComparisonConfig,
+    DeterministicReport, ExperimentBundle, ExperimentRunStatus, MonteCarloResult, RunSummary,
+    SensitivityKind, SweepExecutionResult, TrajectoryComparison,
 };
 use thiserror::Error;
 
@@ -39,11 +40,19 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let summary = read_json::<RunSummary>(path)?;
             Ok(format_summary(&summary))
         }
+        [_bin, command, path] if command == "inspect-report" => {
+            let report = read_json::<DeterministicReport>(path)?;
+            Ok(format_report(&report))
+        }
         [_bin, command, path, tail @ ..] if command == "summarize-monte-carlo" => {
             let result = read_json::<MonteCarloResult>(path)?;
             let summary = summarize_run(Some(&result), None);
             let output = serde_json::to_string_pretty(&summary).map_err(CliError::SerializeJson)?;
             write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path] if command == "inspect-calibration" => {
+            let calibration = read_json::<CalibrationResult>(path)?;
+            Ok(format_calibration(&calibration))
         }
         [_bin, command, path] if command == "inspect-compare" => {
             let comparison = read_json::<TrajectoryComparison>(path)?;
@@ -82,6 +91,18 @@ fn run(args: &[String]) -> Result<String, CliError> {
                 serde_json::to_string_pretty(&comparison).map_err(CliError::SerializeJson)?;
             write_output(output, options.output_path.as_deref())
         }
+        [_bin, command, baseline_path, candidate_path, tail @ ..] if command == "build-report" => {
+            let baseline = read_json::<RunSummary>(baseline_path)?;
+            let candidate = read_json::<RunSummary>(candidate_path)?;
+            let options = parse_build_report_options(tail)?;
+            let comparison = match options.comparison_path.as_deref() {
+                Some(path) => Some(read_json::<TrajectoryComparison>(path)?),
+                None => None,
+            };
+            let report = build_deterministic_report(&baseline, &candidate, comparison.as_ref());
+            let output = serde_json::to_string_pretty(&report).map_err(CliError::SerializeJson)?;
+            write_output(output, options.output_path.as_deref())
+        }
         [_bin, ..] => Err(CliError::UnknownCommand { usage: usage() }),
         [] => Err(CliError::Usage(usage())),
     }
@@ -93,25 +114,32 @@ fn usage() -> String {
         "  composure inspect-bundle <path>",
         "  composure inspect-sweep <path>",
         "  composure inspect-summary <path>",
+        "  composure inspect-report <path>",
         "  composure summarize-monte-carlo <path> [--output <path>]",
         "  composure summarize-bundle-run <bundle-path> <run-id> [--output <path>]",
+        "  composure inspect-calibration <path>",
         "  composure inspect-compare <path>",
         "  composure compare-monte-carlo <baseline-path> <candidate-path> [flags] [--output <path>]",
+        "  composure build-report <baseline-summary-path> <candidate-summary-path> [--comparison <path>] [--output <path>]",
         "",
         "Commands:",
         "  inspect-bundle   Read an ExperimentBundle JSON artifact and print a summary",
         "  inspect-sweep    Read a SweepExecutionResult JSON artifact and print a summary",
         "  inspect-summary  Read a RunSummary JSON artifact and print a summary",
+        "  inspect-report   Read a DeterministicReport JSON artifact and print a summary",
         "  summarize-monte-carlo  Convert a MonteCarloResult JSON artifact into a RunSummary JSON artifact",
         "  summarize-bundle-run   Extract and summarize one run from an ExperimentBundle JSON artifact",
+        "  inspect-calibration  Read a CalibrationResult JSON artifact and print a summary",
         "  inspect-compare  Read a TrajectoryComparison JSON artifact and print a summary",
         "  compare-monte-carlo  Compare two MonteCarloResult JSON artifacts and emit JSON",
+        "  build-report   Build a DeterministicReport JSON artifact from two RunSummary artifacts",
         "",
-        "Compare flags:",
+        "Compare/build flags:",
         "  --divergence-threshold <float>",
         "  --sustained-steps <usize>",
         "  --equality-epsilon <float>",
         "  --failure-threshold <float>",
+        "  --comparison <path>",
         "  --output <path>",
     ]
     .join("\n")
@@ -134,6 +162,12 @@ where
 #[derive(Debug)]
 struct CompareOptions {
     config: ComparisonConfig,
+    output_path: Option<String>,
+}
+
+#[derive(Debug)]
+struct BuildReportOptions {
+    comparison_path: Option<String>,
     output_path: Option<String>,
 }
 
@@ -173,6 +207,36 @@ fn parse_compare_options(args: &[String]) -> Result<CompareOptions, CliError> {
     config.validate().map_err(CliError::Compare)?;
     Ok(CompareOptions {
         config,
+        output_path,
+    })
+}
+
+fn parse_build_report_options(args: &[String]) -> Result<BuildReportOptions, CliError> {
+    let mut comparison_path = None;
+    let mut output_path = None;
+    let mut index = 0;
+
+    while index < args.len() {
+        let flag = &args[index];
+        let value = args
+            .get(index + 1)
+            .ok_or_else(|| CliError::MissingFlagValue(flag.clone()))?;
+
+        match flag.as_str() {
+            "--comparison" => {
+                comparison_path = Some(value.clone());
+            }
+            "--output" => {
+                output_path = Some(value.clone());
+            }
+            _ => return Err(CliError::UnknownFlag(flag.clone())),
+        }
+
+        index += 2;
+    }
+
+    Ok(BuildReportOptions {
+        comparison_path,
         output_path,
     })
 }
@@ -362,6 +426,102 @@ fn format_comparison(comparison: &TrajectoryComparison) -> String {
     .join("\n")
 }
 
+fn format_report(report: &DeterministicReport) -> String {
+    let mut lines = vec![
+        format!("Start delta: {}", format_delta(&report.start_delta)),
+        format!("End delta: {}", format_delta(&report.end_delta)),
+        format!("AUC delta: {}", format_delta(&report.auc_delta)),
+        format!(
+            "Residual damage delta: {}",
+            format_delta(&report.residual_damage_delta)
+        ),
+        format!(
+            "Archetype change: baseline={:?}, candidate={:?}, changed={}",
+            report.archetype_change.baseline,
+            report.archetype_change.candidate,
+            report.archetype_change.changed
+        ),
+        format!(
+            "Break point shift: baseline={:?}, candidate={:?}, shift={:?}",
+            report.break_point_shift.baseline,
+            report.break_point_shift.candidate,
+            report.break_point_shift.shift
+        ),
+        format!(
+            "Recovery shift: baseline={:?}, candidate={:?}, shift={:?}",
+            report.recovery_shift.baseline,
+            report.recovery_shift.candidate,
+            report.recovery_shift.shift
+        ),
+        format!(
+            "Percentile band change: baseline={:?}, candidate={:?}, delta={:?}, direction={:?}",
+            report.percentile_band_change.baseline,
+            report.percentile_band_change.candidate,
+            report.percentile_band_change.delta,
+            report.percentile_band_change.direction
+        ),
+    ];
+
+    match &report.comparison {
+        Some(comparison) => {
+            lines.push(format!(
+                "Comparison: rmse={:.4}, mean_abs_delta={:.4}, end_delta={:.4}, divergence={:?}->{:?}, failure_shift={:?}",
+                comparison.rmse,
+                comparison.mean_abs_delta,
+                comparison.end_delta,
+                comparison.divergence_start_t,
+                comparison.divergence_end_t,
+                comparison.failure_shift
+            ));
+        }
+        None => lines.push("Comparison: none".into()),
+    }
+
+    lines.join("\n")
+}
+
+fn format_calibration(result: &CalibrationResult) -> String {
+    let mut lines = vec![
+        format!(
+            "Calibration: {} ({})",
+            result.definition.name, result.definition.id
+        ),
+        format!(
+            "Observed: {} ({})",
+            result.observed.name, result.observed.id
+        ),
+        format!("Objective: {:?}", result.config.objective),
+        format!("Failure mode: {:?}", result.config.failure_mode),
+        format!("Observed points: {}", result.observed.values.len()),
+        format!("Candidates: {}", result.candidates.len()),
+        format!("Failures: {}", result.failures.len()),
+        format!("Bundle attached: {}", result.bundle.is_some()),
+        format!("Best case: {:?}", result.best_case_id),
+        format!("Best parameter set: {:?}", result.best_parameter_set_id),
+        format!("Best score: {:?}", result.best_score),
+    ];
+
+    if let Some(candidate) = result.candidates.first() {
+        lines.push(format!(
+            "Top candidate: case={}, parameter_set={}, score={:.4}, rmse={:.4}, end_delta={:.4}",
+            candidate.case.case_id,
+            candidate.parameter_set.id,
+            candidate.score,
+            candidate.comparison.metrics.rmse,
+            candidate.comparison.metrics.end_delta
+        ));
+    }
+
+    lines.join("\n")
+}
+
+fn format_delta(delta: &composure_core::SummaryDelta) -> String {
+    format!(
+        "baseline={:?}, candidate={:?}, delta={:?}",
+        delta.baseline, delta.candidate, delta.delta
+    )
+}
+
 #[derive(Debug, Error)]
 enum CliError {
     #[error("{0}")]
@@ -406,11 +566,16 @@ enum CliError {
 mod tests {
     use std::collections::BTreeMap;
 
+    use composure_calibration::{
+        CalibrationCandidate, CalibrationCaseFailure, CalibrationConfig, CalibrationFailureMode,
+        CalibrationObjective, CalibrationResult, ObservedTrajectory,
+    };
     use composure_core::monte_carlo::PercentileBands;
     use composure_core::{
-        ComposureSummary, ExperimentExecutionConfig, ExperimentParameterSet, ExperimentSpec,
-        MonteCarloConfig, MonteCarloSummary, Scenario, SensitivityConfig, SensitivityDirection,
-        SweepCase, SweepDefinition, SweepExecutionResult, SweepFailureMode, SweepRunnerConfig,
+        ComposureSummary, ExperimentExecutionConfig, ExperimentOutcome, ExperimentParameterSet,
+        ExperimentSpec, MonteCarloConfig, MonteCarloSummary, ParameterValue, Scenario,
+        SensitivityConfig, SensitivityDirection, SweepCase, SweepDefinition, SweepExecutionResult,
+        SweepFailureMode, SweepParameter, SweepRunnerConfig, SweepStrategy,
     };
 
     use super::*;
@@ -466,6 +631,169 @@ mod tests {
             },
             mean_trajectory: values.into(),
             config: MonteCarloConfig::with_seed(10, 3, seed),
+        }
+    }
+
+    fn sample_baseline_summary() -> RunSummary {
+        RunSummary {
+            monte_carlo: Some(MonteCarloSummary {
+                time_steps: 3,
+                num_paths: 10,
+                start: Some(0.84),
+                end: Some(0.64),
+                min: Some(0.64),
+                max: Some(0.84),
+                mean: Some(0.74),
+                auc: Some(1.48),
+                p10_end: Some(0.6),
+                p50_end: Some(0.64),
+                p90_end: Some(0.68),
+                final_band_width: Some(0.08),
+            }),
+            composure: Some(ComposureSummary {
+                archetype: composure_core::Archetype::CliffFaller,
+                slope: -0.1,
+                variance: 0.01,
+                peak: 0.84,
+                trough: 0.64,
+                recovery_half_life: Some(2),
+                residual_damage: 0.2,
+                break_point: Some(1),
+            }),
+        }
+    }
+
+    fn sample_candidate_summary() -> RunSummary {
+        RunSummary {
+            monte_carlo: Some(MonteCarloSummary {
+                time_steps: 3,
+                num_paths: 10,
+                start: Some(0.86),
+                end: Some(0.69),
+                min: Some(0.69),
+                max: Some(0.86),
+                mean: Some(0.7733333333333333),
+                auc: Some(1.545),
+                p10_end: Some(0.65),
+                p50_end: Some(0.69),
+                p90_end: Some(0.73),
+                final_band_width: Some(0.08),
+            }),
+            composure: Some(ComposureSummary {
+                archetype: composure_core::Archetype::Phoenix,
+                slope: -0.085,
+                variance: 0.004822222222222221,
+                peak: 0.86,
+                trough: 0.69,
+                recovery_half_life: Some(1),
+                residual_damage: 0.17,
+                break_point: Some(2),
+            }),
+        }
+    }
+
+    fn sample_comparison() -> TrajectoryComparison {
+        composure_core::compare_trajectories(
+            &[0.84, 0.74, 0.64],
+            &[0.86, 0.77, 0.69],
+            &ComparisonConfig::default(),
+        )
+        .unwrap()
+    }
+
+    fn sample_report() -> DeterministicReport {
+        let baseline = sample_baseline_summary();
+        let candidate = sample_candidate_summary();
+        let comparison = sample_comparison();
+        build_deterministic_report(&baseline, &candidate, Some(&comparison))
+    }
+
+    fn sample_calibration_result() -> CalibrationResult {
+        let comparison = sample_comparison();
+        let report = build_deterministic_report(
+            &sample_baseline_summary(),
+            &sample_candidate_summary(),
+            Some(&comparison),
+        );
+        let mut parameters = BTreeMap::new();
+        parameters.insert("dose".into(), ParameterValue::Int(3));
+        let case = SweepCase {
+            case_id: "dose-sweep-1".into(),
+            parameters: parameters.clone(),
+        };
+
+        let mut parameter_set = ExperimentParameterSet::new(
+            "ps-dose-sweep-1",
+            "Dose Sweep 1",
+            Scenario::new(
+                "scenario-dose-sweep-1",
+                "Scenario Dose Sweep 1",
+                composure_core::SimState::zeros(1),
+                3,
+            ),
+        );
+        parameter_set.monte_carlo = Some(MonteCarloConfig::with_seed(10, 3, 7));
+
+        let run = composure_core::ExperimentRunRecord::running(
+            "calibration-run-1",
+            Some("ps-dose-sweep-1"),
+            Some(7),
+        )
+        .mark_completed(ExperimentOutcome {
+            monte_carlo: Some(sample_monte_carlo(7, [0.86, 0.77, 0.69])),
+            composure: None,
+            replay: None,
+            metadata: None,
+        });
+
+        let mut failure_parameters = BTreeMap::new();
+        failure_parameters.insert("dose".into(), ParameterValue::Int(2));
+
+        CalibrationResult {
+            definition: SweepDefinition {
+                id: "dose-sweep".into(),
+                name: "Dose Sweep".into(),
+                parameters: vec![SweepParameter {
+                    name: "dose".into(),
+                    values: vec![
+                        ParameterValue::Int(1),
+                        ParameterValue::Int(2),
+                        ParameterValue::Int(3),
+                    ],
+                }],
+                strategy: SweepStrategy::Grid,
+                sample_count: None,
+                seed: None,
+                metadata: None,
+            },
+            observed: ObservedTrajectory::new("obs-1", "Observed Recovery", vec![0.84, 0.74, 0.64]),
+            observed_summary: sample_baseline_summary(),
+            bundle: None,
+            candidates: vec![CalibrationCandidate {
+                case,
+                parameter_set,
+                run,
+                summary: sample_candidate_summary(),
+                comparison: comparison.clone(),
+                report,
+                score: comparison.metrics.rmse,
+            }],
+            failures: vec![CalibrationCaseFailure {
+                case: SweepCase {
+                    case_id: "dose-sweep-2".into(),
+                    parameters: failure_parameters,
+                },
+                parameter_set_id: Some("ps-dose-sweep-2".into()),
+                error: "dose rejected".into(),
+            }],
+            best_case_id: Some("dose-sweep-1".into()),
+            best_parameter_set_id: Some("ps-dose-sweep-1".into()),
+            best_score: Some(comparison.metrics.rmse),
+            config: CalibrationConfig {
+                objective: CalibrationObjective::Rmse,
+                failure_mode: CalibrationFailureMode::Continue,
+                ..CalibrationConfig::default()
+            },
         }
     }
 
@@ -592,9 +920,30 @@ mod tests {
     }
 
     #[test]
+    fn test_format_report() {
+        let output = format_report(&sample_report());
+        assert!(output.contains("Start delta:"));
+        assert!(output.contains("Archetype change:"));
+        assert!(output.contains("Phoenix"));
+        assert!(output.contains("Comparison: rmse="));
+    }
+
+    #[test]
+    fn test_format_calibration() {
+        let output = format_calibration(&sample_calibration_result());
+        assert!(output.contains("Calibration: Dose Sweep (dose-sweep)"));
+        assert!(output.contains("Observed: Observed Recovery (obs-1)"));
+        assert!(output.contains("Failures: 1"));
+        assert!(output.contains("Top candidate: case=dose-sweep-1"));
+    }
+
+    #[test]
     fn test_run_help() {
         let output = run(&["composure".into(), "help".into()]).unwrap();
+        assert!(output.contains("inspect-report"));
+        assert!(output.contains("inspect-calibration"));
         assert!(output.contains("summarize-bundle-run"));
+        assert!(output.contains("build-report"));
         assert!(output.contains("--output <path>"));
     }
 
@@ -653,6 +1002,29 @@ mod tests {
     #[test]
     fn test_parse_compare_options_rejects_unknown_flag() {
         let err = parse_compare_options(&["--unknown".into(), "1".into()]).unwrap_err();
+        assert!(matches!(err, CliError::UnknownFlag(flag) if flag == "--unknown"));
+    }
+
+    #[test]
+    fn test_parse_build_report_options_accepts_flags() {
+        let options = parse_build_report_options(&[
+            "--comparison".into(),
+            "/tmp/comparison.json".into(),
+            "--output".into(),
+            "/tmp/report.json".into(),
+        ])
+        .unwrap();
+
+        assert_eq!(
+            options.comparison_path.as_deref(),
+            Some("/tmp/comparison.json")
+        );
+        assert_eq!(options.output_path.as_deref(), Some("/tmp/report.json"));
+    }
+
+    #[test]
+    fn test_parse_build_report_options_rejects_unknown_flag() {
+        let err = parse_build_report_options(&["--unknown".into(), "1".into()]).unwrap_err();
         assert!(matches!(err, CliError::UnknownFlag(flag) if flag == "--unknown"));
     }
 
@@ -716,6 +1088,86 @@ mod tests {
         let written = fs::read_to_string(&output_path).unwrap();
         let comparison: TrajectoryComparison = serde_json::from_str(&written).unwrap();
         assert_eq!(comparison.series_len, 3);
+
+        let _ = fs::remove_file(baseline_path);
+        let _ = fs::remove_file(candidate_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_build_report_outputs_json() {
+        let temp_dir = std::env::temp_dir();
+        let baseline_path = temp_dir.join("composure-cli-baseline-summary.json");
+        let candidate_path = temp_dir.join("composure-cli-candidate-summary.json");
+        let comparison_path = temp_dir.join("composure-cli-build-report-comparison.json");
+
+        fs::write(
+            &baseline_path,
+            serde_json::to_string(&sample_baseline_summary()).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            &candidate_path,
+            serde_json::to_string(&sample_candidate_summary()).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            &comparison_path,
+            serde_json::to_string(&sample_comparison()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "build-report".into(),
+            baseline_path.display().to_string(),
+            candidate_path.display().to_string(),
+            "--comparison".into(),
+            comparison_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let report: DeterministicReport = serde_json::from_str(&output).unwrap();
+        assert_eq!(report.end_delta.delta, Some(0.04999999999999993));
+        assert!(report.comparison.is_some());
+
+        let _ = fs::remove_file(baseline_path);
+        let _ = fs::remove_file(candidate_path);
+        let _ = fs::remove_file(comparison_path);
+    }
+
+    #[test]
+    fn test_run_build_report_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let baseline_path = temp_dir.join("composure-cli-baseline-summary-output.json");
+        let candidate_path = temp_dir.join("composure-cli-candidate-summary-output.json");
+        let output_path = temp_dir.join("composure-cli-report-output.json");
+
+        fs::write(
+            &baseline_path,
+            serde_json::to_string(&sample_baseline_summary()).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            &candidate_path,
+            serde_json::to_string(&sample_candidate_summary()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "build-report".into(),
+            baseline_path.display().to_string(),
+            candidate_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        let report: DeterministicReport = serde_json::from_str(&written).unwrap();
+        assert!(report.comparison.is_none());
 
         let _ = fs::remove_file(baseline_path);
         let _ = fs::remove_file(candidate_path);
@@ -826,5 +1278,49 @@ mod tests {
 
         let _ = fs::remove_file(bundle_path);
         let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_inspect_report_outputs_summary() {
+        let temp_dir = std::env::temp_dir();
+        let path = temp_dir.join("composure-cli-report-inspect.json");
+
+        fs::write(&path, serde_json::to_string(&sample_report()).unwrap()).unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "inspect-report".into(),
+            path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Archetype change:"));
+        assert!(output.contains("Comparison: rmse="));
+
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_run_inspect_calibration_outputs_summary() {
+        let temp_dir = std::env::temp_dir();
+        let path = temp_dir.join("composure-cli-calibration-inspect.json");
+
+        fs::write(
+            &path,
+            serde_json::to_string(&sample_calibration_result()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "inspect-calibration".into(),
+            path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Calibration: Dose Sweep (dose-sweep)"));
+        assert!(output.contains("Best case: Some(\"dose-sweep-1\")"));
+
+        let _ = fs::remove_file(path);
     }
 }

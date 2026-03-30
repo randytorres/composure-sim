@@ -1,0 +1,52 @@
+{
+  "start_delta": {
+    "baseline": 0.84,
+    "candidate": 0.86,
+    "delta": 0.020000000000000018
+  },
+  "end_delta": {
+    "baseline": 0.64,
+    "candidate": 0.69,
+    "delta": 0.04999999999999993
+  },
+  "auc_delta": {
+    "baseline": 1.48,
+    "candidate": 1.545,
+    "delta": 0.06499999999999995
+  },
+  "residual_damage_delta": {
+    "baseline": 0.2,
+    "candidate": 0.17,
+    "delta": -0.03
+  },
+  "archetype_change": {
+    "baseline": "CliffFaller",
+    "candidate": "Phoenix",
+    "changed": true
+  },
+  "break_point_shift": {
+    "baseline": 1,
+    "candidate": null,
+    "shift": null
+  },
+  "recovery_shift": {
+    "baseline": 2,
+    "candidate": null,
+    "shift": null
+  },
+  "percentile_band_change": {
+    "baseline": 0.08,
+    "candidate": 0.08,
+    "delta": 0.0,
+    "direction": "Unchanged"
+  },
+  "comparison": {
+    "mean_delta": 0.03333333333333333,
+    "mean_abs_delta": 0.03333333333333333,
+    "rmse": 0.03559026084010437,
+    "end_delta": 0.05,
+    "divergence_start_t": null,
+    "divergence_end_t": null,
+    "failure_shift": null
+  }
+}

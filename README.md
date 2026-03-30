@@ -198,10 +198,20 @@ The `composure` CLI can inspect saved artifacts, transform them into summaries, 
 
 ```bash
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
+cargo run -p composure-cli -- inspect-report examples/artifacts/report.json
 cargo run -p composure-cli -- summarize-monte-carlo examples/artifacts/candidate-monte-carlo.json
 cargo run -p composure-cli -- summarize-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   --output /tmp/run-summary.json
+cargo run -p composure-cli -- build-report \
+  examples/artifacts/baseline-run-summary.json \
+  examples/artifacts/run-summary.json \
+  --comparison examples/artifacts/comparison.json
+cargo run -p composure-cli -- build-report \
+  examples/artifacts/baseline-run-summary.json \
+  examples/artifacts/run-summary.json \
+  --comparison examples/artifacts/comparison.json \
+  --output /tmp/report.json
 cargo run -p composure-cli -- inspect-bundle examples/artifacts/experiment-bundle.json
 cargo run -p composure-cli -- summarize-bundle-run \
   examples/artifacts/experiment-bundle-with-output.json \
@@ -212,6 +222,7 @@ cargo run -p composure-cli -- summarize-bundle-run \
   --output /tmp/bundle-run-summary.json
 cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
+cargo run -p composure-cli -- inspect-calibration examples/artifacts/calibration-result.json
 cargo run -p composure-cli -- compare-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   examples/artifacts/candidate-monte-carlo.json
@@ -246,6 +257,15 @@ let report = build_deterministic_report(
 
 println!("Archetype changed: {}", report.archetype_change.changed);
 println!("Band change: {:?}", report.percentile_band_change.direction);
+```
+
+The CLI can also build the same artifact from saved summaries:
+
+```bash
+cargo run -p composure-cli -- build-report \
+  examples/artifacts/baseline-run-summary.json \
+  examples/artifacts/run-summary.json \
+  --comparison examples/artifacts/comparison.json
 ```
 
 ### Sweep Runner
@@ -387,6 +407,12 @@ println!("Best case: {:?}", result.best_case_id);
 println!("Best score: {:?}", result.best_score);
 ```
 
+The checked-in example artifact can be inspected directly:
+
+```bash
+cargo run -p composure-cli -- inspect-calibration examples/artifacts/calibration-result.json
+```
+
 ### Run Summaries
 
 Extract compact deterministic metrics for reports and sweep objectives:
@@ -445,13 +471,17 @@ cargo test
 # Inspect saved artifacts
 cargo run -p composure-cli -- inspect-sweep path/to/sweep-result.json
 cargo run -p composure-cli -- inspect-bundle path/to/experiment-bundle.json
+cargo run -p composure-cli -- inspect-report path/to/report.json
 cargo run -p composure-cli -- inspect-compare path/to/comparison.json
+cargo run -p composure-cli -- inspect-calibration path/to/calibration-result.json
 cargo run -p composure-cli -- summarize-monte-carlo path/to/monte-carlo.json
 cargo run -p composure-cli -- summarize-bundle-run path/to/bundle.json run-id
 cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json
+cargo run -p composure-cli -- build-report baseline-summary.json candidate-summary.json
 cargo run -p composure-cli -- summarize-monte-carlo path/to/monte-carlo.json --output run-summary.json
 cargo run -p composure-cli -- summarize-bundle-run path/to/bundle.json run-id --output run-summary.json
 cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json --output comparison.json
+cargo run -p composure-cli -- build-report baseline-summary.json candidate-summary.json --comparison comparison.json --output report.json
 
 # Python bindings (requires maturin)
 cd crates/composure-py && maturin develop --features python-module

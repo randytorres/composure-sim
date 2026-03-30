@@ -4,10 +4,20 @@ These files are small JSON examples for the `composure` CLI:
 
 ```bash
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
+cargo run -p composure-cli -- inspect-report examples/artifacts/report.json
 cargo run -p composure-cli -- summarize-monte-carlo examples/artifacts/candidate-monte-carlo.json
 cargo run -p composure-cli -- summarize-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   --output /tmp/run-summary.json
+cargo run -p composure-cli -- build-report \
+  examples/artifacts/baseline-run-summary.json \
+  examples/artifacts/run-summary.json \
+  --comparison examples/artifacts/comparison.json
+cargo run -p composure-cli -- build-report \
+  examples/artifacts/baseline-run-summary.json \
+  examples/artifacts/run-summary.json \
+  --comparison examples/artifacts/comparison.json \
+  --output /tmp/report.json
 cargo run -p composure-cli -- inspect-bundle examples/artifacts/experiment-bundle.json
 cargo run -p composure-cli -- summarize-bundle-run \
   examples/artifacts/experiment-bundle-with-output.json \
@@ -18,6 +28,7 @@ cargo run -p composure-cli -- summarize-bundle-run \
   --output /tmp/bundle-run-summary.json
 cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
+cargo run -p composure-cli -- inspect-calibration examples/artifacts/calibration-result.json
 cargo run -p composure-cli -- compare-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   examples/artifacts/candidate-monte-carlo.json
