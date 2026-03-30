@@ -1,5 +1,8 @@
 # composure-sim roadmap
 
+For the next-generation engine plan, see
+[`docs/v2-engine-roadmap.md`](/Users/randytorres/Projects/composure-sim/docs/v2-engine-roadmap.md).
+
 ## Goal
 
 `composure-sim` should stay a small, reusable simulation foundation rather than turning into a single domain product.
