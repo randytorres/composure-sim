@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "crates/composure-calibration",
     "crates/composure-cli",
     "crates/composure-core",
     "crates/composure-py",

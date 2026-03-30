@@ -12,6 +12,7 @@
 //! - **Sensitivity analysis**: Sweep definitions, generated cases, and parameter influence ranking.
 //! - **Run summaries**: Deterministic scalar summaries for report-ready downstream use.
 //! - **Sweep execution**: Case generation, execution, scalar objective extraction, and ranking.
+//! - **Deterministic reports**: JSON-first deltas for archetypes, break points, recovery, and bands.
 //!
 //! # Design Principles
 //!
@@ -30,6 +31,7 @@ pub mod execution;
 pub mod experiment;
 pub mod monte_carlo;
 pub mod replay;
+pub mod report;
 pub mod run_summary;
 pub mod scenario;
 pub mod sensitivity;
@@ -59,6 +61,10 @@ pub use monte_carlo::{
     PathResult,
 };
 pub use replay::{EventEntry, EventKind, EventLog, ReplayRun, StateSnapshot};
+pub use report::{
+    build_deterministic_report, ArchetypeChange, BandChangeDirection, BreakPointShift,
+    ComparisonSnapshot, DeterministicReport, PercentileBandChange, RecoveryShift, SummaryDelta,
+};
 pub use run_summary::{
     summarize_composure, summarize_monte_carlo, summarize_run, ComposureSummary, MonteCarloSummary,
     RunSummary,

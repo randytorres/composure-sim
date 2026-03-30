@@ -120,7 +120,7 @@ This should likely become a dedicated crate such as `composure-sensitivity`.
 
 ### 4. Calibration / fitting
 
-Status: planned
+Status: started
 
 Add a fitting layer for observed trajectories:
 
@@ -130,6 +130,13 @@ Add a fitting layer for observed trajectories:
 - preserve deterministic seeds and search settings
 
 Without calibration, users can simulate but cannot easily tune their model to reality.
+
+Current progress in repo:
+
+- `composure-calibration` crate with deterministic observed-trajectory fitting
+- sweep-case execution and residual scoring against observed series
+- best-case selection with portable candidate/run artifacts
+- experiment-backed calibration with inherited Monte Carlo defaults
 
 ### 5. Deterministic reporting
 
@@ -145,6 +152,14 @@ Add a non-LLM reporting layer for:
 - percentile band widening / narrowing
 
 This should produce JSON-first outputs that are easy to render in CLI/web/report pipelines.
+
+Current progress in core:
+
+- compact deterministic report artifacts from run summaries and trajectory comparisons
+- archetype change summaries
+- break-point and recovery-half-life shifts
+- percentile-band widening / narrowing summaries
+- comparison snapshots for divergence and failure shift context
 
 ### 6. Optional network/entity simulation
 

@@ -8,6 +8,7 @@ Use this to simulate any system that degrades and recovers under stress — heal
 
 | Crate | Purpose |
 |---|---|
+| `composure-calibration` | Deterministic fitting utilities that score sweep candidates against observed trajectories |
 | `composure-cli` | Minimal CLI for inspecting, summarizing, and comparing saved simulation artifacts |
 | `composure-core` | Core library: SimState, Simulator trait, Monte Carlo (rayon parallel), Composure Curve (archetype classification), event-sourced replay, comparison, experiment bundles, execution, sweep runner, sensitivity, run summaries |
 | `composure-py` | PyO3 Python bindings |
@@ -224,6 +225,29 @@ cargo run -p composure-cli -- compare-monte-carlo \
 
 Sample artifacts live under [`examples/artifacts`](/Users/randytorres/Projects/composure-sim/examples/artifacts/README.md).
 
+### Deterministic Reports
+
+Build a compact JSON-first report from two run summaries and an optional trajectory comparison:
+
+```rust
+use composure_core::{build_deterministic_report, compare_trajectories, ComparisonConfig};
+
+let comparison = compare_trajectories(
+    &baseline.mean_trajectory,
+    &candidate.mean_trajectory,
+    &ComparisonConfig::default(),
+)?;
+
+let report = build_deterministic_report(
+    &baseline_summary,
+    &candidate_summary,
+    Some(&comparison),
+);
+
+println!("Archetype changed: {}", report.archetype_change.changed);
+println!("Band change: {:?}", report.percentile_band_change.direction);
+```
+
 ### Sweep Runner
 
 Execute a generated sweep end-to-end by mapping each `SweepCase` into an `ExperimentParameterSet`
@@ -320,6 +344,47 @@ let results = execute_experiment_sweep(
 
 println!("Bundle runs: {}", results.bundle.as_ref().unwrap().runs.len());
 println!("Case failures: {}", results.failures.len());
+```
+
+### Calibration / Fitting
+
+Use `composure-calibration` to score sweep candidates against an observed trajectory:
+
+```rust
+use composure_calibration::{calibrate_experiment, CalibrationConfig, ObservedTrajectory};
+use composure_core::{ExperimentParameterSet, ExperimentSpec, MonteCarloConfig, Scenario, SimState};
+
+let mut spec = ExperimentSpec::new(
+    "exp-001",
+    "Dose Fit",
+    Scenario::new("baseline", "Baseline", SimState::zeros(1), 4),
+);
+spec.default_monte_carlo = Some(MonteCarloConfig::with_seed(100, 4, 42));
+
+let observed = ObservedTrajectory::new(
+    "obs-1",
+    "Observed Recovery",
+    vec![0.45, 0.52, 0.6, 0.7],
+);
+
+let result = calibrate_experiment(
+    &my_sim,
+    &spec,
+    &observed,
+    &sweep,
+    &CalibrationConfig::default(),
+    |spec, case| {
+        let mut parameter_set = ExperimentParameterSet::new(
+            format!("ps-{}", case.case_id),
+            format!("Case {}", case.case_id),
+            spec.scenario.clone(),
+        );
+        Ok(parameter_set)
+    },
+)?;
+
+println!("Best case: {:?}", result.best_case_id);
+println!("Best score: {:?}", result.best_score);
 ```
 
 ### Run Summaries
