@@ -200,6 +200,7 @@ The `composure` CLI can inspect saved artifacts, transform them into summaries, 
 ```bash
 cargo run -p composure-cli -- validate-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- inspect-pack examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- run-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
 cargo run -p composure-cli -- inspect-report examples/artifacts/report.json
 cargo run -p composure-cli -- export-report-markdown examples/artifacts/report.json
@@ -272,16 +273,20 @@ Typed input packs for multiple domains live under [`examples/packs`](/Users/rand
 - [`supply-chain-disruption`](/Users/randytorres/Projects/composure-sim/examples/packs/supply-chain-disruption/README.md)
 
 Each pack now includes a `pack.json` manifest that the CLI can validate and
-compile into a pack summary:
+compile into a pack summary, and the checked-in examples now include a
+constrained built-in linear runtime model:
 
 ```bash
 cargo run -p composure-cli -- validate-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- inspect-pack examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- run-pack examples/packs/health-recovery/pack.json
 ```
 
-Execution is still input-first: the pack artifacts plug into your
-domain-specific `Simulator` implementation and feed the same downstream
-artifact pipeline.
+The built-in runtime is intentionally simple. It is useful for executable
+reference packs and early pipeline validation, while richer domain simulators
+can still consume the same artifacts and downstream workflow.
+`run-pack` only depends on the scenario, experiment spec, and runtime model, so
+unused sweep or calibration inputs do not block execution.
 
 ### Deterministic Reports
 

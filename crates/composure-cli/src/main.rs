@@ -5,10 +5,10 @@ use std::{env, fs};
 use composure_calibration::CalibrationResult;
 use composure_core::{
     build_deterministic_report, compare_monte_carlo_results, summarize_run, ComparisonConfig,
-    DeterministicReport, ExperimentBundle, MonteCarloResult, RunSummary, SweepExecutionResult,
-    TrajectoryComparison,
+    DeterministicReport, ExperimentBundle, ExperimentExecutionConfig, MonteCarloResult, RunSummary,
+    SweepExecutionResult, TrajectoryComparison,
 };
-use composure_runtime::load_pack;
+use composure_runtime::{default_run_id, load_pack, load_pack_for_run, run_pack};
 use render::{
     format_bundle, format_calibration, format_comparison, format_report, format_summary,
     format_sweep, render_bundle_markdown, render_calibration_csv, render_calibration_markdown,
@@ -46,6 +46,17 @@ fn run(args: &[String]) -> Result<String, CliError> {
                 "Pack valid: {} ({})",
                 pack.definition.name, pack.definition.id
             ))
+        }
+        [_bin, command, path, tail @ ..] if command == "run-pack" => {
+            let pack = load_pack_for_run(path).map_err(CliError::Pack)?;
+            let bundle = run_pack(
+                &pack,
+                default_run_id(&pack),
+                &ExperimentExecutionConfig::default(),
+            )
+            .map_err(CliError::PackRun)?;
+            let output = serde_json::to_string_pretty(&bundle).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
         }
         [_bin, command, path] if command == "inspect-bundle" => {
             let bundle = read_json::<ExperimentBundle>(path)?;
@@ -172,6 +183,7 @@ fn usage() -> String {
         "Usage:",
         "  composure inspect-pack <path>",
         "  composure validate-pack <path>",
+        "  composure run-pack <path> [--output <path>]",
         "  composure inspect-bundle <path>",
         "  composure export-bundle-markdown <path> [--output <path>]",
         "  composure inspect-sweep <path>",
@@ -193,6 +205,7 @@ fn usage() -> String {
         "Commands:",
         "  inspect-pack   Read a pack directory or manifest and print a compiled summary",
         "  validate-pack  Validate a pack directory or manifest and its referenced artifacts",
+        "  run-pack  Execute a pack with its built-in runtime model and emit an ExperimentBundle artifact",
         "  inspect-bundle   Read an ExperimentBundle JSON artifact and print a summary",
         "  export-bundle-markdown  Convert an ExperimentBundle JSON artifact into markdown",
         "  inspect-sweep    Read a SweepExecutionResult JSON artifact and print a summary",
@@ -388,6 +401,8 @@ enum CliError {
     Compare(composure_core::CompareError),
     #[error("pack error: {0}")]
     Pack(composure_runtime::PackError),
+    #[error("pack execution error: {0}")]
+    PackRun(composure_runtime::PackRunError),
     #[error("failed to serialize JSON output: {0}")]
     SerializeJson(serde_json::Error),
 }
@@ -865,6 +880,7 @@ mod tests {
         let output = run(&["composure".into(), "help".into()]).unwrap();
         assert!(output.contains("inspect-pack"));
         assert!(output.contains("validate-pack"));
+        assert!(output.contains("run-pack"));
         assert!(output.contains("inspect-report"));
         assert!(output.contains("inspect-calibration"));
         assert!(output.contains("export-bundle-markdown"));
@@ -1198,7 +1214,43 @@ mod tests {
                 "scenario": "scenario.json",
                 "experiment_spec": "experiment-spec.json",
                 "sweep_definition": "sweep-definition.json",
-                "observed_trajectory": "observed-trajectory.json"
+                "observed_trajectory": "observed-trajectory.json",
+                "runtime_model": {
+                    "kind": "linear",
+                    "dimensions": [
+                        {
+                            "drift": 0.01,
+                            "action_gain": 0.08,
+                            "memory_decay": 0.1,
+                            "action_to_memory": 0.06,
+                            "memory_to_state": 0.04,
+                            "uncertainty_decay": 0.05,
+                            "action_to_uncertainty": 0.2,
+                            "min_value": 0.0,
+                            "max_value": 1.0
+                        },
+                        {
+                            "drift": 0.015,
+                            "action_gain": 0.06,
+                            "memory_decay": 0.08,
+                            "action_to_memory": 0.05,
+                            "memory_to_state": 0.03,
+                            "uncertainty_decay": 0.05,
+                            "action_to_uncertainty": 0.2,
+                            "min_value": 0.0,
+                            "max_value": 1.0
+                        }
+                    ],
+                    "action_type_scales": {
+                        "intervention": 1.0,
+                        "stressor_onset": 1.0,
+                        "stressor_removal": 0.8,
+                        "hold": 0.0,
+                        "custom": {}
+                    },
+                    "noise_scale": 0.01,
+                    "aggregate_weights": [0.7, 0.3]
+                }
             }))
             .unwrap(),
         )
@@ -1235,6 +1287,109 @@ mod tests {
         .unwrap();
 
         assert_eq!(output, "Pack valid: Health Pack (health-pack)");
+    }
+
+    #[test]
+    fn test_run_run_pack_outputs_bundle_json() {
+        let dir = temp_pack_dir("run-pack");
+        write_sample_pack(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "run-pack".into(),
+            dir.display().to_string(),
+        ])
+        .unwrap();
+
+        let bundle: ExperimentBundle = serde_json::from_str(&output).unwrap();
+        assert_eq!(bundle.spec.id, "pack-exp");
+        assert_eq!(bundle.runs.len(), 1);
+        assert_eq!(bundle.runs[0].run_id, "health-pack-run-1");
+    }
+
+    #[test]
+    fn test_run_run_pack_accepts_manifest_path() {
+        let dir = temp_pack_dir("run-pack-manifest");
+        write_sample_pack(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "run-pack".into(),
+            dir.join("pack.json").display().to_string(),
+        ])
+        .unwrap();
+
+        let bundle: ExperimentBundle = serde_json::from_str(&output).unwrap();
+        assert_eq!(bundle.runs.len(), 1);
+    }
+
+    #[test]
+    fn test_run_run_pack_writes_output_file() {
+        let dir = temp_pack_dir("run-pack-output");
+        write_sample_pack(&dir);
+        let output_path = dir.join("bundle-output.json");
+
+        let output = run(&[
+            "composure".into(),
+            "run-pack".into(),
+            dir.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        let bundle: ExperimentBundle = serde_json::from_str(&written).unwrap();
+        assert_eq!(bundle.runs.len(), 1);
+    }
+
+    #[test]
+    fn test_run_run_pack_ignores_invalid_observed_and_sweep_inputs() {
+        let dir = temp_pack_dir("run-pack-runtime-only");
+        write_sample_pack(&dir);
+        fs::write(dir.join("observed-trajectory.json"), "{not-json").unwrap();
+        fs::write(dir.join("sweep-definition.json"), "{not-json").unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "run-pack".into(),
+            dir.display().to_string(),
+        ])
+        .unwrap();
+
+        let bundle: ExperimentBundle = serde_json::from_str(&output).unwrap();
+        assert_eq!(bundle.runs.len(), 1);
+    }
+
+    #[test]
+    fn test_run_run_pack_requires_runtime_model() {
+        let dir = temp_pack_dir("run-pack-missing-runtime");
+        write_sample_pack(&dir);
+
+        let mut manifest: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(dir.join("pack.json")).unwrap()).unwrap();
+        manifest
+            .as_object_mut()
+            .unwrap()
+            .remove("runtime_model")
+            .unwrap();
+        fs::write(
+            dir.join("pack.json"),
+            serde_json::to_string_pretty(&manifest).unwrap(),
+        )
+        .unwrap();
+
+        let err = run(&[
+            "composure".into(),
+            "run-pack".into(),
+            dir.display().to_string(),
+        ])
+        .unwrap_err();
+
+        assert!(err
+            .to_string()
+            .contains("pack does not define a runtime_model"));
     }
 
     #[test]

@@ -13,6 +13,7 @@ description = "Pack loading and runtime foundations for composure-sim"
 [dependencies]
 composure-calibration = { path = "../composure-calibration" }
 composure-core = { path = "../composure-core" }
+rand.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

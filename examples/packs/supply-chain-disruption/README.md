@@ -26,7 +26,8 @@ Suggested workflow:
 
 1. Validate the manifest with `composure validate-pack examples/packs/supply-chain-disruption/pack.json`.
 2. Inspect the compiled pack with `composure inspect-pack examples/packs/supply-chain-disruption/pack.json`.
-3. Load the pack inputs and bind them to a supply-chain-specific simulator.
-4. Run a sweep to score policy options by recovery speed and end-state fill rate.
-5. Calibrate the policy space against the observed disruption trajectory.
-6. Export bundle, sweep, and calibration summaries into markdown for operations review.
+3. Run the built-in reference runtime with `composure run-pack examples/packs/supply-chain-disruption/pack.json`.
+4. Replace the reference runtime with a supply-chain-specific simulator when you need richer propagation logic.
+5. Run a sweep to score policy options by recovery speed and end-state fill rate.
+6. Calibrate the policy space against the observed disruption trajectory.
+7. Export bundle, sweep, and calibration summaries into markdown for operations review.

@@ -26,7 +26,8 @@ Suggested workflow:
 
 1. Validate the manifest with `composure validate-pack examples/packs/campaign-fatigue/pack.json`.
 2. Inspect the compiled pack with `composure inspect-pack examples/packs/campaign-fatigue/pack.json`.
-3. Map the sweep parameters into campaign-specific interventions inside your `Simulator`.
-4. Run a sweep to score candidate plans by end-of-flight conversion intent or area under the response curve.
-5. Calibrate against observed weekly response to infer the most plausible fatigue settings.
-6. Export sweep and calibration results as CSV/markdown for planning reviews.
+3. Run the built-in reference runtime with `composure run-pack examples/packs/campaign-fatigue/pack.json`.
+4. Map the sweep parameters into campaign-specific interventions inside your `Simulator` when you need richer marketing logic.
+5. Run a sweep to score candidate plans by end-of-flight conversion intent or area under the response curve.
+6. Calibrate against observed weekly response to infer the most plausible fatigue settings.
+7. Export sweep and calibration results as CSV/markdown for planning reviews.

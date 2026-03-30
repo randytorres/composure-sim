@@ -5,6 +5,53 @@
   "experiment_spec": "experiment-spec.json",
   "sweep_definition": "sweep-definition.json",
   "observed_trajectory": "observed-trajectory.json",
+  "runtime_model": {
+    "kind": "linear",
+    "dimensions": [
+      {
+        "drift": -0.004,
+        "action_gain": 0.06,
+        "memory_decay": 0.06,
+        "action_to_memory": 0.05,
+        "memory_to_state": 0.05,
+        "uncertainty_decay": 0.04,
+        "action_to_uncertainty": 0.2,
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      {
+        "drift": -0.006,
+        "action_gain": 0.08,
+        "memory_decay": 0.05,
+        "action_to_memory": 0.06,
+        "memory_to_state": 0.055,
+        "uncertainty_decay": 0.04,
+        "action_to_uncertainty": 0.2,
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      {
+        "drift": -0.005,
+        "action_gain": 0.07,
+        "memory_decay": 0.05,
+        "action_to_memory": 0.05,
+        "memory_to_state": 0.05,
+        "uncertainty_decay": 0.04,
+        "action_to_uncertainty": 0.2,
+        "min_value": 0.0,
+        "max_value": 1.0
+      }
+    ],
+    "action_type_scales": {
+      "intervention": 1.0,
+      "stressor_onset": 1.0,
+      "stressor_removal": 0.7,
+      "hold": 0.0,
+      "custom": {}
+    },
+    "noise_scale": 0.012,
+    "aggregate_weights": [0.25, 0.35, 0.4]
+  },
   "metadata": {
     "domain": "campaign"
   }

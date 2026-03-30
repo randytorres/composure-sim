@@ -26,7 +26,8 @@ Suggested workflow:
 
 1. Validate the manifest with `composure validate-pack examples/packs/health-recovery/pack.json`.
 2. Inspect the compiled pack with `composure inspect-pack examples/packs/health-recovery/pack.json`.
-3. Implement a health-specific `Simulator` that interprets the three dimensions.
-4. Use `execute_experiment_sweep` to rank intervention mixes by end-state recovery.
-5. Use `calibrate_experiment` against the observed trajectory to find the closest parameter set.
-6. Build a `DeterministicReport` from baseline and candidate summaries, then inspect it with the CLI.
+3. Run the built-in reference runtime with `composure run-pack examples/packs/health-recovery/pack.json`.
+4. Replace the reference runtime with a health-specific `Simulator` when you need richer physiology logic.
+5. Use `execute_experiment_sweep` to rank intervention mixes by end-state recovery.
+6. Use `calibrate_experiment` against the observed trajectory to find the closest parameter set.
+7. Build a `DeterministicReport` from baseline and candidate summaries, then inspect it with the CLI.
