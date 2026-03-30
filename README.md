@@ -276,6 +276,9 @@ The `composure` CLI can inspect saved artifacts, transform them into summaries, 
 cargo run -p composure-cli -- validate-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- inspect-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- run-pack examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- inspect-counterfactual examples/artifacts/counterfactual-definition.json
+cargo run -p composure-cli -- validate-counterfactual examples/artifacts/counterfactual-definition.json
+cargo run -p composure-cli -- run-counterfactual examples/artifacts/counterfactual-definition.json
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
 cargo run -p composure-cli -- inspect-report examples/artifacts/report.json
 cargo run -p composure-cli -- export-report-markdown examples/artifacts/report.json

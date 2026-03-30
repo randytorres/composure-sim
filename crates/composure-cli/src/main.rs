@@ -8,7 +8,10 @@ use composure_core::{
     DeterministicReport, ExperimentBundle, ExperimentExecutionConfig, MonteCarloResult, RunSummary,
     SweepExecutionResult, TrajectoryComparison,
 };
-use composure_runtime::{default_run_id, load_pack, load_pack_for_run, run_pack};
+use composure_runtime::{
+    default_run_id, load_counterfactual, load_pack, load_pack_for_run,
+    run_counterfactual_definition, run_pack,
+};
 use render::{
     format_bundle, format_calibration, format_comparison, format_report, format_summary,
     format_sweep, render_bundle_markdown, render_calibration_csv, render_calibration_markdown,
@@ -40,11 +43,22 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let pack = load_pack(path).map_err(CliError::Pack)?;
             Ok(pack.summary())
         }
+        [_bin, command, path] if command == "inspect-counterfactual" => {
+            let counterfactual = load_counterfactual(path).map_err(CliError::CounterfactualSpec)?;
+            Ok(counterfactual.summary())
+        }
         [_bin, command, path] if command == "validate-pack" => {
             let pack = load_pack(path).map_err(CliError::Pack)?;
             Ok(format!(
                 "Pack valid: {} ({})",
                 pack.definition.name, pack.definition.id
+            ))
+        }
+        [_bin, command, path] if command == "validate-counterfactual" => {
+            let counterfactual = load_counterfactual(path).map_err(CliError::CounterfactualSpec)?;
+            Ok(format!(
+                "Counterfactual valid: {} ({})",
+                counterfactual.definition.name, counterfactual.definition.id
             ))
         }
         [_bin, command, path, tail @ ..] if command == "run-pack" => {
@@ -56,6 +70,13 @@ fn run(args: &[String]) -> Result<String, CliError> {
             )
             .map_err(CliError::PackRun)?;
             let output = serde_json::to_string_pretty(&bundle).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "run-counterfactual" => {
+            let counterfactual = load_counterfactual(path).map_err(CliError::CounterfactualSpec)?;
+            let result = run_counterfactual_definition(&counterfactual)
+                .map_err(CliError::CounterfactualRun)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
             write_output(output, parse_output_flag(tail)?)
         }
         [_bin, command, path] if command == "inspect-bundle" => {
@@ -182,8 +203,11 @@ fn usage() -> String {
     [
         "Usage:",
         "  composure inspect-pack <path>",
+        "  composure inspect-counterfactual <path>",
         "  composure validate-pack <path>",
+        "  composure validate-counterfactual <path>",
         "  composure run-pack <path> [--output <path>]",
+        "  composure run-counterfactual <path> [--output <path>]",
         "  composure inspect-bundle <path>",
         "  composure export-bundle-markdown <path> [--output <path>]",
         "  composure inspect-sweep <path>",
@@ -204,8 +228,11 @@ fn usage() -> String {
         "",
         "Commands:",
         "  inspect-pack   Read a pack directory or manifest and print a compiled summary",
+        "  inspect-counterfactual   Read a CounterfactualDefinition JSON artifact and print a summary",
         "  validate-pack  Validate a pack directory or manifest and its referenced artifacts",
+        "  validate-counterfactual  Validate a CounterfactualDefinition JSON artifact",
         "  run-pack  Execute a pack with its built-in runtime model and emit an ExperimentBundle artifact",
+        "  run-counterfactual  Execute a CounterfactualDefinition JSON artifact and emit a CounterfactualResult artifact",
         "  inspect-bundle   Read an ExperimentBundle JSON artifact and print a summary",
         "  export-bundle-markdown  Convert an ExperimentBundle JSON artifact into markdown",
         "  inspect-sweep    Read a SweepExecutionResult JSON artifact and print a summary",
@@ -403,6 +430,10 @@ enum CliError {
     Pack(composure_runtime::PackError),
     #[error("pack execution error: {0}")]
     PackRun(composure_runtime::PackRunError),
+    #[error("counterfactual spec error: {0}")]
+    CounterfactualSpec(composure_runtime::CounterfactualSpecError),
+    #[error("counterfactual execution error: {0}")]
+    CounterfactualRun(composure_runtime::CounterfactualRunError),
     #[error("failed to serialize JSON output: {0}")]
     SerializeJson(serde_json::Error),
 }
@@ -880,8 +911,11 @@ mod tests {
     fn test_run_help() {
         let output = run(&["composure".into(), "help".into()]).unwrap();
         assert!(output.contains("inspect-pack"));
+        assert!(output.contains("inspect-counterfactual"));
         assert!(output.contains("validate-pack"));
+        assert!(output.contains("validate-counterfactual"));
         assert!(output.contains("run-pack"));
+        assert!(output.contains("run-counterfactual"));
         assert!(output.contains("inspect-report"));
         assert!(output.contains("inspect-calibration"));
         assert!(output.contains("export-bundle-markdown"));
@@ -1272,6 +1306,160 @@ mod tests {
         .unwrap();
     }
 
+    fn write_sample_counterfactual(dir: &std::path::Path) -> std::path::PathBuf {
+        let path = dir.join("counterfactual.json");
+        fs::write(
+            &path,
+            serde_json::to_string_pretty(&serde_json::json!({
+                "id": "cf-1",
+                "name": "Recovery branch",
+                "branch_state": {
+                    "z": [0.4, 0.5],
+                    "m": [0.1, 0.2],
+                    "u": [0.2, 0.2],
+                    "t": 3
+                },
+                "baseline": {
+                    "branch_id": "baseline",
+                    "intervention_label": "No change",
+                    "actions": [
+                        {
+                            "dimension": 0,
+                            "magnitude": 0.0,
+                            "action_type": "Hold",
+                            "metadata": null
+                        },
+                        {
+                            "dimension": 0,
+                            "magnitude": 0.0,
+                            "action_type": "Hold",
+                            "metadata": null
+                        },
+                        {
+                            "dimension": 0,
+                            "magnitude": 0.0,
+                            "action_type": "Hold",
+                            "metadata": null
+                        },
+                        {
+                            "dimension": 0,
+                            "magnitude": 0.0,
+                            "action_type": "Hold",
+                            "metadata": null
+                        }
+                    ],
+                    "conditional_actions": []
+                },
+                "candidate": {
+                    "branch_id": "candidate",
+                    "intervention_label": "Recovery",
+                    "actions": [
+                        {
+                            "dimension": 0,
+                            "magnitude": 0.2,
+                            "action_type": "Intervention",
+                            "metadata": null
+                        },
+                        {
+                            "dimension": 0,
+                            "magnitude": 0.2,
+                            "action_type": "Intervention",
+                            "metadata": null
+                        },
+                        {
+                            "dimension": 0,
+                            "magnitude": 0.2,
+                            "action_type": "Intervention",
+                            "metadata": null
+                        },
+                        {
+                            "dimension": 0,
+                            "magnitude": 0.2,
+                            "action_type": "Intervention",
+                            "metadata": null
+                        }
+                    ],
+                    "conditional_actions": [
+                        {
+                            "id": "stabilize",
+                            "trigger": {
+                                "kind": "health_index_below",
+                                "threshold": 0.45
+                            },
+                            "action": {
+                                "dimension": 1,
+                                "magnitude": 0.1,
+                                "action_type": "Intervention",
+                                "metadata": null
+                            },
+                            "delay_steps": 1,
+                            "cooldown_steps": 2,
+                            "priority": 1,
+                            "max_fires": 1
+                        }
+                    ]
+                },
+                "config": {
+                    "monte_carlo": {
+                        "num_paths": 6,
+                        "time_steps": 4,
+                        "seed_base": 19
+                    },
+                    "execution": {
+                        "retain_paths": true,
+                        "analyze_composure": true
+                    },
+                    "comparison": {
+                        "divergence_threshold": 0.1,
+                        "sustained_steps": 1,
+                        "equality_epsilon": 0.000000001,
+                        "failure_threshold": 0.45
+                    },
+                    "analysis_failure_threshold": 0.45
+                },
+                "runtime_model": {
+                    "kind": "linear",
+                    "dimensions": [
+                        {
+                            "drift": 0.01,
+                            "action_gain": 0.08,
+                            "memory_decay": 0.1,
+                            "action_to_memory": 0.06,
+                            "memory_to_state": 0.04,
+                            "uncertainty_decay": 0.05,
+                            "action_to_uncertainty": 0.2,
+                            "min_value": 0.0,
+                            "max_value": 1.0
+                        },
+                        {
+                            "drift": 0.015,
+                            "action_gain": 0.06,
+                            "memory_decay": 0.08,
+                            "action_to_memory": 0.05,
+                            "memory_to_state": 0.03,
+                            "uncertainty_decay": 0.05,
+                            "action_to_uncertainty": 0.2,
+                            "min_value": 0.0,
+                            "max_value": 1.0
+                        }
+                    ],
+                    "action_type_scales": {
+                        "intervention": 1.0,
+                        "stressor_onset": 1.0,
+                        "stressor_removal": 0.8,
+                        "hold": 0.0,
+                        "custom": {}
+                    },
+                    "noise_scale": 0.01,
+                    "aggregate_weights": [0.7, 0.3]
+                }
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+        path
+    }
+
     #[test]
     fn test_run_inspect_pack_outputs_summary() {
         let dir = temp_pack_dir("inspect-pack");
@@ -1302,6 +1490,78 @@ mod tests {
         .unwrap();
 
         assert_eq!(output, "Pack valid: Health Pack (health-pack)");
+    }
+
+    #[test]
+    fn test_run_inspect_counterfactual_outputs_summary() {
+        let dir = temp_pack_dir("inspect-counterfactual");
+        let path = write_sample_counterfactual(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "inspect-counterfactual".into(),
+            path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Counterfactual: Recovery branch (cf-1)"));
+        assert!(output.contains("Baseline: No change (baseline)"));
+        assert!(output.contains("Candidate: Recovery (candidate)"));
+    }
+
+    #[test]
+    fn test_run_validate_counterfactual_outputs_success() {
+        let dir = temp_pack_dir("validate-counterfactual");
+        let path = write_sample_counterfactual(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "validate-counterfactual".into(),
+            path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert_eq!(output, "Counterfactual valid: Recovery branch (cf-1)");
+    }
+
+    #[test]
+    fn test_run_run_counterfactual_outputs_json() {
+        let dir = temp_pack_dir("run-counterfactual");
+        let path = write_sample_counterfactual(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "run-counterfactual".into(),
+            path.display().to_string(),
+        ])
+        .unwrap();
+
+        let result: composure_core::CounterfactualResult = serde_json::from_str(&output).unwrap();
+        assert_eq!(result.baseline.branch_id, "baseline");
+        assert_eq!(result.candidate.branch_id, "candidate");
+        assert!(result.comparison.metrics.end_delta > 0.0);
+    }
+
+    #[test]
+    fn test_run_run_counterfactual_writes_output_file() {
+        let dir = temp_pack_dir("run-counterfactual-output");
+        let path = write_sample_counterfactual(&dir);
+        let output_path = dir.join("counterfactual-result.json");
+
+        let output = run(&[
+            "composure".into(),
+            "run-counterfactual".into(),
+            path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        let result: composure_core::CounterfactualResult = serde_json::from_str(&written).unwrap();
+        assert_eq!(result.baseline.branch_id, "baseline");
+        assert_eq!(result.candidate.branch_id, "candidate");
     }
 
     #[test]

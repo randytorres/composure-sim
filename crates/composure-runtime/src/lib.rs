@@ -6,15 +6,91 @@ use std::{
 
 use composure_calibration::{CalibrationError, ObservedTrajectory};
 use composure_core::{
-    execute_experiment_spec, Action, ActionType, ExperimentBundle, ExperimentError,
-    ExperimentExecutionConfig, ExperimentExecutionError, ExperimentSpec, Scenario, ScenarioError,
-    SensitivityError, SimState, Simulator, SweepDefinition,
+    execute_experiment_spec, run_counterfactual, Action, ActionType, CounterfactualBranchInput,
+    CounterfactualConfig, CounterfactualError, CounterfactualResult, ExperimentBundle,
+    ExperimentError, ExperimentExecutionConfig, ExperimentExecutionError, ExperimentSpec,
+    MonteCarloError, Scenario, ScenarioError, SensitivityError, SimState, Simulator,
+    SweepDefinition,
 };
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 const MANIFEST_FILE: &str = "pack.json";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CounterfactualDefinition {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub branch_state: SimState,
+    pub baseline: CounterfactualBranchInput,
+    pub candidate: CounterfactualBranchInput,
+    pub config: CounterfactualConfig,
+    pub runtime_model: PackRuntimeModel,
+    pub metadata: Option<serde_json::Value>,
+}
+
+impl CounterfactualDefinition {
+    pub fn validate(&self) -> Result<(), CounterfactualSpecError> {
+        if self.id.trim().is_empty() {
+            return Err(CounterfactualSpecError::EmptyCounterfactualId);
+        }
+        if self.name.trim().is_empty() {
+            return Err(CounterfactualSpecError::EmptyCounterfactualName);
+        }
+
+        self.config
+            .monte_carlo
+            .validate()
+            .map_err(CounterfactualSpecError::InvalidMonteCarlo)?;
+        self.config
+            .comparison
+            .validate()
+            .map_err(CounterfactualSpecError::InvalidComparison)?;
+
+        if self.baseline.branch_id.trim().is_empty() {
+            return Err(CounterfactualSpecError::EmptyBranchId { role: "baseline" });
+        }
+        if self.candidate.branch_id.trim().is_empty() {
+            return Err(CounterfactualSpecError::EmptyBranchId { role: "candidate" });
+        }
+        if self.baseline.intervention_label.trim().is_empty() {
+            return Err(CounterfactualSpecError::EmptyInterventionLabel { role: "baseline" });
+        }
+        if self.candidate.intervention_label.trim().is_empty() {
+            return Err(CounterfactualSpecError::EmptyInterventionLabel { role: "candidate" });
+        }
+        if self.baseline.branch_id == self.candidate.branch_id {
+            return Err(CounterfactualSpecError::DuplicateBranchId(
+                self.baseline.branch_id.clone(),
+            ));
+        }
+
+        validate_counterfactual_branch(
+            &self.branch_state,
+            &self.baseline,
+            self.config.monte_carlo.time_steps,
+            self.config.analysis_failure_threshold,
+        )?;
+        validate_counterfactual_branch(
+            &self.branch_state,
+            &self.candidate,
+            self.config.monte_carlo.time_steps,
+            self.config.analysis_failure_threshold,
+        )?;
+
+        self.runtime_model
+            .validate(&counterfactual_runtime_scenario(
+                &self.branch_state,
+                self.config.monte_carlo.time_steps,
+                self.config.analysis_failure_threshold,
+            ))
+            .map_err(CounterfactualSpecError::InvalidRuntimeModel)?;
+
+        Ok(())
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackDefinition {
@@ -222,6 +298,12 @@ pub struct CompiledPack {
     pub dimension_labels: Vec<String>,
 }
 
+#[derive(Debug, Clone)]
+pub struct CompiledCounterfactual {
+    pub path: PathBuf,
+    pub definition: CounterfactualDefinition,
+}
+
 impl CompiledPack {
     pub fn summary(&self) -> String {
         [
@@ -267,6 +349,45 @@ impl CompiledPack {
     }
 }
 
+impl CompiledCounterfactual {
+    pub fn summary(&self) -> String {
+        [
+            format!(
+                "Counterfactual: {} ({})",
+                self.definition.name, self.definition.id
+            ),
+            format!("Path: {}", self.path.display()),
+            format!("Dimensions: {}", self.definition.branch_state.dimensions()),
+            format!("Branch from t: {}", self.definition.branch_state.t),
+            format!(
+                "Time steps: {}",
+                self.definition.config.monte_carlo.time_steps
+            ),
+            format!(
+                "Baseline: {} ({})",
+                self.definition.baseline.intervention_label, self.definition.baseline.branch_id
+            ),
+            format!(
+                "Candidate: {} ({})",
+                self.definition.candidate.intervention_label, self.definition.candidate.branch_id
+            ),
+            format!(
+                "Comparison failure threshold: {:?}",
+                self.definition.config.comparison.failure_threshold
+            ),
+            format!(
+                "Analysis failure threshold: {:?}",
+                self.definition.config.analysis_failure_threshold
+            ),
+            format!(
+                "Runtime model: {}",
+                self.definition.runtime_model.summary_label()
+            ),
+        ]
+        .join("\n")
+    }
+}
+
 pub fn load_pack(path: impl AsRef<Path>) -> Result<CompiledPack, PackError> {
     let manifest_path = resolve_manifest_path(path.as_ref())?;
     let root = manifest_path
@@ -276,6 +397,15 @@ pub fn load_pack(path: impl AsRef<Path>) -> Result<CompiledPack, PackError> {
 
     let definition = read_json::<PackDefinition>(&manifest_path)?;
     compile_pack_with_mode(root, manifest_path, definition, PackLoadMode::Full)
+}
+
+pub fn load_counterfactual(
+    path: impl AsRef<Path>,
+) -> Result<CompiledCounterfactual, CounterfactualSpecError> {
+    let path = path.as_ref().to_path_buf();
+    let definition = read_counterfactual_json::<CounterfactualDefinition>(&path)?;
+    definition.validate()?;
+    Ok(CompiledCounterfactual { path, definition })
 }
 
 pub fn load_pack_for_run(path: impl AsRef<Path>) -> Result<CompiledPack, PackError> {
@@ -422,6 +552,22 @@ pub fn run_pack(
     Ok(bundle)
 }
 
+pub fn run_counterfactual_definition(
+    definition: &CompiledCounterfactual,
+) -> Result<CounterfactualResult, CounterfactualRunError> {
+    let simulator = RuntimePackSimulator {
+        model: definition.definition.runtime_model.clone(),
+    };
+    run_counterfactual(
+        &simulator,
+        &definition.definition.branch_state,
+        &definition.definition.baseline,
+        &definition.definition.candidate,
+        &definition.definition.config,
+    )
+    .map_err(CounterfactualRunError::Execute)
+}
+
 #[derive(Debug, Clone)]
 struct RuntimePackSimulator {
     model: PackRuntimeModel,
@@ -551,6 +697,59 @@ where
     })
 }
 
+fn read_counterfactual_json<T>(path: &Path) -> Result<T, CounterfactualSpecError>
+where
+    T: serde::de::DeserializeOwned,
+{
+    let raw = fs::read_to_string(path).map_err(|source| CounterfactualSpecError::ReadFile {
+        path: path.to_path_buf(),
+        source,
+    })?;
+    serde_json::from_str(&raw).map_err(|source| CounterfactualSpecError::ParseJson {
+        path: path.to_path_buf(),
+        source,
+    })
+}
+
+fn counterfactual_runtime_scenario(
+    branch_state: &SimState,
+    time_steps: usize,
+    failure_threshold: Option<f64>,
+) -> Scenario {
+    let mut scenario = Scenario::new(
+        "counterfactual-runtime",
+        "Counterfactual Runtime",
+        branch_state.clone(),
+        time_steps,
+    );
+    scenario.failure_threshold = failure_threshold;
+    scenario
+}
+
+fn validate_counterfactual_branch(
+    branch_state: &SimState,
+    branch: &CounterfactualBranchInput,
+    time_steps: usize,
+    failure_threshold: Option<f64>,
+) -> Result<(), CounterfactualSpecError> {
+    let scenario = Scenario {
+        id: format!("counterfactual-{}", branch.branch_id),
+        name: format!("Counterfactual {}", branch.intervention_label),
+        initial_state: branch_state.clone(),
+        actions: branch.actions.clone(),
+        time_steps,
+        conditional_actions: branch.conditional_actions.clone(),
+        failure_threshold,
+        metadata: None,
+    };
+    scenario
+        .validate()
+        .map_err(|source| CounterfactualSpecError::InvalidBranchScenario {
+            branch_id: branch.branch_id.clone(),
+            source,
+        })
+}
+
 fn json_equal<T>(left: &T, right: &T) -> bool
 where
     T: Serialize,
@@ -672,13 +871,55 @@ pub enum PackRunError {
     RecordRun(ExperimentError),
 }
 
+#[derive(Debug, Error)]
+pub enum CounterfactualSpecError {
+    #[error("counterfactual ID cannot be empty")]
+    EmptyCounterfactualId,
+    #[error("counterfactual name cannot be empty")]
+    EmptyCounterfactualName,
+    #[error("counterfactual {role} branch ID cannot be empty")]
+    EmptyBranchId { role: &'static str },
+    #[error("counterfactual {role} intervention label cannot be empty")]
+    EmptyInterventionLabel { role: &'static str },
+    #[error("counterfactual branch IDs must be unique, got {0}")]
+    DuplicateBranchId(String),
+    #[error("failed to read {path}: {source}")]
+    ReadFile {
+        path: PathBuf,
+        source: std::io::Error,
+    },
+    #[error("failed to parse JSON in {path}: {source}")]
+    ParseJson {
+        path: PathBuf,
+        source: serde_json::Error,
+    },
+    #[error("invalid Monte Carlo configuration: {0}")]
+    InvalidMonteCarlo(MonteCarloError),
+    #[error("invalid comparison configuration: {0}")]
+    InvalidComparison(composure_core::CompareError),
+    #[error("invalid counterfactual branch {branch_id}: {source}")]
+    InvalidBranchScenario {
+        branch_id: String,
+        source: ScenarioError,
+    },
+    #[error("invalid runtime model: {0}")]
+    InvalidRuntimeModel(PackError),
+}
+
+#[derive(Debug, Error)]
+pub enum CounterfactualRunError {
+    #[error("counterfactual execution failed: {0}")]
+    Execute(CounterfactualError),
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     use composure_core::{
-        Action, ActionType, ConditionalActionRule, ConditionalTrigger, MonteCarloConfig,
-        ParameterValue, SimState, SweepParameter, SweepStrategy,
+        Action, ActionType, ComparisonConfig, ConditionalActionRule, ConditionalTrigger,
+        CounterfactualBranchInput, CounterfactualConfig, MonteCarloConfig, ParameterValue,
+        SimState, SweepParameter, SweepStrategy,
     };
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -825,6 +1066,80 @@ mod tests {
         .unwrap();
     }
 
+    fn sample_counterfactual_definition() -> CounterfactualDefinition {
+        CounterfactualDefinition {
+            id: "cf-1".into(),
+            name: "Recovery branch".into(),
+            description: None,
+            branch_state: SimState::new(vec![0.4, 0.5], vec![0.1, 0.2], vec![0.2, 0.2]),
+            baseline: CounterfactualBranchInput {
+                branch_id: "baseline".into(),
+                intervention_label: "No change".into(),
+                actions: vec![
+                    Action {
+                        dimension: Some(0),
+                        magnitude: 0.0,
+                        action_type: ActionType::Hold,
+                        metadata: None,
+                    };
+                    4
+                ],
+                conditional_actions: Vec::new(),
+            },
+            candidate: CounterfactualBranchInput {
+                branch_id: "candidate".into(),
+                intervention_label: "Recovery".into(),
+                actions: vec![
+                    Action {
+                        dimension: Some(0),
+                        magnitude: 0.2,
+                        action_type: ActionType::Intervention,
+                        metadata: None,
+                    };
+                    4
+                ],
+                conditional_actions: vec![ConditionalActionRule {
+                    id: "stabilize".into(),
+                    trigger: ConditionalTrigger::HealthIndexBelow { threshold: 0.45 },
+                    action: Action {
+                        dimension: Some(1),
+                        magnitude: 0.1,
+                        action_type: ActionType::Intervention,
+                        metadata: None,
+                    },
+                    delay_steps: 1,
+                    cooldown_steps: 2,
+                    priority: 1,
+                    max_fires: Some(1),
+                }],
+            },
+            config: CounterfactualConfig {
+                monte_carlo: MonteCarloConfig::with_seed(6, 4, 19),
+                execution: ExperimentExecutionConfig {
+                    retain_paths: true,
+                    analyze_composure: true,
+                },
+                comparison: ComparisonConfig {
+                    failure_threshold: Some(0.45),
+                    ..ComparisonConfig::default()
+                },
+                analysis_failure_threshold: Some(0.45),
+            },
+            runtime_model: sample_definition(true).runtime_model.unwrap(),
+            metadata: None,
+        }
+    }
+
+    fn write_counterfactual(dir: &Path) -> PathBuf {
+        let path = dir.join("counterfactual.json");
+        fs::write(
+            &path,
+            serde_json::to_string_pretty(&sample_counterfactual_definition()).unwrap(),
+        )
+        .unwrap();
+        path
+    }
+
     #[test]
     fn test_load_pack_reads_and_validates_manifest() {
         let dir = temp_pack_dir("valid");
@@ -943,5 +1258,61 @@ mod tests {
                 actual: 1
             }
         ));
+    }
+
+    #[test]
+    fn test_load_counterfactual_reads_and_validates_definition() {
+        let dir = temp_pack_dir("counterfactual-valid");
+        let path = write_counterfactual(&dir);
+
+        let counterfactual = load_counterfactual(&path).unwrap();
+        assert_eq!(counterfactual.definition.id, "cf-1");
+        assert_eq!(counterfactual.definition.baseline.branch_id, "baseline");
+        assert_eq!(counterfactual.definition.candidate.branch_id, "candidate");
+        assert_eq!(counterfactual.definition.config.monte_carlo.time_steps, 4);
+    }
+
+    #[test]
+    fn test_load_counterfactual_rejects_invalid_runtime_dimensions() {
+        let dir = temp_pack_dir("counterfactual-runtime-dims");
+        let path = write_counterfactual(&dir);
+        let mut definition: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+        definition["runtime_model"]["dimensions"] = serde_json::json!([{
+            "drift": 0.01,
+            "action_gain": 0.08,
+            "memory_decay": 0.1,
+            "action_to_memory": 0.06,
+            "memory_to_state": 0.04,
+            "uncertainty_decay": 0.05,
+            "action_to_uncertainty": 0.2,
+            "min_value": 0.0,
+            "max_value": 1.0
+        }]);
+        fs::write(&path, serde_json::to_string_pretty(&definition).unwrap()).unwrap();
+
+        let err = load_counterfactual(&path).unwrap_err();
+        assert!(matches!(
+            err,
+            CounterfactualSpecError::InvalidRuntimeModel(PackError::RuntimeDimensionsMismatch {
+                expected: 2,
+                actual: 1,
+            })
+        ));
+    }
+
+    #[test]
+    fn test_run_counterfactual_definition_returns_result() {
+        let dir = temp_pack_dir("counterfactual-run");
+        let path = write_counterfactual(&dir);
+
+        let counterfactual = load_counterfactual(&path).unwrap();
+        let result = run_counterfactual_definition(&counterfactual).unwrap();
+
+        assert_eq!(result.baseline.branch_id, "baseline");
+        assert_eq!(result.candidate.branch_id, "candidate");
+        assert!(result.comparison.metrics.end_delta > 0.0);
+        assert!(result.baseline.outcome.monte_carlo.is_some());
+        assert!(result.candidate.outcome.monte_carlo.is_some());
     }
 }

@@ -6,6 +6,9 @@ These files are small JSON examples for the `composure` CLI:
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
 cargo run -p composure-cli -- inspect-report examples/artifacts/report.json
 cargo run -p composure-cli -- export-report-markdown examples/artifacts/report.json
+cargo run -p composure-cli -- inspect-counterfactual examples/artifacts/counterfactual-definition.json
+cargo run -p composure-cli -- validate-counterfactual examples/artifacts/counterfactual-definition.json
+cargo run -p composure-cli -- run-counterfactual examples/artifacts/counterfactual-definition.json
 cargo run -p composure-cli -- summarize-monte-carlo examples/artifacts/candidate-monte-carlo.json
 cargo run -p composure-cli -- summarize-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
