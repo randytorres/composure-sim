@@ -300,8 +300,8 @@ mod tests {
         let series = &monte_carlo.paths[0].health_indices;
         assert_eq!(series.len(), 4);
         assert!((series[0] - 0.2).abs() < 1e-9);
-        assert!((series[1] - series[0]).abs() < 1e-9);
-        assert!(series[2] > series[1]);
+        assert!(series[1] > series[0]);
+        assert!((series[2] - series[1]).abs() < 1e-9);
         assert!((series[3] - series[2]).abs() < 1e-9);
     }
 }
