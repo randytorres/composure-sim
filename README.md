@@ -154,6 +154,39 @@ let run = execute_parameter_set(
 println!("Run status: {:?}", run.status);
 ```
 
+### Conditional Actions
+
+Scenarios can now react to state with threshold-based conditional actions that
+remain deterministic under the same seed and rule set:
+
+```rust
+use composure_core::{
+    Action, ActionType, ConditionalActionRule, ConditionalTrigger, Scenario, SimState,
+};
+
+let mut scenario = Scenario::new("reactive", "Reactive", SimState::zeros(1), 6);
+scenario.conditional_actions.push(ConditionalActionRule {
+    id: "rescue".into(),
+    trigger: ConditionalTrigger::HealthIndexBelow { threshold: 0.35 },
+    action: Action {
+        dimension: Some(0),
+        magnitude: 0.25,
+        action_type: ActionType::Intervention,
+        metadata: None,
+    },
+    delay_steps: 1,
+    cooldown_steps: 2,
+    priority: 1,
+    max_fires: Some(2),
+});
+```
+
+The first slice supports threshold triggers, delay, cooldown, deterministic
+priority ordering, and bounded firing counts. Level-based rules evaluate
+against the current step state, so `delay_steps: 0` means "apply on this
+step"; crossing triggers need a previous state and therefore first affect the
+following step.
+
 ### Sensitivity Analysis
 
 Define sweep cases and rank parameter influence against a scalar objective:

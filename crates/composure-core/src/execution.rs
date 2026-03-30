@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
-    analyze_composure_checked, run_monte_carlo_checked, ComposureError, ExperimentOutcome,
+    analyze_composure_checked, run_scenario_monte_carlo_checked, ComposureError, ExperimentOutcome,
     ExperimentParameterSet, ExperimentRunRecord, ExperimentSpec, MonteCarloConfig, MonteCarloError,
     ScenarioError, Simulator,
 };
@@ -88,14 +88,9 @@ fn execute<S: Simulator>(
         .validate()
         .map_err(ExperimentExecutionError::InvalidScenario)?;
 
-    let result = run_monte_carlo_checked(
-        sim,
-        &scenario.initial_state,
-        &scenario.actions,
-        monte_carlo,
-        execution.retain_paths,
-    )
-    .map_err(ExperimentExecutionError::MonteCarlo)?;
+    let result =
+        run_scenario_monte_carlo_checked(sim, scenario, monte_carlo, execution.retain_paths)
+            .map_err(ExperimentExecutionError::MonteCarlo)?;
 
     let composure = if execution.analyze_composure {
         Some(
@@ -143,7 +138,7 @@ pub enum ExperimentExecutionError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Action, ActionType, SimState};
+    use crate::{Action, ActionType, ConditionalActionRule, ConditionalTrigger, SimState};
 
     struct DriftSim;
 
@@ -156,6 +151,29 @@ mod tests {
             for i in 0..next.z.len() {
                 let noise = (rng.gen::<f64>() - 0.5) * 0.02;
                 next.z[i] = (next.z[i] + action.magnitude * 0.01 + noise).clamp(0.0, 1.0);
+            }
+            next
+        }
+    }
+
+    struct DeterministicSim;
+
+    impl Simulator for DeterministicSim {
+        fn step(
+            &self,
+            state: &SimState,
+            action: &Action,
+            _rng: &mut dyn rand::RngCore,
+        ) -> SimState {
+            let mut next = state.clone();
+            next.t += 1;
+            for i in 0..next.z.len() {
+                let effect = if action.dimension.map(|value| value == i).unwrap_or(true) {
+                    action.magnitude
+                } else {
+                    0.0
+                };
+                next.z[i] = (next.z[i] + effect).clamp(0.0, 1.0);
             }
             next
         }
@@ -235,5 +253,55 @@ mod tests {
             err,
             ExperimentExecutionError::MissingMonteCarloConfig
         ));
+    }
+
+    #[test]
+    fn test_execute_experiment_spec_applies_conditional_actions() {
+        let mut spec = ExperimentSpec::new(
+            "exp-conditional",
+            "Conditional",
+            crate::Scenario::new(
+                "conditional-scenario",
+                "Conditional Scenario",
+                SimState::new(vec![0.2], vec![0.0], vec![0.0]),
+                4,
+            ),
+        );
+        spec.scenario
+            .conditional_actions
+            .push(ConditionalActionRule {
+                id: "rescue".into(),
+                trigger: ConditionalTrigger::HealthIndexBelow { threshold: 0.3 },
+                action: Action {
+                    dimension: Some(0),
+                    magnitude: 0.4,
+                    action_type: ActionType::Intervention,
+                    metadata: None,
+                },
+                delay_steps: 1,
+                cooldown_steps: 10,
+                priority: 1,
+                max_fires: Some(1),
+            });
+        spec.default_monte_carlo = Some(MonteCarloConfig::with_seed(1, 4, 7));
+
+        let run = execute_experiment_spec(
+            "run-conditional",
+            &DeterministicSim,
+            &spec,
+            &ExperimentExecutionConfig {
+                analyze_composure: false,
+                retain_paths: true,
+            },
+        )
+        .unwrap();
+
+        let monte_carlo = run.outcome.unwrap().monte_carlo.unwrap();
+        let series = &monte_carlo.paths[0].health_indices;
+        assert_eq!(series.len(), 4);
+        assert!((series[0] - 0.2).abs() < 1e-9);
+        assert!((series[1] - series[0]).abs() < 1e-9);
+        assert!(series[2] > series[1]);
+        assert!((series[3] - series[2]).abs() < 1e-9);
     }
 }

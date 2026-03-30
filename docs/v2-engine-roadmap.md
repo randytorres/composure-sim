@@ -233,6 +233,27 @@ fixed seed and rule set.
 
 ### Scope
 
+Implemented in the first slice:
+
+- threshold-based triggers
+- delayed effects
+- cooldown windows
+- deterministic priority ordering
+- bounded firing counts
+
+Contract:
+
+- rules evaluate after each completed step
+- level triggers may schedule for the current step, while crossing triggers
+  first apply after a transition has occurred
+- multiple actions in the same step are applied in deterministic priority order
+
+Deferred:
+
+- guard conditions
+- cascading actions
+- replay-level event artifacts
+
 Support:
 
 - threshold-based triggers

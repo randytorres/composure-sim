@@ -57,7 +57,8 @@ pub use experiment::{
     ExperimentRunRecord, ExperimentRunStatus, ExperimentSpec,
 };
 pub use monte_carlo::{
-    run_monte_carlo, run_monte_carlo_checked, MonteCarloConfig, MonteCarloError, MonteCarloResult,
+    run_monte_carlo, run_monte_carlo_checked, run_scenario_monte_carlo,
+    run_scenario_monte_carlo_checked, MonteCarloConfig, MonteCarloError, MonteCarloResult,
     PathResult,
 };
 pub use replay::{EventEntry, EventKind, EventLog, ReplayRun, StateSnapshot};
@@ -69,7 +70,7 @@ pub use run_summary::{
     summarize_composure, summarize_monte_carlo, summarize_run, ComposureSummary, MonteCarloSummary,
     RunSummary,
 };
-pub use scenario::{Scenario, ScenarioError};
+pub use scenario::{ConditionalActionRule, ConditionalTrigger, Scenario, ScenarioError};
 pub use sensitivity::{
     analyze_sensitivity, generate_sweep_cases, CategoricalBucketSummary,
     CategoricalSensitivityStats, NumericSensitivityStats, ObjectiveSummary, ParameterSensitivity,

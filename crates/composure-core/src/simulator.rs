@@ -40,6 +40,30 @@ pub trait Simulator: Send + Sync {
     /// to ensure deterministic replay when seeded.
     fn step(&self, state: &SimState, action: &Action, rng: &mut dyn rand::RngCore) -> SimState;
 
+    /// Apply zero or more actions within a single timestep.
+    ///
+    /// Default behavior applies actions sequentially while preserving the outer
+    /// timestep, which lets scenario-level conditional actions coexist without
+    /// forcing all simulators to reimplement batching.
+    fn step_actions(
+        &self,
+        state: &SimState,
+        actions: &[Action],
+        rng: &mut dyn rand::RngCore,
+    ) -> SimState {
+        if actions.is_empty() {
+            return self.step(state, &Action::default(), rng);
+        }
+
+        let mut next = state.clone();
+        for action in actions {
+            next = self.step(&next, action, rng);
+            next.t = state.t;
+        }
+        next.t = state.t + 1;
+        next
+    }
+
     /// Compute a scalar health/performance index from state.
     /// Used for composure curve analysis and trajectory projection.
     /// Default: mean of z dimensions.
