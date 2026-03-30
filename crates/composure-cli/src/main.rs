@@ -10,7 +10,8 @@ use composure_core::{
 };
 use render::{
     format_bundle, format_calibration, format_comparison, format_report, format_summary,
-    format_sweep, render_calibration_csv, render_report_markdown, render_sweep_csv,
+    format_sweep, render_calibration_csv, render_calibration_markdown, render_report_markdown,
+    render_sweep_csv, render_sweep_markdown,
 };
 use thiserror::Error;
 
@@ -73,6 +74,11 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let output = render_calibration_csv(&calibration);
             write_output(output, parse_output_flag(tail)?)
         }
+        [_bin, command, path, tail @ ..] if command == "export-calibration-candidates-markdown" => {
+            let calibration = read_json::<CalibrationResult>(path)?;
+            let output = render_calibration_markdown(&calibration);
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, command, path] if command == "inspect-compare" => {
             let comparison = read_json::<TrajectoryComparison>(path)?;
             Ok(format_comparison(&comparison))
@@ -82,6 +88,11 @@ fn run(args: &[String]) -> Result<String, CliError> {
         {
             let result = read_json::<SweepExecutionResult>(path)?;
             let output = render_sweep_csv(&result);
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "export-sweep-samples-markdown" => {
+            let result = read_json::<SweepExecutionResult>(path)?;
+            let output = render_sweep_markdown(&result);
             write_output(output, parse_output_flag(tail)?)
         }
         [_bin, command, bundle_path, run_id, tail @ ..] if command == "summarize-bundle-run" => {
@@ -146,8 +157,10 @@ fn usage() -> String {
         "  composure summarize-bundle-run <bundle-path> <run-id> [--output <path>]",
         "  composure inspect-calibration <path>",
         "  composure export-calibration-candidates <path> [--output <path>]",
+        "  composure export-calibration-candidates-markdown <path> [--output <path>]",
         "  composure inspect-compare <path>",
         "  composure export-sweep-samples <path> [--output <path>]",
+        "  composure export-sweep-samples-markdown <path> [--output <path>]",
         "  composure compare-monte-carlo <baseline-path> <candidate-path> [flags] [--output <path>]",
         "  composure build-report <baseline-summary-path> <candidate-summary-path> [--comparison <path>] [--output <path>]",
         "",
@@ -161,8 +174,10 @@ fn usage() -> String {
         "  summarize-bundle-run   Extract and summarize one run from an ExperimentBundle JSON artifact",
         "  inspect-calibration  Read a CalibrationResult JSON artifact and print a summary",
         "  export-calibration-candidates  Convert a CalibrationResult JSON artifact into CSV",
+        "  export-calibration-candidates-markdown  Convert a CalibrationResult JSON artifact into markdown",
         "  inspect-compare  Read a TrajectoryComparison JSON artifact and print a summary",
         "  export-sweep-samples  Convert a SweepExecutionResult JSON artifact into CSV",
+        "  export-sweep-samples-markdown  Convert a SweepExecutionResult JSON artifact into markdown",
         "  compare-monte-carlo  Compare two MonteCarloResult JSON artifacts and emit JSON",
         "  build-report   Build a DeterministicReport JSON artifact from two RunSummary artifacts",
         "",
@@ -766,11 +781,27 @@ mod tests {
     }
 
     #[test]
+    fn test_render_sweep_markdown() {
+        let output = render_sweep_markdown(&sample_sweep_result());
+        assert!(output.contains("# Sweep Samples: Sweep (sweep-1)"));
+        assert!(output.contains("| Case | Best | Objective | Run | Parameter Set | dose |"));
+        assert!(output.contains("| sweep-1-1 | yes | 0.6900 | run-1 | variant-a | 2 |"));
+    }
+
+    #[test]
     fn test_render_calibration_csv() {
         let output = render_calibration_csv(&sample_calibration_result());
         assert!(output.contains("rank,is_best,case_id,parameter_set_id,run_id,score"));
         assert!(output.contains("1,true,dose-sweep-1,ps-dose-sweep-1,calibration-run-1"));
         assert!(output.contains(",3"));
+    }
+
+    #[test]
+    fn test_render_calibration_markdown() {
+        let output = render_calibration_markdown(&sample_calibration_result());
+        assert!(output.contains("# Calibration Candidates: Dose Sweep (dose-sweep)"));
+        assert!(output.contains("| Rank | Best | Case | Parameter Set | Run | Score | RMSE | Mean Abs Delta | End Delta | dose |"));
+        assert!(output.contains("| 1 | yes | dose-sweep-1 | ps-dose-sweep-1 | calibration-run-1 | 0.0356 | 0.0356 | 0.0333 | 0.0500 | 3 |"));
     }
 
     #[test]
@@ -780,7 +811,9 @@ mod tests {
         assert!(output.contains("inspect-calibration"));
         assert!(output.contains("export-report-markdown"));
         assert!(output.contains("export-sweep-samples"));
+        assert!(output.contains("export-sweep-samples-markdown"));
         assert!(output.contains("export-calibration-candidates"));
+        assert!(output.contains("export-calibration-candidates-markdown"));
         assert!(output.contains("summarize-bundle-run"));
         assert!(output.contains("build-report"));
         assert!(output.contains("--output <path>"));
@@ -1072,6 +1105,35 @@ mod tests {
     }
 
     #[test]
+    fn test_run_export_sweep_markdown_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let input_path = temp_dir.join("composure-cli-sweep-md-input.json");
+        let output_path = temp_dir.join("composure-cli-sweep-md-output.md");
+
+        fs::write(
+            &input_path,
+            serde_json::to_string(&sample_sweep_result()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "export-sweep-samples-markdown".into(),
+            input_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("# Sweep Samples: Sweep (sweep-1)"));
+
+        let _ = fs::remove_file(input_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
     fn test_run_export_calibration_csv_writes_output_file() {
         let temp_dir = std::env::temp_dir();
         let input_path = temp_dir.join("composure-cli-calibration-csv-input.json");
@@ -1095,6 +1157,35 @@ mod tests {
         assert!(output.contains("Wrote artifact"));
         let written = fs::read_to_string(&output_path).unwrap();
         assert!(written.contains("rank,is_best,case_id,parameter_set_id,run_id,score"));
+
+        let _ = fs::remove_file(input_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_export_calibration_markdown_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let input_path = temp_dir.join("composure-cli-calibration-md-input.json");
+        let output_path = temp_dir.join("composure-cli-calibration-md-output.md");
+
+        fs::write(
+            &input_path,
+            serde_json::to_string(&sample_calibration_result()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "export-calibration-candidates-markdown".into(),
+            input_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("# Calibration Candidates: Dose Sweep (dose-sweep)"));
 
         let _ = fs::remove_file(input_path);
         let _ = fs::remove_file(output_path);

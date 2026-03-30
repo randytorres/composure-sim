@@ -223,9 +223,11 @@ cargo run -p composure-cli -- summarize-bundle-run \
   --output /tmp/bundle-run-summary.json
 cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- export-sweep-samples examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples-markdown examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
 cargo run -p composure-cli -- inspect-calibration examples/artifacts/calibration-result.json
 cargo run -p composure-cli -- export-calibration-candidates examples/artifacts/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates-markdown examples/artifacts/calibration-result.json
 cargo run -p composure-cli -- compare-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   examples/artifacts/candidate-monte-carlo.json
@@ -437,6 +439,14 @@ Sweep samples can also be exported as a flat CSV table:
 
 ```bash
 cargo run -p composure-cli -- export-sweep-samples examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples-markdown examples/artifacts/sweep-result.json
+```
+
+Calibration candidate rankings can be exported in CSV or markdown:
+
+```bash
+cargo run -p composure-cli -- export-calibration-candidates examples/artifacts/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates-markdown examples/artifacts/calibration-result.json
 ```
 
 ### Run Summaries
@@ -502,7 +512,9 @@ cargo run -p composure-cli -- inspect-compare path/to/comparison.json
 cargo run -p composure-cli -- inspect-calibration path/to/calibration-result.json
 cargo run -p composure-cli -- export-report-markdown path/to/report.json
 cargo run -p composure-cli -- export-sweep-samples path/to/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples-markdown path/to/sweep-result.json
 cargo run -p composure-cli -- export-calibration-candidates path/to/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates-markdown path/to/calibration-result.json
 cargo run -p composure-cli -- summarize-monte-carlo path/to/monte-carlo.json
 cargo run -p composure-cli -- summarize-bundle-run path/to/bundle.json run-id
 cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json
@@ -513,7 +525,9 @@ cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json -
 cargo run -p composure-cli -- build-report baseline-summary.json candidate-summary.json --comparison comparison.json --output report.json
 cargo run -p composure-cli -- export-report-markdown path/to/report.json --output report.md
 cargo run -p composure-cli -- export-sweep-samples path/to/sweep-result.json --output sweep-samples.csv
+cargo run -p composure-cli -- export-sweep-samples-markdown path/to/sweep-result.json --output sweep-samples.md
 cargo run -p composure-cli -- export-calibration-candidates path/to/calibration-result.json --output calibration-candidates.csv
+cargo run -p composure-cli -- export-calibration-candidates-markdown path/to/calibration-result.json --output calibration-candidates.md
 
 # Python bindings (requires maturin)
 cd crates/composure-py && maturin develop --features python-module

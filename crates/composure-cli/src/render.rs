@@ -387,6 +387,69 @@ pub(crate) fn render_sweep_csv(result: &SweepExecutionResult) -> String {
     rows.join("\n")
 }
 
+pub(crate) fn render_sweep_markdown(result: &SweepExecutionResult) -> String {
+    let best_case_id = result
+        .sensitivity
+        .as_ref()
+        .map(|report| report.objective.best_case_id.as_str());
+    let parameter_names = collect_parameter_names(
+        result
+            .samples
+            .iter()
+            .map(|sample| &sample.parameters)
+            .collect::<Vec<_>>()
+            .as_slice(),
+    );
+
+    let mut lines = vec![
+        format!(
+            "# Sweep Samples: {} ({})",
+            result.definition.name, result.definition.id
+        ),
+        "".into(),
+        format!("- Strategy: `{:?}`", result.definition.strategy),
+        format!("- Scored samples: `{}`", result.samples.len()),
+        format!("- Failures: `{}`", result.failures.len()),
+        format!("- Bundle attached: `{}`", result.bundle.is_some()),
+        "".into(),
+        "## Samples".into(),
+    ];
+
+    let mut header = vec![
+        "Case".into(),
+        "Best".into(),
+        "Objective".into(),
+        "Run".into(),
+        "Parameter Set".into(),
+    ];
+    header.extend(parameter_names.iter().cloned());
+
+    lines.push(markdown_row(&header));
+    lines.push(markdown_separator(header.len()));
+
+    for sample in &result.samples {
+        let mut row = vec![
+            sample.case_id.clone(),
+            if best_case_id == Some(sample.case_id.as_str()) {
+                "yes".into()
+            } else {
+                String::new()
+            },
+            format!("{:.4}", sample.objective),
+            metadata_string(sample.metadata.as_ref(), "run_id"),
+            metadata_string(sample.metadata.as_ref(), "parameter_set_id"),
+        ];
+        row.extend(
+            parameter_names
+                .iter()
+                .map(|name| parameter_string(sample.parameters.get(name))),
+        );
+        lines.push(markdown_row(&row));
+    }
+
+    lines.join("\n")
+}
+
 pub(crate) fn render_calibration_csv(result: &CalibrationResult) -> String {
     let best_case_id = result.best_case_id.as_deref();
     let best_parameter_set_id = result.best_parameter_set_id.as_deref();
@@ -474,6 +537,92 @@ pub(crate) fn render_calibration_csv(result: &CalibrationResult) -> String {
     rows.join("\n")
 }
 
+pub(crate) fn render_calibration_markdown(result: &CalibrationResult) -> String {
+    let best_case_id = result.best_case_id.as_deref();
+    let best_parameter_set_id = result.best_parameter_set_id.as_deref();
+    let parameter_names = collect_parameter_names(
+        result
+            .candidates
+            .iter()
+            .map(|candidate| &candidate.case.parameters)
+            .collect::<Vec<_>>()
+            .as_slice(),
+    );
+
+    let mut lines = vec![
+        format!(
+            "# Calibration Candidates: {} ({})",
+            result.definition.name, result.definition.id
+        ),
+        "".into(),
+        format!("- Objective: `{:?}`", result.config.objective),
+        format!("- Failure mode: `{:?}`", result.config.failure_mode),
+        format!("- Candidates: `{}`", result.candidates.len()),
+        format!("- Failures: `{}`", result.failures.len()),
+        format!(
+            "- Best case: `{}`",
+            result.best_case_id.as_deref().unwrap_or("n/a")
+        ),
+        format!(
+            "- Best parameter set: `{}`",
+            result.best_parameter_set_id.as_deref().unwrap_or("n/a")
+        ),
+        "".into(),
+        "## Candidates".into(),
+    ];
+
+    let mut header = vec![
+        "Rank".into(),
+        "Best".into(),
+        "Case".into(),
+        "Parameter Set".into(),
+        "Run".into(),
+        "Score".into(),
+        "RMSE".into(),
+        "Mean Abs Delta".into(),
+        "End Delta".into(),
+    ];
+    header.extend(parameter_names.iter().cloned());
+
+    lines.push(markdown_row(&header));
+    lines.push(markdown_separator(header.len()));
+
+    for (index, candidate) in result.candidates.iter().enumerate() {
+        let is_best_case = best_case_id
+            .map(|id| id == candidate.case.case_id)
+            .unwrap_or(false);
+        let is_best_parameter_set = best_parameter_set_id
+            .map(|id| id == candidate.parameter_set.id)
+            .unwrap_or(false);
+        let is_best = match (best_case_id, best_parameter_set_id) {
+            (Some(_), Some(_)) => is_best_case && is_best_parameter_set,
+            (Some(_), None) => is_best_case,
+            (None, Some(_)) => is_best_parameter_set,
+            (None, None) => false,
+        };
+
+        let mut row = vec![
+            (index + 1).to_string(),
+            if is_best { "yes".into() } else { String::new() },
+            candidate.case.case_id.clone(),
+            candidate.parameter_set.id.clone(),
+            candidate.run.run_id.clone(),
+            format!("{:.4}", candidate.score),
+            format!("{:.4}", candidate.comparison.metrics.rmse),
+            format!("{:.4}", candidate.comparison.metrics.mean_abs_delta),
+            format!("{:.4}", candidate.comparison.metrics.end_delta),
+        ];
+        row.extend(
+            parameter_names
+                .iter()
+                .map(|name| parameter_string(candidate.case.parameters.get(name))),
+        );
+        lines.push(markdown_row(&row));
+    }
+
+    lines.join("\n")
+}
+
 fn format_delta(delta: &composure_core::SummaryDelta) -> String {
     format!(
         "baseline={:?}, candidate={:?}, delta={:?}",
@@ -522,6 +671,14 @@ fn csv_escape(field: &str) -> String {
     } else {
         field.to_string()
     }
+}
+
+fn markdown_row(fields: &[String]) -> String {
+    format!("| {} |", fields.join(" | "))
+}
+
+fn markdown_separator(columns: usize) -> String {
+    format!("|{}|", vec![" --- "; columns].join("|"))
 }
 
 fn json_cell(value: &serde_json::Value) -> String {

@@ -29,9 +29,11 @@ cargo run -p composure-cli -- summarize-bundle-run \
   --output /tmp/bundle-run-summary.json
 cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- export-sweep-samples examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-samples-markdown examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
 cargo run -p composure-cli -- inspect-calibration examples/artifacts/calibration-result.json
 cargo run -p composure-cli -- export-calibration-candidates examples/artifacts/calibration-result.json
+cargo run -p composure-cli -- export-calibration-candidates-markdown examples/artifacts/calibration-result.json
 cargo run -p composure-cli -- compare-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
   examples/artifacts/candidate-monte-carlo.json
@@ -57,7 +59,9 @@ Generated export examples are also checked in:
 ```text
 examples/artifacts/report.md
 examples/artifacts/sweep-samples.csv
+examples/artifacts/sweep-samples.md
 examples/artifacts/calibration-candidates.csv
+examples/artifacts/calibration-candidates.md
 ```
 
 If you want a browser view instead of CLI output, serve the repo root and open

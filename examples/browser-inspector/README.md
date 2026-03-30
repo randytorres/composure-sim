@@ -22,3 +22,6 @@ Load one or more JSON artifacts with the file picker. Supported shapes:
 - `CalibrationResult`
 - `ExperimentBundle`
 - `SweepExecutionResult`
+
+For sweep samples and calibration candidates, the inspector also exposes simple
+sort and filter controls directly in the browser.

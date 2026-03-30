@@ -10,6 +10,7 @@ const ARTIFACT_TYPES = {
   EXPERIMENT_BUNDLE: "ExperimentBundle",
   SWEEP_EXECUTION_RESULT: "SweepExecutionResult",
 };
+const FILTER_ALL = "__all__";
 
 fileInput.addEventListener("change", async (event) => {
   const files = Array.from(event.target.files || []);
@@ -370,6 +371,10 @@ function renderCalibrationResult(result) {
     `));
   }
 
+  if (result.candidates?.length) {
+    wrapper.appendChild(renderCalibrationCandidatesSection(result.candidates));
+  }
+
   if (result.failures?.length) {
     const rows = result.failures.slice(0, 6).map((failure) => `
       <div class="list-row">
@@ -477,7 +482,8 @@ function renderExperimentBundle(bundle) {
 }
 
 function renderSweepExecutionResult(result) {
-  const topCases = Array.isArray(result.executed_cases) ? result.executed_cases.slice(0, 6) : [];
+  const executedCases = Array.isArray(result.executed_cases) ? result.executed_cases : [];
+  const topCases = executedCases.slice(0, 6);
   const topFailures = Array.isArray(result.failures) ? result.failures.slice(0, 6) : [];
   const topRankings = Array.isArray(result.sensitivity?.rankings) ? result.sensitivity.rankings.slice(0, 5) : [];
   const wrapper = document.createElement("div");
@@ -559,6 +565,10 @@ function renderSweepExecutionResult(result) {
     `));
   }
 
+  if (result.samples?.length) {
+    wrapper.appendChild(renderSweepSamplesSection(result.samples, executedCases));
+  }
+
   if (topCases.length) {
     const rows = topCases.map((entry) => `
       <tr>
@@ -597,6 +607,279 @@ function renderSweepExecutionResult(result) {
   }
 
   return wrapper;
+}
+
+function renderCalibrationCandidatesSection(candidates) {
+  const rows = candidates.map((candidate, index) => normalizeCalibrationCandidate(candidate, index));
+  return renderInteractiveTableSection({
+    title: "Calibration Candidates",
+    rowLabel: "candidate",
+    rows,
+    queryPlaceholder: "Search case, parameter set, status, or parameters",
+    filterLabel: "Status",
+    getFilterValue: (row) => row.status,
+    defaultSort: "original",
+    sortOptions: [
+      {
+        value: "original",
+        label: "Original order",
+        compare: (left, right) => left.index - right.index,
+      },
+      {
+        value: "score-asc",
+        label: "Score low to high",
+        compare: (left, right) => compareNullableNumbers(left.score, right.score),
+      },
+      {
+        value: "score-desc",
+        label: "Score high to low",
+        compare: (left, right) => compareNullableNumbers(left.score, right.score, "desc"),
+      },
+      {
+        value: "rmse-asc",
+        label: "RMSE low to high",
+        compare: (left, right) => compareNullableNumbers(left.rmse, right.rmse),
+      },
+      {
+        value: "case-asc",
+        label: "Case A-Z",
+        compare: (left, right) => compareTextValues(left.caseId, right.caseId),
+      },
+    ],
+    emptyMessage: "No calibration candidates match the current controls.",
+    buildTableMarkup: (filteredRows) => `
+      <table>
+        <thead>
+          <tr>
+            <th>Case</th>
+            <th>Parameter Set</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>RMSE</th>
+            <th>End Delta</th>
+            <th>Parameters</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredRows.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.caseId)}</td>
+              <td>${escapeHtml(row.parameterSet)}</td>
+              <td>${escapeHtml(row.status)}</td>
+              <td>${escapeHtml(num(row.score))}</td>
+              <td>${escapeHtml(num(row.rmse))}</td>
+              <td>${escapeHtml(num(row.endDelta))}</td>
+              <td>${escapeHtml(row.parameters)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `,
+  });
+}
+
+function normalizeCalibrationCandidate(candidate, index) {
+  const caseId = fmt(candidate.case?.case_id);
+  const parameterSet = labelPair(candidate.parameter_set?.name, candidate.parameter_set?.id);
+  const score = toNumberOrNull(candidate.score);
+  const rmse = toNumberOrNull(candidate.comparison?.metrics?.rmse);
+  const endDelta = toNumberOrNull(candidate.comparison?.metrics?.end_delta);
+  const status = fmt(candidate.run?.status);
+  const parameters = parameterDetails(candidate.case?.parameters);
+
+  return {
+    index,
+    caseId,
+    parameterSet,
+    score,
+    rmse,
+    endDelta,
+    status,
+    parameters,
+    searchText: [caseId, parameterSet, status, parameters].join(" ").toLowerCase(),
+  };
+}
+
+function renderSweepSamplesSection(samples, executedCases) {
+  const caseLookup = new Map(
+    executedCases
+      .filter((entry) => entry?.case?.case_id)
+      .map((entry) => [entry.case.case_id, entry]),
+  );
+  const rows = samples.map((sample, index) => normalizeSweepSample(sample, index, caseLookup));
+
+  return renderInteractiveTableSection({
+    title: "Scored Samples",
+    rowLabel: "sample",
+    rows,
+    queryPlaceholder: "Search case, parameter set, run, status, or parameters",
+    filterLabel: "Parameter Set",
+    getFilterValue: (row) => row.parameterSetId,
+    defaultSort: "original",
+    sortOptions: [
+      {
+        value: "original",
+        label: "Original order",
+        compare: (left, right) => left.index - right.index,
+      },
+      {
+        value: "objective-asc",
+        label: "Objective low to high",
+        compare: (left, right) => compareNullableNumbers(left.objective, right.objective),
+      },
+      {
+        value: "objective-desc",
+        label: "Objective high to low",
+        compare: (left, right) => compareNullableNumbers(left.objective, right.objective, "desc"),
+      },
+      {
+        value: "case-asc",
+        label: "Case A-Z",
+        compare: (left, right) => compareTextValues(left.caseId, right.caseId),
+      },
+      {
+        value: "parameter-set-asc",
+        label: "Parameter Set A-Z",
+        compare: (left, right) => compareTextValues(left.parameterSetId, right.parameterSetId),
+      },
+    ],
+    emptyMessage: "No sweep samples match the current controls.",
+    buildTableMarkup: (filteredRows) => `
+      <table>
+        <thead>
+          <tr>
+            <th>Case</th>
+            <th>Objective</th>
+            <th>Status</th>
+            <th>Parameter Set</th>
+            <th>Run</th>
+            <th>Parameters</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredRows.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.caseId)}</td>
+              <td>${escapeHtml(num(row.objective))}</td>
+              <td>${escapeHtml(row.status)}</td>
+              <td>${escapeHtml(row.parameterSetId)}</td>
+              <td>${escapeHtml(row.runId)}</td>
+              <td>${escapeHtml(row.parameters)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `,
+  });
+}
+
+function normalizeSweepSample(sample, index, caseLookup) {
+  const executedCase = caseLookup.get(sample.case_id);
+  const caseId = fmt(sample.case_id);
+  const objective = toNumberOrNull(sample.objective);
+  const parameterSetId = fmt(
+    sample.metadata?.parameter_set_id
+      ?? executedCase?.parameter_set?.id
+      ?? executedCase?.run?.parameter_set_id,
+  );
+  const runId = fmt(sample.metadata?.run_id ?? executedCase?.run?.run_id);
+  const status = fmt(executedCase?.run?.status);
+  const parameters = parameterDetails(sample.parameters ?? executedCase?.case?.parameters);
+
+  return {
+    index,
+    caseId,
+    objective,
+    parameterSetId,
+    runId,
+    status,
+    parameters,
+    searchText: [caseId, parameterSetId, runId, status, parameters].join(" ").toLowerCase(),
+  };
+}
+
+function renderInteractiveTableSection({
+  title,
+  rowLabel,
+  rows,
+  queryPlaceholder,
+  filterLabel,
+  getFilterValue,
+  defaultSort,
+  sortOptions,
+  emptyMessage,
+  buildTableMarkup,
+}) {
+  const sectionNode = document.createElement("section");
+  sectionNode.className = "section";
+
+  const titleNode = document.createElement("h3");
+  titleNode.textContent = title;
+
+  const controlsNode = document.createElement("div");
+  controlsNode.className = "table-controls";
+
+  const queryField = createTextControl("Filter", "query", queryPlaceholder);
+  const queryInput = queryField.querySelector("input");
+  controlsNode.appendChild(queryField);
+
+  const filterValues = collectFilterValues(rows, getFilterValue);
+  const shouldRenderFilter = filterValues.length > 1;
+  let filterSelect = null;
+  if (shouldRenderFilter) {
+    const filterField = createSelectControl(filterLabel, "filter", [
+      { value: FILTER_ALL, label: `All ${filterLabel.toLowerCase()}s` },
+      ...filterValues.map((value) => ({ value, label: value })),
+    ], FILTER_ALL);
+    filterSelect = filterField.querySelector("select");
+    controlsNode.appendChild(filterField);
+  }
+
+  const sortField = createSelectControl("Sort", "sort", sortOptions, defaultSort);
+  const sortSelect = sortField.querySelector("select");
+  controlsNode.appendChild(sortField);
+
+  const summaryNode = document.createElement("p");
+  summaryNode.className = "table-summary";
+
+  const tableShell = document.createElement("div");
+  tableShell.className = "table-shell";
+
+  const updateTable = () => {
+    const query = queryInput.value.trim().toLowerCase();
+    const activeFilter = filterSelect ? filterSelect.value : FILTER_ALL;
+    const activeSort = sortOptions.find((option) => option.value === sortSelect.value) || sortOptions[0];
+
+    const filteredRows = rows
+      .filter((row) => {
+        if (query && !row.searchText.includes(query)) {
+          return false;
+        }
+
+        if (activeFilter !== FILTER_ALL && getFilterValue(row) !== activeFilter) {
+          return false;
+        }
+
+        return true;
+      })
+      .slice()
+      .sort((left, right) => activeSort.compare(left, right) || left.index - right.index);
+
+    summaryNode.textContent = `Showing ${filteredRows.length} of ${rows.length} ${rowLabel}${rows.length === 1 ? "" : "s"}.`;
+    tableShell.innerHTML = filteredRows.length
+      ? buildTableMarkup(filteredRows)
+      : `<div class="callout">${escapeHtml(emptyMessage)}</div>`;
+  };
+
+  queryInput.addEventListener("input", updateTable);
+  sortSelect.addEventListener("change", updateTable);
+  if (filterSelect) {
+    filterSelect.addEventListener("change", updateTable);
+  }
+
+  sectionNode.append(titleNode, controlsNode, summaryNode, tableShell);
+  updateTable();
+  return sectionNode;
 }
 
 function renderErrorCard(fileName, error) {
@@ -671,11 +954,16 @@ function labelPair(name, id) {
 }
 
 function parameterSummary(parameters) {
+  const details = parameterDetails(parameters);
+  return details === "n/a" ? "No parameter details available." : `Parameters: ${details}`;
+}
+
+function parameterDetails(parameters) {
   if (!isObject(parameters)) {
-    return "No parameter details available.";
+    return "n/a";
   }
   const parts = Object.entries(parameters).map(([key, value]) => `${key}=${renderParameterValue(value)}`);
-  return parts.length ? `Parameters: ${parts.join(", ")}` : "No parameter details available.";
+  return parts.length ? parts.join(", ") : "n/a";
 }
 
 function renderParameterValue(value) {
@@ -782,6 +1070,53 @@ function htmlBlock(markup) {
   return wrapper.firstElementChild || wrapper;
 }
 
+function createTextControl(label, role, placeholder) {
+  const field = document.createElement("label");
+  field.className = "control-field";
+
+  const labelNode = document.createElement("span");
+  labelNode.className = "control-label";
+  labelNode.textContent = label;
+
+  const input = document.createElement("input");
+  input.type = "search";
+  input.placeholder = placeholder;
+  input.dataset.role = role;
+
+  field.append(labelNode, input);
+  return field;
+}
+
+function createSelectControl(label, role, options, selectedValue) {
+  const field = document.createElement("label");
+  field.className = "control-field";
+
+  const labelNode = document.createElement("span");
+  labelNode.className = "control-label";
+  labelNode.textContent = label;
+
+  const select = document.createElement("select");
+  select.dataset.role = role;
+
+  for (const option of options) {
+    const optionNode = document.createElement("option");
+    optionNode.value = option.value;
+    optionNode.textContent = option.label;
+    if (option.value === selectedValue) {
+      optionNode.selected = true;
+    }
+    select.appendChild(optionNode);
+  }
+
+  field.append(labelNode, select);
+  return field;
+}
+
+function collectFilterValues(rows, getFilterValue) {
+  return Array.from(new Set(rows.map((row) => fmt(getFilterValue(row)))))
+    .sort((left, right) => compareTextValues(left, right));
+}
+
 function num(value) {
   if (value === null || value === undefined || Number.isNaN(value)) {
     return "n/a";
@@ -818,6 +1153,34 @@ function formatByteSize(size) {
 
 function isObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function toNumberOrNull(value) {
+  return typeof value === "number" && !Number.isNaN(value) ? value : null;
+}
+
+function compareNullableNumbers(left, right, direction = "asc") {
+  const leftMissing = left === null || left === undefined;
+  const rightMissing = right === null || right === undefined;
+
+  if (leftMissing && rightMissing) {
+    return 0;
+  }
+  if (leftMissing) {
+    return 1;
+  }
+  if (rightMissing) {
+    return -1;
+  }
+
+  return direction === "desc" ? right - left : left - right;
+}
+
+function compareTextValues(left, right) {
+  return fmt(left).localeCompare(fmt(right), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
 }
 
 function escapeHtml(value) {
