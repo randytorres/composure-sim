@@ -677,8 +677,8 @@ mod tests {
     use super::*;
 
     use composure_core::{
-        Action, ActionType, MonteCarloConfig, ParameterValue, SimState, SweepParameter,
-        SweepStrategy,
+        Action, ActionType, ConditionalActionRule, ConditionalTrigger, MonteCarloConfig,
+        ParameterValue, SimState, SweepParameter, SweepStrategy,
     };
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -701,6 +701,20 @@ mod tests {
             magnitude: 0.2,
             action_type: ActionType::Intervention,
             metadata: None,
+        });
+        scenario.conditional_actions.push(ConditionalActionRule {
+            id: "stabilize-readiness".into(),
+            trigger: ConditionalTrigger::HealthIndexBelow { threshold: 0.5 },
+            action: Action {
+                dimension: Some(1),
+                magnitude: 0.12,
+                action_type: ActionType::Intervention,
+                metadata: None,
+            },
+            delay_steps: 1,
+            cooldown_steps: 2,
+            priority: 1,
+            max_fires: Some(1),
         });
         scenario.metadata = Some(serde_json::json!({
             "dimension_labels": ["sleep", "readiness"]

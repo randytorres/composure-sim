@@ -45,6 +45,27 @@
         }
       }
     ],
+    "conditional_actions": [
+      {
+        "id": "recovery-backstop",
+        "trigger": {
+          "kind": "health_index_below",
+          "threshold": 0.44
+        },
+        "action": {
+          "dimension": 0,
+          "magnitude": 0.16,
+          "action_type": "Intervention",
+          "metadata": {
+            "label": "automatic sleep protection"
+          }
+        },
+        "delay_steps": 1,
+        "cooldown_steps": 2,
+        "priority": 1,
+        "max_fires": 1
+      }
+    ],
     "time_steps": 12,
     "failure_threshold": 0.45,
     "metadata": {

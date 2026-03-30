@@ -117,12 +117,12 @@ impl Scenario {
 pub struct ConditionalActionRule {
     /// Stable identifier for deterministic debugging and future reporting.
     pub id: String,
-    /// Predicate evaluated before each step against the current state.
-    /// Crossing variants compare the previous state transition against the current state.
+    /// Predicate evaluated after each step against the resulting state.
+    /// Crossing variants compare the previous state to the resulting state.
     pub trigger: ConditionalTrigger,
     /// Action to schedule when the trigger matches.
     pub action: Action,
-    /// Delay before the action is applied. `0` means the current step.
+    /// Delay before the action is applied. `0` means the next step.
     #[serde(default)]
     pub delay_steps: usize,
     /// Minimum number of steps before the same rule can fire again.

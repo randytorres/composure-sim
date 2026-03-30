@@ -29,6 +29,8 @@ Typical flow for any pack:
 3. Run `composure run-pack path/to/pack.json` to emit a baseline `ExperimentBundle`.
    This only requires `scenario.json`, `experiment-spec.json`, and
    `runtime_model` in `pack.json`.
+   `scenario.json` can also include `conditional_actions`, and `run-pack` will
+   execute them through the same scenario-aware Monte Carlo path used in core.
 4. Load `experiment-spec.json` into `ExperimentSpec`.
 5. Load `sweep-definition.json` into `SweepDefinition`.
 6. Load `observed-trajectory.json` into `ObservedTrajectory`.

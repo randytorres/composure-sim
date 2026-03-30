@@ -420,10 +420,11 @@ mod tests {
     };
     use composure_core::monte_carlo::PercentileBands;
     use composure_core::{
-        ComposureSummary, ExperimentExecutionConfig, ExperimentOutcome, ExperimentParameterSet,
-        ExperimentSpec, MonteCarloConfig, MonteCarloSummary, ParameterValue, Scenario,
-        SensitivityConfig, SensitivityDirection, SensitivityKind, SweepCase, SweepDefinition,
-        SweepExecutionResult, SweepFailureMode, SweepParameter, SweepRunnerConfig, SweepStrategy,
+        Action, ActionType, ComposureSummary, ConditionalActionRule, ConditionalTrigger,
+        ExperimentExecutionConfig, ExperimentOutcome, ExperimentParameterSet, ExperimentSpec,
+        MonteCarloConfig, MonteCarloSummary, ParameterValue, Scenario, SensitivityConfig,
+        SensitivityDirection, SensitivityKind, SweepCase, SweepDefinition, SweepExecutionResult,
+        SweepFailureMode, SweepParameter, SweepRunnerConfig, SweepStrategy,
     };
 
     use super::*;
@@ -1171,6 +1172,20 @@ mod tests {
         scenario.initial_state =
             composure_core::SimState::new(vec![0.4, 0.5], vec![0.1, 0.2], vec![0.2, 0.2]);
         scenario.failure_threshold = Some(0.45);
+        scenario.conditional_actions.push(ConditionalActionRule {
+            id: "stabilize-sleep".into(),
+            trigger: ConditionalTrigger::HealthIndexBelow { threshold: 0.45 },
+            action: Action {
+                dimension: Some(0),
+                magnitude: 0.1,
+                action_type: ActionType::Intervention,
+                metadata: None,
+            },
+            delay_steps: 1,
+            cooldown_steps: 2,
+            priority: 1,
+            max_fires: Some(1),
+        });
         scenario.metadata = Some(serde_json::json!({
             "dimension_labels": ["sleep", "readiness"]
         }));

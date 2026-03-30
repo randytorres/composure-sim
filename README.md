@@ -182,10 +182,9 @@ scenario.conditional_actions.push(ConditionalActionRule {
 ```
 
 The first slice supports threshold triggers, delay, cooldown, deterministic
-priority ordering, and bounded firing counts. Level-based rules evaluate
-against the current step state, so `delay_steps: 0` means "apply on this
-step"; crossing triggers need a previous state and therefore first affect the
-following step.
+priority ordering, and bounded firing counts. Rules evaluate after each step,
+so `delay_steps: 0` means "apply on the next step"; crossing triggers compare
+the previous state with the resulting state.
 
 ### Sensitivity Analysis
 
@@ -320,6 +319,9 @@ reference packs and early pipeline validation, while richer domain simulators
 can still consume the same artifacts and downstream workflow.
 `run-pack` only depends on the scenario, experiment spec, and runtime model, so
 unused sweep or calibration inputs do not block execution.
+Because packs load the shared `Scenario` shape directly, executable packs can
+also use `conditional_actions` in `scenario.json` and the CLI will honor them
+without extra runtime schema work.
 
 ### Deterministic Reports
 
