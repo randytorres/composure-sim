@@ -1145,7 +1145,7 @@ mod tests {
         dir
     }
 
-    fn write_sample_pack(dir: &std::path::Path) -> std::path::PathBuf {
+    fn write_sample_pack(dir: &std::path::Path) {
         let mut scenario = Scenario::new(
             "pack-scenario",
             "Pack Scenario",
@@ -1190,9 +1190,8 @@ mod tests {
             serde_json::to_string_pretty(&observed).unwrap(),
         )
         .unwrap();
-        let manifest_path = dir.join("pack.json");
         fs::write(
-            &manifest_path,
+            dir.join("pack.json"),
             serde_json::to_string_pretty(&serde_json::json!({
                 "id": "health-pack",
                 "name": "Health Pack",
@@ -1204,18 +1203,17 @@ mod tests {
             .unwrap(),
         )
         .unwrap();
-        manifest_path
     }
 
     #[test]
     fn test_run_inspect_pack_outputs_summary() {
         let dir = temp_pack_dir("inspect-pack");
-        let manifest_path = write_sample_pack(&dir);
+        write_sample_pack(&dir);
 
         let output = run(&[
             "composure".into(),
             "inspect-pack".into(),
-            manifest_path.display().to_string(),
+            dir.display().to_string(),
         ])
         .unwrap();
 
@@ -1227,12 +1225,12 @@ mod tests {
     #[test]
     fn test_run_validate_pack_outputs_success() {
         let dir = temp_pack_dir("validate-pack");
-        let manifest_path = write_sample_pack(&dir);
+        write_sample_pack(&dir);
 
         let output = run(&[
             "composure".into(),
             "validate-pack".into(),
-            manifest_path.display().to_string(),
+            dir.display().to_string(),
         ])
         .unwrap();
 
