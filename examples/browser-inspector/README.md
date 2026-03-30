@@ -20,3 +20,5 @@ Load one or more JSON artifacts with the file picker. Supported shapes:
 - `TrajectoryComparison`
 - `DeterministicReport`
 - `CalibrationResult`
+- `ExperimentBundle`
+- `SweepExecutionResult`

@@ -7,6 +7,8 @@ const ARTIFACT_TYPES = {
   TRAJECTORY_COMPARISON: "TrajectoryComparison",
   DETERMINISTIC_REPORT: "DeterministicReport",
   CALIBRATION_RESULT: "CalibrationResult",
+  EXPERIMENT_BUNDLE: "ExperimentBundle",
+  SWEEP_EXECUTION_RESULT: "SweepExecutionResult",
 };
 
 fileInput.addEventListener("change", async (event) => {
@@ -47,6 +49,24 @@ async function readArtifactFile(file) {
 function detectArtifactType(data) {
   if (!isObject(data)) {
     return null;
+  }
+
+  if (
+    isObject(data.definition) &&
+    Array.isArray(data.executed_cases) &&
+    Array.isArray(data.failures) &&
+    Array.isArray(data.samples) &&
+    isObject(data.config)
+  ) {
+    return ARTIFACT_TYPES.SWEEP_EXECUTION_RESULT;
+  }
+
+  if (
+    isObject(data.spec) &&
+    Array.isArray(data.parameter_sets) &&
+    Array.isArray(data.runs)
+  ) {
+    return ARTIFACT_TYPES.EXPERIMENT_BUNDLE;
   }
 
   if (
@@ -104,7 +124,7 @@ function renderArtifactCard(fileName, artifactType, data) {
   if (!artifactType) {
     body.innerHTML = `
       <p class="error">This JSON does not match one of the supported composure artifact shapes.</p>
-      <div class="callout">Expected a RunSummary, TrajectoryComparison, DeterministicReport, or CalibrationResult artifact.</div>
+      <div class="callout">Expected a RunSummary, TrajectoryComparison, DeterministicReport, CalibrationResult, ExperimentBundle, or SweepExecutionResult artifact.</div>
     `;
   } else {
     body.appendChild(renderArtifactBody(artifactType, data));
@@ -124,6 +144,10 @@ function renderArtifactBody(artifactType, data) {
       return renderDeterministicReport(data);
     case ARTIFACT_TYPES.CALIBRATION_RESULT:
       return renderCalibrationResult(data);
+    case ARTIFACT_TYPES.EXPERIMENT_BUNDLE:
+      return renderExperimentBundle(data);
+    case ARTIFACT_TYPES.SWEEP_EXECUTION_RESULT:
+      return renderSweepExecutionResult(data);
     default:
       return htmlBlock("<p class=\"error\">Unsupported artifact type.</p>");
   }
@@ -359,6 +383,222 @@ function renderCalibrationResult(result) {
   return wrapper;
 }
 
+function renderExperimentBundle(bundle) {
+  const statusCounts = countRunStatuses(bundle.runs);
+  const topSets = Array.isArray(bundle.parameter_sets) ? bundle.parameter_sets.slice(0, 6) : [];
+  const topRuns = Array.isArray(bundle.runs) ? bundle.runs.slice(0, 6) : [];
+  const wrapper = document.createElement("div");
+  wrapper.className = "section";
+
+  wrapper.appendChild(section("Bundle Overview", `
+    <div class="grid">
+      ${metric("Experiment", labelPair(bundle.spec?.name, bundle.spec?.id))}
+      ${metric("Scenario", labelPair(bundle.spec?.scenario?.name, bundle.spec?.scenario?.id))}
+      ${metric("Time Steps", fmt(bundle.spec?.scenario?.time_steps))}
+      ${metric("Failure Threshold", num(bundle.spec?.scenario?.failure_threshold))}
+      ${metric("Parameter Sets", fmt(bundle.parameter_sets?.length))}
+      ${metric("Runs", fmt(bundle.runs?.length))}
+      ${metric("Default Paths", fmt(bundle.spec?.default_monte_carlo?.num_paths))}
+      ${metric("Tags", fmt(bundle.spec?.tags?.length))}
+    </div>
+  `));
+
+  wrapper.appendChild(section("Run States", `
+    <div class="grid">
+      ${metric("Completed", fmt(statusCounts.Completed))}
+      ${metric("Failed", fmt(statusCounts.Failed))}
+      ${metric("Running", fmt(statusCounts.Running))}
+      ${metric("Pending", fmt(statusCounts.Pending))}
+      ${metric("Created", unixTime(bundle.spec?.created_at_unix_s))}
+    </div>
+  `));
+
+  if (bundle.spec?.description) {
+    wrapper.appendChild(htmlBlock(`
+      <div class="callout">
+        ${escapeHtml(bundle.spec.description)}
+      </div>
+    `));
+  }
+
+  if (topSets.length) {
+    const rows = topSets.map((parameterSet) => `
+      <tr>
+        <td>${escapeHtml(labelPair(parameterSet.name, parameterSet.id))}</td>
+        <td>${escapeHtml(fmt(parameterSet.scenario?.time_steps))}</td>
+        <td>${escapeHtml(fmt(parameterSet.monte_carlo?.num_paths))}</td>
+        <td>${escapeHtml(fmt(parameterSet.monte_carlo?.seed_base))}</td>
+      </tr>
+    `).join("");
+
+    wrapper.appendChild(section("Parameter Sets", `
+      <table>
+        <thead>
+          <tr>
+            <th>Set</th>
+            <th>Steps</th>
+            <th>Paths</th>
+            <th>Seed</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `));
+  }
+
+  if (topRuns.length) {
+    const rows = topRuns.map((run) => `
+      <tr>
+        <td>${escapeHtml(fmt(run.run_id))}</td>
+        <td>${escapeHtml(fmt(run.parameter_set_id))}</td>
+        <td>${escapeHtml(fmt(run.status))}</td>
+        <td>${escapeHtml(fmt(run.seed))}</td>
+        <td>${escapeHtml(summarizeOutcome(run.outcome))}</td>
+      </tr>
+    `).join("");
+
+    wrapper.appendChild(section("Recent Runs", `
+      <table>
+        <thead>
+          <tr>
+            <th>Run</th>
+            <th>Parameter Set</th>
+            <th>Status</th>
+            <th>Seed</th>
+            <th>Artifacts</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `));
+  }
+
+  return wrapper;
+}
+
+function renderSweepExecutionResult(result) {
+  const topCases = Array.isArray(result.executed_cases) ? result.executed_cases.slice(0, 6) : [];
+  const topFailures = Array.isArray(result.failures) ? result.failures.slice(0, 6) : [];
+  const topRankings = Array.isArray(result.sensitivity?.rankings) ? result.sensitivity.rankings.slice(0, 5) : [];
+  const wrapper = document.createElement("div");
+  wrapper.className = "section";
+
+  wrapper.appendChild(section("Sweep Overview", `
+    <div class="grid">
+      ${metric("Sweep", labelPair(result.definition?.name, result.definition?.id))}
+      ${metric("Strategy", fmt(result.definition?.strategy))}
+      ${metric("Configured Samples", fmt(result.definition?.sample_count))}
+      ${metric("Seed", fmt(result.definition?.seed))}
+      ${metric("Parameters", fmt(result.definition?.parameters?.length))}
+      ${metric("Executed Cases", fmt(result.executed_cases?.length))}
+      ${metric("Failures", fmt(result.failures?.length))}
+      ${metric("Scored Samples", fmt(result.samples?.length))}
+      ${metric("Bundle Attached", result.bundle ? "yes" : "no")}
+      ${metric("Failure Mode", fmt(result.config?.failure_mode))}
+    </div>
+  `));
+
+  if (Array.isArray(result.definition?.parameters) && result.definition.parameters.length) {
+    const rows = result.definition.parameters.slice(0, 6).map((parameter) => `
+      <tr>
+        <td>${escapeHtml(fmt(parameter.name))}</td>
+        <td>${escapeHtml(fmt(parameter.values?.length))}</td>
+        <td>${escapeHtml(parameterValuesSummary(parameter.values))}</td>
+      </tr>
+    `).join("");
+
+    wrapper.appendChild(section("Sweep Parameters", `
+      <table>
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Values</th>
+            <th>Preview</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `));
+  }
+
+  if (result.sensitivity) {
+    wrapper.appendChild(section("Sensitivity Summary", `
+      <div class="grid">
+        ${metric("Sample Count", fmt(result.sensitivity.sample_count))}
+        ${metric("Objective Min", num(result.sensitivity.objective?.min))}
+        ${metric("Objective Mean", num(result.sensitivity.objective?.mean))}
+        ${metric("Objective Max", num(result.sensitivity.objective?.max))}
+        ${metric("Best Case", fmt(result.sensitivity.objective?.best_case_id))}
+        ${metric("Worst Case", fmt(result.sensitivity.objective?.worst_case_id))}
+      </div>
+    `));
+  }
+
+  if (topRankings.length) {
+    const rows = topRankings.map((ranking) => `
+      <tr>
+        <td>${escapeHtml(fmt(ranking.parameter))}</td>
+        <td>${escapeHtml(num(ranking.score))}</td>
+        <td>${escapeHtml(fmt(ranking.direction))}</td>
+        <td>${escapeHtml(sensitivityKindSummary(ranking.kind))}</td>
+      </tr>
+    `).join("");
+
+    wrapper.appendChild(section("Top Sensitivities", `
+      <table>
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Score</th>
+            <th>Direction</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `));
+  }
+
+  if (topCases.length) {
+    const rows = topCases.map((entry) => `
+      <tr>
+        <td>${escapeHtml(fmt(entry.case?.case_id))}</td>
+        <td>${escapeHtml(fmt(entry.run?.status))}</td>
+        <td>${escapeHtml(num(entry.sample?.objective))}</td>
+        <td>${escapeHtml(fmt(entry.parameter_set?.id))}</td>
+        <td>${escapeHtml(parameterSummary(entry.case?.parameters))}</td>
+      </tr>
+    `).join("");
+
+    wrapper.appendChild(section("Executed Cases", `
+      <table>
+        <thead>
+          <tr>
+            <th>Case</th>
+            <th>Status</th>
+            <th>Objective</th>
+            <th>Parameter Set</th>
+            <th>Parameters</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `));
+  }
+
+  if (topFailures.length) {
+    const rows = topFailures.map((failure) => `
+      <div class="list-row">
+        <strong>${escapeHtml(fmt(failure.case?.case_id))}</strong>
+        <div>${escapeHtml(fmt(failure.parameter_set_id))} · ${escapeHtml(failure.error || "Unknown error")}</div>
+      </div>
+    `).join("");
+    wrapper.appendChild(section("Failures", `<div class="list">${rows}</div>`));
+  }
+
+  return wrapper;
+}
+
 function renderErrorCard(fileName, error) {
   const message = error instanceof Error ? error.message : String(error);
   const article = document.createElement("article");
@@ -450,6 +690,77 @@ function renderParameterValue(value) {
     return JSON.stringify(value);
   }
   return fmt(value);
+}
+
+function countRunStatuses(runs) {
+  const counts = {
+    Completed: 0,
+    Failed: 0,
+    Running: 0,
+    Pending: 0,
+  };
+
+  if (!Array.isArray(runs)) {
+    return counts;
+  }
+
+  for (const run of runs) {
+    if (run && typeof run.status === "string" && run.status in counts) {
+      counts[run.status] += 1;
+    }
+  }
+
+  return counts;
+}
+
+function summarizeOutcome(outcome) {
+  if (!isObject(outcome)) {
+    return "none";
+  }
+
+  const parts = [];
+  if (outcome.monte_carlo) {
+    parts.push("monte_carlo");
+  }
+  if (outcome.composure) {
+    parts.push("composure");
+  }
+  if (outcome.replay) {
+    parts.push("replay");
+  }
+  return parts.length ? parts.join(", ") : "none";
+}
+
+function parameterValuesSummary(values) {
+  if (!Array.isArray(values) || !values.length) {
+    return "n/a";
+  }
+  const preview = values.slice(0, 4).map(renderParameterValue);
+  return values.length > 4 ? `${preview.join(", ")}, ...` : preview.join(", ");
+}
+
+function sensitivityKindSummary(kind) {
+  if (!isObject(kind)) {
+    return "n/a";
+  }
+  if (isObject(kind.Numeric)) {
+    return `numeric corr=${num(kind.Numeric.correlation)} slope=${num(kind.Numeric.slope)}`;
+  }
+  if (isObject(kind.Categorical)) {
+    return `categorical range=${num(kind.Categorical.range)} buckets=${fmt(kind.Categorical.buckets?.length)}`;
+  }
+  return "n/a";
+}
+
+function unixTime(value) {
+  if (typeof value !== "number") {
+    return "n/a";
+  }
+  const date = new Date(value * 1000);
+  if (Number.isNaN(date.getTime())) {
+    return "n/a";
+  }
+  return date.toLocaleString();
 }
 
 function metric(label, value) {
