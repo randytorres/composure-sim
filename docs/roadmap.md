@@ -163,6 +163,7 @@ Current progress in core:
 - break-point and recovery-half-life shifts
 - percentile-band widening / narrowing summaries
 - comparison snapshots for divergence and failure shift context
+- matched-seed counterfactual branching from an explicit state with reusable comparison/report artifacts
 
 ### 6. Optional network/entity simulation
 

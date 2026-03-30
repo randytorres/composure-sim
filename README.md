@@ -116,6 +116,49 @@ println!("Mean delta: {}", comparison.metrics.mean_delta);
 println!("First divergence: {:?}", comparison.divergence);
 ```
 
+### Counterfactual Branching
+
+Run matched-seed baseline and candidate branches from an explicit `SimState`.
+This first slice does not fork from replay state or resume in-flight RNG state;
+you provide the branch point state directly.
+
+```rust
+use composure_core::{
+    run_counterfactual, Action, ActionType, CounterfactualBranchInput, CounterfactualConfig,
+    MonteCarloConfig, SimState,
+};
+
+let branch_state = SimState::new(vec![0.4], vec![0.0], vec![0.0]);
+let baseline = CounterfactualBranchInput {
+    branch_id: "baseline".into(),
+    intervention_label: "No change".into(),
+    actions: vec![],
+    conditional_actions: vec![],
+};
+let candidate = CounterfactualBranchInput {
+    branch_id: "candidate".into(),
+    intervention_label: "Recovery protocol".into(),
+    actions: vec![Action {
+        dimension: Some(0),
+        magnitude: 0.15,
+        action_type: ActionType::Intervention,
+        metadata: None,
+    }],
+    conditional_actions: vec![],
+};
+
+let mut config = CounterfactualConfig::new(MonteCarloConfig::with_seed(1_000, 30, 42));
+config.analysis_failure_threshold = Some(0.3);
+
+let result = run_counterfactual(&my_sim, &branch_state, &baseline, &candidate, &config)?;
+
+println!("End delta: {}", result.comparison.metrics.end_delta);
+println!(
+    "Candidate archetype: {:?}",
+    result.candidate.summary.composure.as_ref().map(|s| s.archetype)
+);
+```
+
 ### Experiment Bundles
 
 Store reusable experiment specs, variants, and run artifacts:

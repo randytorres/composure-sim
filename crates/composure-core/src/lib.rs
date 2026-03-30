@@ -27,6 +27,7 @@
 
 pub mod compare;
 pub mod composure;
+pub mod counterfactual;
 pub mod execution;
 pub mod experiment;
 pub mod monte_carlo;
@@ -47,6 +48,10 @@ pub use compare::{
 pub use composure::{
     analyze_composure, analyze_composure_checked, classify_archetype, Archetype, ComposureCurve,
     ComposureError, ComposureMetrics, ComposurePoint,
+};
+pub use counterfactual::{
+    run_counterfactual, CounterfactualBranch, CounterfactualBranchInput, CounterfactualConfig,
+    CounterfactualError, CounterfactualResult,
 };
 pub use execution::{
     execute_experiment_spec, execute_parameter_set, ExperimentExecutionConfig,
