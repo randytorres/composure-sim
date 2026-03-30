@@ -1,0 +1,65 @@
+{
+  "id": "supply-chain-exp",
+  "name": "Disruption Recovery Program",
+  "description": "Baseline disruption recovery plan for supplier outage scenarios.",
+  "scenario": {
+    "id": "supply-chain-baseline",
+    "name": "Supply Chain Disruption Baseline",
+    "initial_state": {
+      "z": [0.74, 0.61, 0.66],
+      "m": [0.21, 0.28, 0.19],
+      "u": [0.24, 0.26, 0.22],
+      "t": 0
+    },
+    "actions": [
+      {
+        "dimension": 2,
+        "magnitude": -0.32,
+        "action_type": "StressorOnset",
+        "metadata": {
+          "label": "supplier outage"
+        }
+      },
+      {
+        "dimension": 1,
+        "magnitude": -0.18,
+        "action_type": "StressorOnset",
+        "metadata": {
+          "label": "inventory drawdown"
+        }
+      },
+      {
+        "dimension": 0,
+        "magnitude": 0.21,
+        "action_type": "Intervention",
+        "metadata": {
+          "label": "expedited routing"
+        }
+      },
+      {
+        "dimension": 2,
+        "magnitude": 0.25,
+        "action_type": "StressorRemoval",
+        "metadata": {
+          "label": "alternate supplier online"
+        }
+      }
+    ],
+    "time_steps": 9,
+    "failure_threshold": 0.5,
+    "metadata": {
+      "domain": "supply_chain",
+      "dimension_labels": ["fill_rate", "inventory_health", "supplier_confidence"]
+    }
+  },
+  "default_monte_carlo": {
+    "num_paths": 600,
+    "time_steps": 9,
+    "seed_base": 303
+  },
+  "tags": ["supply_chain", "operations", "disruption"],
+  "metadata": {
+    "network": "three-node-fulfillment"
+  },
+  "created_at_unix_s": 1700000300
+}

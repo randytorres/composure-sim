@@ -214,6 +214,7 @@ cargo run -p composure-cli -- build-report \
   --comparison examples/artifacts/comparison.json \
   --output /tmp/report.json
 cargo run -p composure-cli -- inspect-bundle examples/artifacts/experiment-bundle.json
+cargo run -p composure-cli -- export-bundle-markdown examples/artifacts/experiment-bundle-with-output.json
 cargo run -p composure-cli -- summarize-bundle-run \
   examples/artifacts/experiment-bundle-with-output.json \
   run-1
@@ -222,6 +223,7 @@ cargo run -p composure-cli -- summarize-bundle-run \
   run-1 \
   --output /tmp/bundle-run-summary.json
 cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-summary-markdown examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- export-sweep-samples examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- export-sweep-samples-markdown examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
@@ -250,6 +252,25 @@ python3 -m http.server 8000
 ```
 
 Then open `http://127.0.0.1:8000/examples/browser-inspector/` and load saved JSON artifacts.
+
+For an automated browser smoke pass that serves the repo locally and validates
+the interactive inspector with Playwright CLI:
+
+```bash
+./scripts/browser-inspector-smoke.sh
+```
+
+### Domain Packs
+
+Typed input packs for multiple domains live under [`examples/packs`](/Users/randytorres/Projects/composure-sim/examples/packs/README.md):
+
+- [`health-recovery`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/README.md)
+- [`campaign-fatigue`](/Users/randytorres/Projects/composure-sim/examples/packs/campaign-fatigue/README.md)
+- [`supply-chain-disruption`](/Users/randytorres/Projects/composure-sim/examples/packs/supply-chain-disruption/README.md)
+
+These are input-first packs: `scenario`, `experiment-spec`, `sweep-definition`, and
+`observed-trajectory` examples that plug into your domain-specific `Simulator`
+implementation and feed the same downstream artifact pipeline.
 
 ### Deterministic Reports
 
@@ -435,7 +456,14 @@ cargo run -p composure-cli -- inspect-calibration examples/artifacts/calibration
 cargo run -p composure-cli -- export-calibration-candidates examples/artifacts/calibration-result.json
 ```
 
-Sweep samples can also be exported as a flat CSV table:
+Bundle and sweep artifacts can also be exported as markdown summaries:
+
+```bash
+cargo run -p composure-cli -- export-bundle-markdown examples/artifacts/experiment-bundle-with-output.json
+cargo run -p composure-cli -- export-sweep-summary-markdown examples/artifacts/sweep-result.json
+```
+
+Sweep samples can also be exported as a flat CSV or markdown table:
 
 ```bash
 cargo run -p composure-cli -- export-sweep-samples examples/artifacts/sweep-result.json
@@ -510,7 +538,9 @@ cargo run -p composure-cli -- inspect-bundle path/to/experiment-bundle.json
 cargo run -p composure-cli -- inspect-report path/to/report.json
 cargo run -p composure-cli -- inspect-compare path/to/comparison.json
 cargo run -p composure-cli -- inspect-calibration path/to/calibration-result.json
+cargo run -p composure-cli -- export-bundle-markdown path/to/bundle.json
 cargo run -p composure-cli -- export-report-markdown path/to/report.json
+cargo run -p composure-cli -- export-sweep-summary-markdown path/to/sweep-result.json
 cargo run -p composure-cli -- export-sweep-samples path/to/sweep-result.json
 cargo run -p composure-cli -- export-sweep-samples-markdown path/to/sweep-result.json
 cargo run -p composure-cli -- export-calibration-candidates path/to/calibration-result.json
@@ -523,7 +553,9 @@ cargo run -p composure-cli -- summarize-monte-carlo path/to/monte-carlo.json --o
 cargo run -p composure-cli -- summarize-bundle-run path/to/bundle.json run-id --output run-summary.json
 cargo run -p composure-cli -- compare-monte-carlo baseline.json candidate.json --output comparison.json
 cargo run -p composure-cli -- build-report baseline-summary.json candidate-summary.json --comparison comparison.json --output report.json
+cargo run -p composure-cli -- export-bundle-markdown path/to/bundle.json --output bundle.md
 cargo run -p composure-cli -- export-report-markdown path/to/report.json --output report.md
+cargo run -p composure-cli -- export-sweep-summary-markdown path/to/sweep-result.json --output sweep-summary.md
 cargo run -p composure-cli -- export-sweep-samples path/to/sweep-result.json --output sweep-samples.csv
 cargo run -p composure-cli -- export-sweep-samples-markdown path/to/sweep-result.json --output sweep-samples.md
 cargo run -p composure-cli -- export-calibration-candidates path/to/calibration-result.json --output calibration-candidates.csv

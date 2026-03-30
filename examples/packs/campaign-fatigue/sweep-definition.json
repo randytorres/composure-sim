@@ -1,0 +1,24 @@
+{
+  "id": "campaign-fatigue-sweep",
+  "name": "Campaign Control Sweep",
+  "parameters": [
+    {
+      "name": "frequency_cap",
+      "values": [{"Int": 3}, {"Int": 5}, {"Int": 7}]
+    },
+    {
+      "name": "creative_refresh_week",
+      "values": [{"Int": 2}, {"Int": 3}, {"Int": 4}]
+    },
+    {
+      "name": "promo_depth",
+      "values": [{"Float": "0.050000000000"}, {"Float": "0.100000000000"}, {"Float": "0.150000000000"}]
+    }
+  ],
+  "strategy": "Random",
+  "sample_count": 6,
+  "seed": 202,
+  "metadata": {
+    "domain": "marketing"
+  }
+}

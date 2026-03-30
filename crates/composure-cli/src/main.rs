@@ -10,8 +10,8 @@ use composure_core::{
 };
 use render::{
     format_bundle, format_calibration, format_comparison, format_report, format_summary,
-    format_sweep, render_calibration_csv, render_calibration_markdown, render_report_markdown,
-    render_sweep_csv, render_sweep_markdown,
+    format_sweep, render_bundle_markdown, render_calibration_csv, render_calibration_markdown,
+    render_report_markdown, render_sweep_csv, render_sweep_markdown, render_sweep_summary_markdown,
 };
 use thiserror::Error;
 
@@ -39,9 +39,19 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let bundle = read_json::<ExperimentBundle>(path)?;
             Ok(format_bundle(&bundle))
         }
+        [_bin, command, path, tail @ ..] if command == "export-bundle-markdown" => {
+            let bundle = read_json::<ExperimentBundle>(path)?;
+            let output = render_bundle_markdown(&bundle);
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, command, path] if command == "inspect-sweep" => {
             let result = read_json::<SweepExecutionResult>(path)?;
             Ok(format_sweep(&result))
+        }
+        [_bin, command, path, tail @ ..] if command == "export-sweep-summary-markdown" => {
+            let result = read_json::<SweepExecutionResult>(path)?;
+            let output = render_sweep_summary_markdown(&result);
+            write_output(output, parse_output_flag(tail)?)
         }
         [_bin, command, path] if command == "inspect-summary" => {
             let summary = read_json::<RunSummary>(path)?;
@@ -149,7 +159,9 @@ fn usage() -> String {
     [
         "Usage:",
         "  composure inspect-bundle <path>",
+        "  composure export-bundle-markdown <path> [--output <path>]",
         "  composure inspect-sweep <path>",
+        "  composure export-sweep-summary-markdown <path> [--output <path>]",
         "  composure inspect-summary <path>",
         "  composure inspect-report <path>",
         "  composure export-report-markdown <path> [--output <path>]",
@@ -166,7 +178,9 @@ fn usage() -> String {
         "",
         "Commands:",
         "  inspect-bundle   Read an ExperimentBundle JSON artifact and print a summary",
+        "  export-bundle-markdown  Convert an ExperimentBundle JSON artifact into markdown",
         "  inspect-sweep    Read a SweepExecutionResult JSON artifact and print a summary",
+        "  export-sweep-summary-markdown  Convert a SweepExecutionResult JSON artifact into markdown summary",
         "  inspect-summary  Read a RunSummary JSON artifact and print a summary",
         "  inspect-report   Read a DeterministicReport JSON artifact and print a summary",
         "  export-report-markdown  Convert a DeterministicReport JSON artifact into markdown",
@@ -705,11 +719,32 @@ mod tests {
     }
 
     #[test]
+    fn test_render_bundle_markdown() {
+        let output = render_bundle_markdown(&sample_bundle());
+        assert!(output.contains("# Experiment Bundle: Baseline (exp-1)"));
+        assert!(output.contains("- Default Monte Carlo: `10 paths / 5 steps / seed 42`"));
+        assert!(output.contains("## Parameter Sets"));
+        assert!(output.contains("| variant-a | Variant A | 5 | 10 paths / 5 steps / seed 7 |"));
+        assert!(output.contains("## Runs"));
+        assert!(output.contains("| run-1 | Completed | variant-a | 7 | no | no |  |"));
+    }
+
+    #[test]
     fn test_format_sweep() {
         let output = format_sweep(&sample_sweep_result());
 
         assert!(output.contains("Strategy: Random"));
         assert!(output.contains("Top sensitivity: dose"));
+    }
+
+    #[test]
+    fn test_render_sweep_summary_markdown() {
+        let output = render_sweep_summary_markdown(&sample_sweep_result());
+        assert!(output.contains("# Sweep Summary: Sweep (sweep-1)"));
+        assert!(output.contains("| Best Case | Best Objective | Worst Case | Mean Objective |"));
+        assert!(output.contains("| sweep-1-1 | 0.6900 | sweep-1-1 | 0.6900 |"));
+        assert!(output.contains("| sweep-1-1 | 0.6900 | run-1 | variant-a | dose=2 |"));
+        assert!(output.contains("| dose | Positive | 0.9000 | numeric corr=0.9000, slope=0.5000 |"));
     }
 
     #[test]
@@ -809,7 +844,9 @@ mod tests {
         let output = run(&["composure".into(), "help".into()]).unwrap();
         assert!(output.contains("inspect-report"));
         assert!(output.contains("inspect-calibration"));
+        assert!(output.contains("export-bundle-markdown"));
         assert!(output.contains("export-report-markdown"));
+        assert!(output.contains("export-sweep-summary-markdown"));
         assert!(output.contains("export-sweep-samples"));
         assert!(output.contains("export-sweep-samples-markdown"));
         assert!(output.contains("export-calibration-candidates"));
@@ -1070,6 +1107,64 @@ mod tests {
         assert!(output.contains("Wrote artifact"));
         let written = fs::read_to_string(&output_path).unwrap();
         assert!(written.contains("# Deterministic Report"));
+
+        let _ = fs::remove_file(input_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_export_bundle_markdown_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let input_path = temp_dir.join("composure-cli-bundle-markdown-input.json");
+        let output_path = temp_dir.join("composure-cli-bundle-markdown-output.md");
+
+        fs::write(
+            &input_path,
+            serde_json::to_string(&sample_bundle()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "export-bundle-markdown".into(),
+            input_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("# Experiment Bundle: Baseline (exp-1)"));
+
+        let _ = fs::remove_file(input_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_export_sweep_summary_markdown_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let input_path = temp_dir.join("composure-cli-sweep-summary-md-input.json");
+        let output_path = temp_dir.join("composure-cli-sweep-summary-md-output.md");
+
+        fs::write(
+            &input_path,
+            serde_json::to_string(&sample_sweep_result()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "export-sweep-summary-markdown".into(),
+            input_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("# Sweep Summary: Sweep (sweep-1)"));
 
         let _ = fs::remove_file(input_path);
         let _ = fs::remove_file(output_path);

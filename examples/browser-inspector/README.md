@@ -25,3 +25,10 @@ Load one or more JSON artifacts with the file picker. Supported shapes:
 
 For sweep samples and calibration candidates, the inspector also exposes simple
 sort and filter controls directly in the browser.
+
+For a repo-local smoke pass that serves the inspector, loads representative
+artifacts, and checks the interactive tables:
+
+```bash
+./scripts/browser-inspector-smoke.sh
+```

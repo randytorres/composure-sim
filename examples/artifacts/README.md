@@ -20,6 +20,7 @@ cargo run -p composure-cli -- build-report \
   --comparison examples/artifacts/comparison.json \
   --output /tmp/report.json
 cargo run -p composure-cli -- inspect-bundle examples/artifacts/experiment-bundle.json
+cargo run -p composure-cli -- export-bundle-markdown examples/artifacts/experiment-bundle-with-output.json
 cargo run -p composure-cli -- summarize-bundle-run \
   examples/artifacts/experiment-bundle-with-output.json \
   run-1
@@ -28,6 +29,7 @@ cargo run -p composure-cli -- summarize-bundle-run \
   run-1 \
   --output /tmp/bundle-run-summary.json
 cargo run -p composure-cli -- inspect-sweep examples/artifacts/sweep-result.json
+cargo run -p composure-cli -- export-sweep-summary-markdown examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- export-sweep-samples examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- export-sweep-samples-markdown examples/artifacts/sweep-result.json
 cargo run -p composure-cli -- inspect-compare examples/artifacts/comparison.json
@@ -58,6 +60,8 @@ Generated export examples are also checked in:
 
 ```text
 examples/artifacts/report.md
+examples/artifacts/experiment-bundle.md
+examples/artifacts/sweep-summary.md
 examples/artifacts/sweep-samples.csv
 examples/artifacts/sweep-samples.md
 examples/artifacts/calibration-candidates.csv

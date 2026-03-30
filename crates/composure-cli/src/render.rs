@@ -343,6 +343,253 @@ pub(crate) fn render_report_markdown(report: &DeterministicReport) -> String {
     lines.join("\n")
 }
 
+pub(crate) fn render_bundle_markdown(bundle: &ExperimentBundle) -> String {
+    let completed = bundle
+        .runs
+        .iter()
+        .filter(|run| run.status == ExperimentRunStatus::Completed)
+        .count();
+    let failed = bundle
+        .runs
+        .iter()
+        .filter(|run| run.status == ExperimentRunStatus::Failed)
+        .count();
+    let running = bundle
+        .runs
+        .iter()
+        .filter(|run| run.status == ExperimentRunStatus::Running)
+        .count();
+    let pending = bundle
+        .runs
+        .iter()
+        .filter(|run| run.status == ExperimentRunStatus::Pending)
+        .count();
+
+    let mut lines = vec![
+        format!(
+            "# Experiment Bundle: {} ({})",
+            bundle.spec.name, bundle.spec.id
+        ),
+        String::new(),
+        format!(
+            "- Scenario: `{}` (`{}`)",
+            bundle.spec.scenario.name, bundle.spec.scenario.id
+        ),
+        format!(
+            "- Description: {}",
+            option_to_string(bundle.spec.description.clone())
+        ),
+        format!("- Time steps: `{}`", bundle.spec.scenario.time_steps),
+        format!(
+            "- Failure threshold: `{}`",
+            markdown_f64(bundle.spec.scenario.failure_threshold)
+        ),
+        format!(
+            "- Default Monte Carlo: `{}`",
+            bundle
+                .spec
+                .default_monte_carlo
+                .as_ref()
+                .map(format_monte_carlo_config)
+                .unwrap_or_else(|| "n/a".into())
+        ),
+        format!(
+            "- Tags: `{}`",
+            if bundle.spec.tags.is_empty() {
+                "n/a".into()
+            } else {
+                bundle.spec.tags.join(", ")
+            }
+        ),
+        format!("- Created at (unix s): `{}`", bundle.spec.created_at_unix_s),
+        format!("- Parameter sets: `{}`", bundle.parameter_sets.len()),
+        format!("- Runs: `{}`", bundle.runs.len()),
+        String::new(),
+        "## Run States".into(),
+        "| Completed | Failed | Running | Pending |".into(),
+        "| --- | --- | --- | --- |".into(),
+        format!("| {} | {} | {} | {} |", completed, failed, running, pending),
+        String::new(),
+        "## Parameter Sets".into(),
+    ];
+
+    if bundle.parameter_sets.is_empty() {
+        lines.push("No parameter sets recorded.".into());
+    } else {
+        lines.push("| ID | Name | Time Steps | Monte Carlo |".into());
+        lines.push("| --- | --- | --- | --- |".into());
+        for parameter_set in &bundle.parameter_sets {
+            lines.push(format!(
+                "| {} | {} | {} | {} |",
+                parameter_set.id,
+                parameter_set.name,
+                parameter_set.scenario.time_steps,
+                parameter_set
+                    .monte_carlo
+                    .as_ref()
+                    .map(format_monte_carlo_config)
+                    .unwrap_or_else(|| "n/a".into())
+            ));
+        }
+    }
+
+    lines.push(String::new());
+    lines.push("## Runs".into());
+
+    if bundle.runs.is_empty() {
+        lines.push("No runs recorded.".into());
+    } else {
+        lines.push(
+            "| Run ID | Status | Parameter Set | Seed | Monte Carlo | Composure | Error |".into(),
+        );
+        lines.push("| --- | --- | --- | --- | --- | --- | --- |".into());
+        for run in &bundle.runs {
+            let outcome = run.outcome.as_ref();
+            lines.push(format!(
+                "| {} | {:?} | {} | {} | {} | {} | {} |",
+                run.run_id,
+                run.status,
+                option_to_string(run.parameter_set_id.clone()),
+                option_to_string(run.seed),
+                bool_cell(
+                    outcome
+                        .and_then(|outcome| outcome.monte_carlo.as_ref())
+                        .is_some()
+                ),
+                bool_cell(
+                    outcome
+                        .and_then(|outcome| outcome.composure.as_ref())
+                        .is_some()
+                ),
+                option_to_string(run.error.clone())
+            ));
+        }
+    }
+
+    lines.join("\n")
+}
+
+pub(crate) fn render_sweep_summary_markdown(result: &SweepExecutionResult) -> String {
+    let best_case_id = result
+        .sensitivity
+        .as_ref()
+        .map(|report| report.objective.best_case_id.as_str())
+        .unwrap_or("n/a");
+    let best_objective = result
+        .samples
+        .iter()
+        .max_by(|a, b| {
+            a.objective
+                .partial_cmp(&b.objective)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
+        .map(|sample| sample.objective);
+
+    let mut ranked_samples = result.samples.iter().collect::<Vec<_>>();
+    ranked_samples.sort_by(|left, right| {
+        right
+            .objective
+            .partial_cmp(&left.objective)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    let mut lines = vec![
+        format!(
+            "# Sweep Summary: {} ({})",
+            result.definition.name, result.definition.id
+        ),
+        String::new(),
+        format!("- Strategy: `{:?}`", result.definition.strategy),
+        format!(
+            "- Configured samples: `{}`",
+            option_to_string(result.definition.sample_count)
+        ),
+        format!("- Seed: `{}`", option_to_string(result.definition.seed)),
+        format!("- Parameters: `{}`", result.definition.parameters.len()),
+        format!("- Executed cases: `{}`", result.executed_cases.len()),
+        format!("- Failures: `{}`", result.failures.len()),
+        format!("- Scored samples: `{}`", result.samples.len()),
+        format!("- Bundle attached: `{}`", result.bundle.is_some()),
+        String::new(),
+        "## Objective".into(),
+        "| Best Case | Best Objective | Worst Case | Mean Objective |".into(),
+        "| --- | --- | --- | --- |".into(),
+        format!(
+            "| {} | {} | {} | {} |",
+            best_case_id,
+            best_objective
+                .map(|value| format!("{value:.4}"))
+                .unwrap_or_else(|| "n/a".into()),
+            result
+                .sensitivity
+                .as_ref()
+                .map(|report| report.objective.worst_case_id.as_str())
+                .unwrap_or("n/a"),
+            result
+                .sensitivity
+                .as_ref()
+                .map(|report| format!("{:.4}", report.objective.mean))
+                .unwrap_or_else(|| "n/a".into())
+        ),
+        String::new(),
+        "## Top Samples".into(),
+    ];
+
+    if ranked_samples.is_empty() {
+        lines.push("No scored samples available.".into());
+    } else {
+        lines.push("| Case | Objective | Run | Parameter Set | Parameters |".into());
+        lines.push("| --- | --- | --- | --- | --- |".into());
+        for sample in ranked_samples.into_iter().take(5) {
+            lines.push(format!(
+                "| {} | {:.4} | {} | {} | {} |",
+                sample.case_id,
+                sample.objective,
+                metadata_string(sample.metadata.as_ref(), "run_id"),
+                metadata_string(sample.metadata.as_ref(), "parameter_set_id"),
+                format_parameter_map(&sample.parameters)
+            ));
+        }
+    }
+
+    lines.push(String::new());
+    lines.push("## Sensitivity Rankings".into());
+
+    match &result.sensitivity {
+        Some(report) if !report.rankings.is_empty() => {
+            lines.push("| Parameter | Direction | Score | Detail |".into());
+            lines.push("| --- | --- | --- | --- |".into());
+            for ranking in &report.rankings {
+                lines.push(format!(
+                    "| {} | {:?} | {:.4} | {} |",
+                    ranking.parameter,
+                    ranking.direction,
+                    ranking.score,
+                    format_sensitivity_kind(&ranking.kind)
+                ));
+            }
+        }
+        _ => lines.push("No sensitivity report attached.".into()),
+    }
+
+    if !result.failures.is_empty() {
+        lines.push(String::new());
+        lines.push("## Failures".into());
+        lines.push("| Case | Parameter Set | Error |".into());
+        lines.push("| --- | --- | --- |".into());
+        for failure in &result.failures {
+            lines.push(format!(
+                "| {} | {} | {} |",
+                failure.case.case_id,
+                option_to_string(failure.parameter_set_id.clone()),
+                failure.error
+            ));
+        }
+    }
+
+    lines.join("\n")
+}
+
 pub(crate) fn render_sweep_csv(result: &SweepExecutionResult) -> String {
     let best_case_id = result
         .sensitivity
@@ -654,6 +901,47 @@ fn parameter_string(value: Option<&ParameterValue>) -> String {
         Some(ParameterValue::Float(value)) => value.clone(),
         Some(ParameterValue::Text(value)) => value.clone(),
         None => String::new(),
+    }
+}
+
+fn format_parameter_map(parameters: &std::collections::BTreeMap<String, ParameterValue>) -> String {
+    parameters
+        .iter()
+        .map(|(name, value)| format!("{name}={}", parameter_string(Some(value))))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn format_monte_carlo_config(config: &composure_core::MonteCarloConfig) -> String {
+    format!(
+        "{} paths / {} steps / seed {}",
+        config.num_paths, config.time_steps, config.seed_base
+    )
+}
+
+fn format_sensitivity_kind(kind: &SensitivityKind) -> String {
+    match kind {
+        SensitivityKind::Numeric(stats) => {
+            format!(
+                "numeric corr={:.4}, slope={:.4}",
+                stats.correlation, stats.slope
+            )
+        }
+        SensitivityKind::Categorical(stats) => {
+            format!(
+                "categorical range={:.4}, buckets={}",
+                stats.range,
+                stats.buckets.len()
+            )
+        }
+    }
+}
+
+fn bool_cell(value: bool) -> &'static str {
+    if value {
+        "yes"
+    } else {
+        "no"
     }
 }
 

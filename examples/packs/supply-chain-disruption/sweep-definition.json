@@ -1,0 +1,24 @@
+{
+  "id": "supply-chain-sweep",
+  "name": "Recovery Policy Sweep",
+  "parameters": [
+    {
+      "name": "safety_stock_weeks",
+      "values": [{"Int": 2}, {"Int": 4}, {"Int": 6}]
+    },
+    {
+      "name": "expedite_budget_index",
+      "values": [{"Int": 1}, {"Int": 2}, {"Int": 3}]
+    },
+    {
+      "name": "alternate_supplier_enabled",
+      "values": [{"Bool": false}, {"Bool": true}]
+    }
+  ],
+  "strategy": "Grid",
+  "sample_count": null,
+  "seed": null,
+  "metadata": {
+    "domain": "supply_chain"
+  }
+}
