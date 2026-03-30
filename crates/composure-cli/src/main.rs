@@ -3,8 +3,8 @@ use std::{env, fs};
 use composure_calibration::CalibrationResult;
 use composure_core::{
     build_deterministic_report, compare_monte_carlo_results, summarize_run, ComparisonConfig,
-    DeterministicReport, ExperimentBundle, ExperimentRunStatus, MonteCarloResult, RunSummary,
-    SensitivityKind, SweepExecutionResult, TrajectoryComparison,
+    DeterministicReport, ExperimentBundle, ExperimentRunStatus, MonteCarloResult, ParameterValue,
+    RunSummary, SensitivityKind, SweepExecutionResult, TrajectoryComparison,
 };
 use thiserror::Error;
 
@@ -44,6 +44,11 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let report = read_json::<DeterministicReport>(path)?;
             Ok(format_report(&report))
         }
+        [_bin, command, path, tail @ ..] if command == "export-report-markdown" => {
+            let report = read_json::<DeterministicReport>(path)?;
+            let output = render_report_markdown(&report);
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, command, path, tail @ ..] if command == "summarize-monte-carlo" => {
             let result = read_json::<MonteCarloResult>(path)?;
             let summary = summarize_run(Some(&result), None);
@@ -54,9 +59,24 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let calibration = read_json::<CalibrationResult>(path)?;
             Ok(format_calibration(&calibration))
         }
+        [_bin, command, path, tail @ ..]
+            if command == "export-calibration-candidates"
+                || command == "export-calibration-csv" =>
+        {
+            let calibration = read_json::<CalibrationResult>(path)?;
+            let output = render_calibration_csv(&calibration);
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, command, path] if command == "inspect-compare" => {
             let comparison = read_json::<TrajectoryComparison>(path)?;
             Ok(format_comparison(&comparison))
+        }
+        [_bin, command, path, tail @ ..]
+            if command == "export-sweep-samples" || command == "export-sweep-csv" =>
+        {
+            let result = read_json::<SweepExecutionResult>(path)?;
+            let output = render_sweep_csv(&result);
+            write_output(output, parse_output_flag(tail)?)
         }
         [_bin, command, bundle_path, run_id, tail @ ..] if command == "summarize-bundle-run" => {
             let bundle = read_json::<ExperimentBundle>(bundle_path)?;
@@ -115,10 +135,13 @@ fn usage() -> String {
         "  composure inspect-sweep <path>",
         "  composure inspect-summary <path>",
         "  composure inspect-report <path>",
+        "  composure export-report-markdown <path> [--output <path>]",
         "  composure summarize-monte-carlo <path> [--output <path>]",
         "  composure summarize-bundle-run <bundle-path> <run-id> [--output <path>]",
         "  composure inspect-calibration <path>",
+        "  composure export-calibration-candidates <path> [--output <path>]",
         "  composure inspect-compare <path>",
+        "  composure export-sweep-samples <path> [--output <path>]",
         "  composure compare-monte-carlo <baseline-path> <candidate-path> [flags] [--output <path>]",
         "  composure build-report <baseline-summary-path> <candidate-summary-path> [--comparison <path>] [--output <path>]",
         "",
@@ -127,10 +150,13 @@ fn usage() -> String {
         "  inspect-sweep    Read a SweepExecutionResult JSON artifact and print a summary",
         "  inspect-summary  Read a RunSummary JSON artifact and print a summary",
         "  inspect-report   Read a DeterministicReport JSON artifact and print a summary",
+        "  export-report-markdown  Convert a DeterministicReport JSON artifact into markdown",
         "  summarize-monte-carlo  Convert a MonteCarloResult JSON artifact into a RunSummary JSON artifact",
         "  summarize-bundle-run   Extract and summarize one run from an ExperimentBundle JSON artifact",
         "  inspect-calibration  Read a CalibrationResult JSON artifact and print a summary",
+        "  export-calibration-candidates  Convert a CalibrationResult JSON artifact into CSV",
         "  inspect-compare  Read a TrajectoryComparison JSON artifact and print a summary",
+        "  export-sweep-samples  Convert a SweepExecutionResult JSON artifact into CSV",
         "  compare-monte-carlo  Compare two MonteCarloResult JSON artifacts and emit JSON",
         "  build-report   Build a DeterministicReport JSON artifact from two RunSummary artifacts",
         "",
@@ -522,6 +548,321 @@ fn format_delta(delta: &composure_core::SummaryDelta) -> String {
     )
 }
 
+fn render_report_markdown(report: &DeterministicReport) -> String {
+    let mut lines = vec![
+        "# Deterministic Report".into(),
+        "".into(),
+        "## Scalar Deltas".into(),
+        "| Metric | Baseline | Candidate | Delta |".into(),
+        "| --- | ---: | ---: | ---: |".into(),
+        format!(
+            "| Start | {} | {} | {} |",
+            markdown_f64(report.start_delta.baseline),
+            markdown_f64(report.start_delta.candidate),
+            markdown_f64(report.start_delta.delta)
+        ),
+        format!(
+            "| End | {} | {} | {} |",
+            markdown_f64(report.end_delta.baseline),
+            markdown_f64(report.end_delta.candidate),
+            markdown_f64(report.end_delta.delta)
+        ),
+        format!(
+            "| AUC | {} | {} | {} |",
+            markdown_f64(report.auc_delta.baseline),
+            markdown_f64(report.auc_delta.candidate),
+            markdown_f64(report.auc_delta.delta)
+        ),
+        format!(
+            "| Residual damage | {} | {} | {} |",
+            markdown_f64(report.residual_damage_delta.baseline),
+            markdown_f64(report.residual_damage_delta.candidate),
+            markdown_f64(report.residual_damage_delta.delta)
+        ),
+        "".into(),
+        "## Structural Changes".into(),
+        "| Metric | Baseline | Candidate | Change |".into(),
+        "| --- | --- | --- | --- |".into(),
+        format!(
+            "| Archetype | {} | {} | {} |",
+            markdown_debug(report.archetype_change.baseline),
+            markdown_debug(report.archetype_change.candidate),
+            if report.archetype_change.changed {
+                "changed"
+            } else {
+                "unchanged"
+            }
+        ),
+        format!(
+            "| Break point | {} | {} | {} |",
+            markdown_usize(report.break_point_shift.baseline),
+            markdown_usize(report.break_point_shift.candidate),
+            markdown_isize(report.break_point_shift.shift)
+        ),
+        format!(
+            "| Recovery half-life | {} | {} | {} |",
+            markdown_usize(report.recovery_shift.baseline),
+            markdown_usize(report.recovery_shift.candidate),
+            markdown_isize(report.recovery_shift.shift)
+        ),
+        format!(
+            "| Final percentile band | {} | {} | {} ({:?}) |",
+            markdown_f64(report.percentile_band_change.baseline),
+            markdown_f64(report.percentile_band_change.candidate),
+            markdown_f64(report.percentile_band_change.delta),
+            report.percentile_band_change.direction
+        ),
+        "".into(),
+        "## Comparison Snapshot".into(),
+    ];
+
+    match &report.comparison {
+        Some(comparison) => {
+            lines.extend([
+                "| Metric | Value |".into(),
+                "| --- | ---: |".into(),
+                format!("| Mean delta | {:.4} |", comparison.mean_delta),
+                format!("| Mean abs delta | {:.4} |", comparison.mean_abs_delta),
+                format!("| RMSE | {:.4} |", comparison.rmse),
+                format!("| End delta | {:.4} |", comparison.end_delta),
+                format!(
+                    "| Divergence start | {} |",
+                    markdown_usize(comparison.divergence_start_t)
+                ),
+                format!(
+                    "| Divergence end | {} |",
+                    markdown_usize(comparison.divergence_end_t)
+                ),
+                format!(
+                    "| Failure shift | {} |",
+                    markdown_isize(comparison.failure_shift)
+                ),
+            ]);
+        }
+        None => lines.push("No trajectory comparison attached.".into()),
+    }
+
+    lines.join("\n")
+}
+
+fn render_sweep_csv(result: &SweepExecutionResult) -> String {
+    let best_case_id = result
+        .sensitivity
+        .as_ref()
+        .map(|report| report.objective.best_case_id.as_str());
+    let parameter_names = collect_parameter_names(
+        result
+            .samples
+            .iter()
+            .map(|sample| &sample.parameters)
+            .collect::<Vec<_>>()
+            .as_slice(),
+    );
+
+    let mut rows = Vec::with_capacity(result.samples.len() + 1);
+    let mut header = vec![
+        "case_id".into(),
+        "is_best".into(),
+        "objective".into(),
+        "run_id".into(),
+        "parameter_set_id".into(),
+    ];
+    header.extend(parameter_names.iter().cloned());
+    rows.push(csv_row(&header));
+
+    for sample in &result.samples {
+        let mut fields = vec![
+            sample.case_id.clone(),
+            (best_case_id == Some(sample.case_id.as_str())).to_string(),
+            format!("{:.12}", sample.objective),
+            metadata_string(sample.metadata.as_ref(), "run_id"),
+            metadata_string(sample.metadata.as_ref(), "parameter_set_id"),
+        ];
+        fields.extend(
+            parameter_names
+                .iter()
+                .map(|name| parameter_string(sample.parameters.get(name))),
+        );
+        rows.push(csv_row(&fields));
+    }
+
+    rows.join("\n")
+}
+
+fn render_calibration_csv(result: &CalibrationResult) -> String {
+    let best_case_id = result.best_case_id.as_deref();
+    let best_parameter_set_id = result.best_parameter_set_id.as_deref();
+    let parameter_names = collect_parameter_names(
+        result
+            .candidates
+            .iter()
+            .map(|candidate| &candidate.case.parameters)
+            .collect::<Vec<_>>()
+            .as_slice(),
+    );
+
+    let mut rows = Vec::with_capacity(result.candidates.len() + 1);
+    let mut header = vec![
+        "rank".into(),
+        "is_best".into(),
+        "case_id".into(),
+        "parameter_set_id".into(),
+        "run_id".into(),
+        "score".into(),
+        "rmse".into(),
+        "mean_abs_delta".into(),
+        "end_delta".into(),
+        "divergence_start_t".into(),
+        "divergence_end_t".into(),
+        "failure_shift".into(),
+    ];
+    header.extend(parameter_names.iter().cloned());
+    rows.push(csv_row(&header));
+
+    for (index, candidate) in result.candidates.iter().enumerate() {
+        let is_best_case = best_case_id
+            .map(|id| id == candidate.case.case_id)
+            .unwrap_or(false);
+        let is_best_parameter_set = best_parameter_set_id
+            .map(|id| id == candidate.parameter_set.id)
+            .unwrap_or(false);
+        let is_best = match (best_case_id, best_parameter_set_id) {
+            (Some(_), Some(_)) => is_best_case && is_best_parameter_set,
+            (Some(_), None) => is_best_case,
+            (None, Some(_)) => is_best_parameter_set,
+            (None, None) => false,
+        };
+
+        let mut fields = vec![
+            (index + 1).to_string(),
+            is_best.to_string(),
+            candidate.case.case_id.clone(),
+            candidate.parameter_set.id.clone(),
+            candidate.run.run_id.clone(),
+            format!("{:.12}", candidate.score),
+            format!("{:.12}", candidate.comparison.metrics.rmse),
+            format!("{:.12}", candidate.comparison.metrics.mean_abs_delta),
+            format!("{:.12}", candidate.comparison.metrics.end_delta),
+            option_to_string(
+                candidate
+                    .report
+                    .comparison
+                    .as_ref()
+                    .and_then(|c| c.divergence_start_t),
+            ),
+            option_to_string(
+                candidate
+                    .report
+                    .comparison
+                    .as_ref()
+                    .and_then(|c| c.divergence_end_t),
+            ),
+            option_to_string(
+                candidate
+                    .report
+                    .comparison
+                    .as_ref()
+                    .and_then(|c| c.failure_shift),
+            ),
+        ];
+        fields.extend(
+            parameter_names
+                .iter()
+                .map(|name| parameter_string(candidate.case.parameters.get(name))),
+        );
+        rows.push(csv_row(&fields));
+    }
+
+    rows.join("\n")
+}
+
+fn collect_parameter_names(
+    parameter_sets: &[&std::collections::BTreeMap<String, ParameterValue>],
+) -> Vec<String> {
+    let mut names = std::collections::BTreeSet::new();
+    for parameters in parameter_sets {
+        names.extend(parameters.keys().cloned());
+    }
+    names.into_iter().collect()
+}
+
+fn metadata_string(metadata: Option<&serde_json::Value>, key: &str) -> String {
+    metadata
+        .and_then(|value| value.get(key))
+        .map(json_cell)
+        .unwrap_or_default()
+}
+
+fn parameter_string(value: Option<&ParameterValue>) -> String {
+    match value {
+        Some(ParameterValue::Bool(value)) => value.to_string(),
+        Some(ParameterValue::Int(value)) => value.to_string(),
+        Some(ParameterValue::Float(value)) => value.clone(),
+        Some(ParameterValue::Text(value)) => value.clone(),
+        None => String::new(),
+    }
+}
+
+fn csv_row(fields: &[String]) -> String {
+    fields
+        .iter()
+        .map(|field| csv_escape(field))
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+fn csv_escape(field: &str) -> String {
+    if field.contains([',', '"', '\n']) {
+        format!("\"{}\"", field.replace('"', "\"\""))
+    } else {
+        field.to_string()
+    }
+}
+
+fn json_cell(value: &serde_json::Value) -> String {
+    match value {
+        serde_json::Value::Null => String::new(),
+        serde_json::Value::Bool(value) => value.to_string(),
+        serde_json::Value::Number(value) => value.to_string(),
+        serde_json::Value::String(value) => value.clone(),
+        other => serde_json::to_string(other).unwrap_or_default(),
+    }
+}
+
+fn option_to_string<T>(value: Option<T>) -> String
+where
+    T: ToString,
+{
+    value.map(|value| value.to_string()).unwrap_or_default()
+}
+
+fn markdown_f64(value: Option<f64>) -> String {
+    value
+        .map(|value| format!("{value:.4}"))
+        .unwrap_or_else(|| "n/a".into())
+}
+
+fn markdown_usize(value: Option<usize>) -> String {
+    value
+        .map(|value| value.to_string())
+        .unwrap_or_else(|| "n/a".into())
+}
+
+fn markdown_isize(value: Option<isize>) -> String {
+    value
+        .map(|value| value.to_string())
+        .unwrap_or_else(|| "n/a".into())
+}
+
+fn markdown_debug<T>(value: Option<T>) -> String
+where
+    T: std::fmt::Debug,
+{
+    value
+        .map(|value| format!("{value:?}"))
+        .unwrap_or_else(|| "n/a".into())
+}
+
 #[derive(Debug, Error)]
 enum CliError {
     #[error("{0}")]
@@ -797,21 +1138,22 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_format_bundle() {
-        let output = format_bundle(&sample_bundle());
-        assert!(output.contains("Bundle: Baseline (exp-1)"));
-        assert!(output.contains("Parameter sets: 1"));
-        assert!(output.contains("completed=1"));
-    }
+    fn sample_sweep_result() -> SweepExecutionResult {
+        let mut parameters = BTreeMap::new();
+        parameters.insert("dose".into(), ParameterValue::Int(2));
 
-    #[test]
-    fn test_format_sweep() {
-        let output = format_sweep(&SweepExecutionResult {
+        SweepExecutionResult {
             definition: SweepDefinition {
                 id: "sweep-1".into(),
                 name: "Sweep".into(),
-                parameters: vec![],
+                parameters: vec![SweepParameter {
+                    name: "dose".into(),
+                    values: vec![
+                        ParameterValue::Int(1),
+                        ParameterValue::Int(2),
+                        ParameterValue::Int(3),
+                    ],
+                }],
                 strategy: composure_core::SweepStrategy::Random,
                 sample_count: Some(6),
                 seed: Some(7),
@@ -821,7 +1163,7 @@ mod tests {
             executed_cases: vec![composure_core::ExecutedSweepCase {
                 case: SweepCase {
                     case_id: "sweep-1-1".into(),
-                    parameters: BTreeMap::new(),
+                    parameters: parameters.clone(),
                 },
                 parameter_set: ExperimentParameterSet::new(
                     "variant-a",
@@ -848,18 +1190,34 @@ mod tests {
                     monte_carlo: None,
                     composure: None,
                 },
-                sample: None,
+                sample: Some(composure_core::SweepSample {
+                    case_id: "sweep-1-1".into(),
+                    parameters: parameters.clone(),
+                    objective: 0.69,
+                    metadata: Some(serde_json::json!({
+                        "run_id": "run-1",
+                        "parameter_set_id": "variant-a"
+                    })),
+                }),
             }],
             failures: vec![],
-            samples: vec![],
+            samples: vec![composure_core::SweepSample {
+                case_id: "sweep-1-1".into(),
+                parameters,
+                objective: 0.69,
+                metadata: Some(serde_json::json!({
+                    "run_id": "run-1",
+                    "parameter_set_id": "variant-a"
+                })),
+            }],
             sensitivity: Some(composure_core::SensitivityReport {
                 sample_count: 3,
                 objective: composure_core::ObjectiveSummary {
-                    min: 0.1,
-                    max: 0.8,
-                    mean: 0.4,
-                    best_case_id: "best".into(),
-                    worst_case_id: "worst".into(),
+                    min: 0.69,
+                    max: 0.69,
+                    mean: 0.69,
+                    best_case_id: "sweep-1-1".into(),
+                    worst_case_id: "sweep-1-1".into(),
                 },
                 rankings: vec![composure_core::ParameterSensitivity {
                     parameter: "dose".into(),
@@ -878,7 +1236,20 @@ mod tests {
                 sensitivity: SensitivityConfig::default(),
                 failure_mode: SweepFailureMode::Continue,
             },
-        });
+        }
+    }
+
+    #[test]
+    fn test_format_bundle() {
+        let output = format_bundle(&sample_bundle());
+        assert!(output.contains("Bundle: Baseline (exp-1)"));
+        assert!(output.contains("Parameter sets: 1"));
+        assert!(output.contains("completed=1"));
+    }
+
+    #[test]
+    fn test_format_sweep() {
+        let output = format_sweep(&sample_sweep_result());
 
         assert!(output.contains("Strategy: Random"));
         assert!(output.contains("Top sensitivity: dose"));
@@ -929,6 +1300,14 @@ mod tests {
     }
 
     #[test]
+    fn test_render_report_markdown() {
+        let output = render_report_markdown(&sample_report());
+        assert!(output.contains("# Deterministic Report"));
+        assert!(output.contains("| Start | 0.8400 | 0.8600 |"));
+        assert!(output.contains("## Comparison Snapshot"));
+    }
+
+    #[test]
     fn test_format_calibration() {
         let output = format_calibration(&sample_calibration_result());
         assert!(output.contains("Calibration: Dose Sweep (dose-sweep)"));
@@ -938,10 +1317,28 @@ mod tests {
     }
 
     #[test]
+    fn test_render_sweep_csv() {
+        let output = render_sweep_csv(&sample_sweep_result());
+        assert!(output.contains("case_id,is_best,objective,run_id,parameter_set_id,dose"));
+        assert!(output.contains("sweep-1-1,true,0.690000000000,run-1,variant-a,2"));
+    }
+
+    #[test]
+    fn test_render_calibration_csv() {
+        let output = render_calibration_csv(&sample_calibration_result());
+        assert!(output.contains("rank,is_best,case_id,parameter_set_id,run_id,score"));
+        assert!(output.contains("1,true,dose-sweep-1,ps-dose-sweep-1,calibration-run-1"));
+        assert!(output.contains(",3"));
+    }
+
+    #[test]
     fn test_run_help() {
         let output = run(&["composure".into(), "help".into()]).unwrap();
         assert!(output.contains("inspect-report"));
         assert!(output.contains("inspect-calibration"));
+        assert!(output.contains("export-report-markdown"));
+        assert!(output.contains("export-sweep-samples"));
+        assert!(output.contains("export-calibration-candidates"));
         assert!(output.contains("summarize-bundle-run"));
         assert!(output.contains("build-report"));
         assert!(output.contains("--output <path>"));
@@ -1171,6 +1568,93 @@ mod tests {
 
         let _ = fs::remove_file(baseline_path);
         let _ = fs::remove_file(candidate_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_export_report_markdown_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let input_path = temp_dir.join("composure-cli-report-markdown-input.json");
+        let output_path = temp_dir.join("composure-cli-report-markdown-output.md");
+
+        fs::write(
+            &input_path,
+            serde_json::to_string(&sample_report()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "export-report-markdown".into(),
+            input_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("# Deterministic Report"));
+
+        let _ = fs::remove_file(input_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_export_sweep_csv_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let input_path = temp_dir.join("composure-cli-sweep-csv-input.json");
+        let output_path = temp_dir.join("composure-cli-sweep-csv-output.csv");
+
+        fs::write(
+            &input_path,
+            serde_json::to_string(&sample_sweep_result()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "export-sweep-samples".into(),
+            input_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("case_id,is_best,objective,run_id,parameter_set_id,dose"));
+
+        let _ = fs::remove_file(input_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_export_calibration_csv_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let input_path = temp_dir.join("composure-cli-calibration-csv-input.json");
+        let output_path = temp_dir.join("composure-cli-calibration-csv-output.csv");
+
+        fs::write(
+            &input_path,
+            serde_json::to_string(&sample_calibration_result()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "export-calibration-candidates".into(),
+            input_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("rank,is_best,case_id,parameter_set_id,run_id,score"));
+
+        let _ = fs::remove_file(input_path);
         let _ = fs::remove_file(output_path);
     }
 
