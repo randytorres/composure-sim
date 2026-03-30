@@ -17,6 +17,8 @@ http://127.0.0.1:8000/examples/browser-inspector/
 Load one or more JSON artifacts with the file picker. Supported shapes:
 
 - `RunSummary`
+- `CounterfactualResult`
+- `CounterfactualDefinition`
 - `TrajectoryComparison`
 - `DeterministicReport`
 - `CalibrationResult`

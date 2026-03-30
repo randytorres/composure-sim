@@ -1,0 +1,177 @@
+{
+  "id": "campaign-fatigue-counterfactual",
+  "name": "Creative reset branch",
+  "description": "Pack-local counterfactual showing a mid-flight creative reset and pacing change",
+  "branch_state": {
+    "z": [0.55, 0.43, 0.41],
+    "m": [0.2, 0.28, 0.24],
+    "u": [0.18, 0.2, 0.22],
+    "t": 3
+  },
+  "baseline": {
+    "branch_id": "baseline",
+    "intervention_label": "Keep current cadence",
+    "actions": [
+      {
+        "dimension": 1,
+        "magnitude": 0.0,
+        "action_type": "Hold",
+        "metadata": {
+          "label": "no creative change"
+        }
+      },
+      {
+        "dimension": 1,
+        "magnitude": 0.0,
+        "action_type": "Hold",
+        "metadata": {
+          "label": "no creative change"
+        }
+      },
+      {
+        "dimension": 2,
+        "magnitude": 0.0,
+        "action_type": "Hold",
+        "metadata": {
+          "label": "no offer change"
+        }
+      },
+      {
+        "dimension": 1,
+        "magnitude": 0.0,
+        "action_type": "Hold",
+        "metadata": {
+          "label": "no pacing change"
+        }
+      }
+    ],
+    "conditional_actions": []
+  },
+  "candidate": {
+    "branch_id": "candidate",
+    "intervention_label": "Reset creative and pace frequency",
+    "actions": [
+      {
+        "dimension": 0,
+        "magnitude": 0.18,
+        "action_type": "Intervention",
+        "metadata": {
+          "label": "new awareness creative"
+        }
+      },
+      {
+        "dimension": 1,
+        "magnitude": 0.16,
+        "action_type": "Intervention",
+        "metadata": {
+          "label": "reduced frequency cap"
+        }
+      },
+      {
+        "dimension": 2,
+        "magnitude": 0.12,
+        "action_type": "Intervention",
+        "metadata": {
+          "label": "lighter promotional offer"
+        }
+      },
+      {
+        "dimension": 1,
+        "magnitude": 0.14,
+        "action_type": "Intervention",
+        "metadata": {
+          "label": "reinforce pacing"
+        }
+      }
+    ],
+    "conditional_actions": [
+      {
+        "id": "engagement-backstop",
+        "trigger": {
+          "kind": "health_index_below",
+          "threshold": 0.42
+        },
+        "action": {
+          "dimension": 1,
+          "magnitude": 0.12,
+          "action_type": "Intervention",
+          "metadata": {
+            "label": "automatic frequency clamp"
+          }
+        },
+        "delay_steps": 1,
+        "cooldown_steps": 2,
+        "priority": 1,
+        "max_fires": 1
+      }
+    ]
+  },
+  "config": {
+    "monte_carlo": {
+      "num_paths": 8,
+      "time_steps": 4,
+      "seed_base": 37
+    },
+    "execution": {
+      "retain_paths": true,
+      "analyze_composure": true
+    },
+    "comparison": {
+      "divergence_threshold": 0.06,
+      "sustained_steps": 1,
+      "equality_epsilon": 1e-9,
+      "failure_threshold": 0.4
+    },
+    "analysis_failure_threshold": 0.4
+  },
+  "runtime_model": {
+    "kind": "linear",
+    "dimensions": [
+      {
+        "drift": -0.004,
+        "action_gain": 0.06,
+        "memory_decay": 0.06,
+        "action_to_memory": 0.05,
+        "memory_to_state": 0.05,
+        "uncertainty_decay": 0.04,
+        "action_to_uncertainty": 0.2,
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      {
+        "drift": -0.006,
+        "action_gain": 0.08,
+        "memory_decay": 0.05,
+        "action_to_memory": 0.06,
+        "memory_to_state": 0.055,
+        "uncertainty_decay": 0.04,
+        "action_to_uncertainty": 0.2,
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      {
+        "drift": -0.005,
+        "action_gain": 0.07,
+        "memory_decay": 0.05,
+        "action_to_memory": 0.05,
+        "memory_to_state": 0.05,
+        "uncertainty_decay": 0.04,
+        "action_to_uncertainty": 0.2,
+        "min_value": 0.0,
+        "max_value": 1.0
+      }
+    ],
+    "action_type_scales": {
+      "intervention": 1.0,
+      "stressor_onset": 1.0,
+      "stressor_removal": 0.7,
+      "hold": 0.0,
+      "custom": {}
+    },
+    "noise_scale": 0.012,
+    "aggregate_weights": [0.25, 0.35, 0.4]
+  },
+  "metadata": {
+    "domain": "campaign"
+  }
+}

@@ -9,6 +9,16 @@ cargo run -p composure-cli -- export-report-markdown examples/artifacts/report.j
 cargo run -p composure-cli -- inspect-counterfactual examples/artifacts/counterfactual-definition.json
 cargo run -p composure-cli -- validate-counterfactual examples/artifacts/counterfactual-definition.json
 cargo run -p composure-cli -- run-counterfactual examples/artifacts/counterfactual-definition.json
+cargo run -p composure-cli -- inspect-counterfactual-result examples/artifacts/counterfactual-result.json
+cargo run -p composure-cli -- run-counterfactual \
+  examples/artifacts/counterfactual-definition.json \
+  --output /tmp/counterfactual-result.json
+cargo run -p composure-cli -- inspect-counterfactual-result /tmp/counterfactual-result.json
+cargo run -p composure-cli -- inspect-pack-counterfactual examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- run-pack-counterfactual \
+  examples/packs/health-recovery/pack.json \
+  --output /tmp/pack-counterfactual-result.json
+cargo run -p composure-cli -- inspect-counterfactual-result /tmp/pack-counterfactual-result.json
 cargo run -p composure-cli -- summarize-monte-carlo examples/artifacts/candidate-monte-carlo.json
 cargo run -p composure-cli -- summarize-monte-carlo \
   examples/artifacts/baseline-monte-carlo.json \
@@ -58,6 +68,12 @@ cargo run -p composure-cli -- compare-monte-carlo \
   examples/artifacts/candidate-monte-carlo.json \
   > /tmp/comparison.json
 ```
+
+`inspect-counterfactual-result` expects a saved `CounterfactualResult` JSON
+artifact. A checked-in example lives at
+`examples/artifacts/counterfactual-result.json`, and the examples above also
+show how to generate new results with either `run-counterfactual --output` or
+`run-pack-counterfactual --output`.
 
 Generated export examples are also checked in:
 

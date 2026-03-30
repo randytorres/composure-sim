@@ -5,17 +5,18 @@ use std::{env, fs};
 use composure_calibration::CalibrationResult;
 use composure_core::{
     build_deterministic_report, compare_monte_carlo_results, summarize_run, ComparisonConfig,
-    DeterministicReport, ExperimentBundle, ExperimentExecutionConfig, MonteCarloResult, RunSummary,
-    SweepExecutionResult, TrajectoryComparison,
+    CounterfactualResult, DeterministicReport, ExperimentBundle, ExperimentExecutionConfig,
+    MonteCarloResult, RunSummary, SweepExecutionResult, TrajectoryComparison,
 };
 use composure_runtime::{
     default_run_id, load_counterfactual, load_pack, load_pack_for_run,
-    run_counterfactual_definition, run_pack,
+    run_counterfactual_definition, run_pack, run_pack_counterfactual,
 };
 use render::{
-    format_bundle, format_calibration, format_comparison, format_report, format_summary,
-    format_sweep, render_bundle_markdown, render_calibration_csv, render_calibration_markdown,
-    render_report_markdown, render_sweep_csv, render_sweep_markdown, render_sweep_summary_markdown,
+    format_bundle, format_calibration, format_comparison, format_counterfactual_result,
+    format_report, format_summary, format_sweep, render_bundle_markdown, render_calibration_csv,
+    render_calibration_markdown, render_report_markdown, render_sweep_csv, render_sweep_markdown,
+    render_sweep_summary_markdown,
 };
 use thiserror::Error;
 
@@ -47,12 +48,24 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let counterfactual = load_counterfactual(path).map_err(CliError::CounterfactualSpec)?;
             Ok(counterfactual.summary())
         }
+        [_bin, command, path] if command == "inspect-counterfactual-result" => {
+            let result = read_json::<CounterfactualResult>(path)?;
+            Ok(format_counterfactual_result(&result))
+        }
         [_bin, command, path] if command == "validate-pack" => {
             let pack = load_pack(path).map_err(CliError::Pack)?;
             Ok(format!(
                 "Pack valid: {} ({})",
                 pack.definition.name, pack.definition.id
             ))
+        }
+        [_bin, command, path] if command == "inspect-pack-counterfactual" => {
+            let pack = load_pack(path).map_err(CliError::Pack)?;
+            let counterfactual = pack
+                .counterfactual_definition
+                .as_ref()
+                .ok_or(CliError::MissingPackCounterfactual)?;
+            Ok(counterfactual.summary())
         }
         [_bin, command, path] if command == "validate-counterfactual" => {
             let counterfactual = load_counterfactual(path).map_err(CliError::CounterfactualSpec)?;
@@ -70,6 +83,12 @@ fn run(args: &[String]) -> Result<String, CliError> {
             )
             .map_err(CliError::PackRun)?;
             let output = serde_json::to_string_pretty(&bundle).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "run-pack-counterfactual" => {
+            let pack = load_pack_for_run(path).map_err(CliError::Pack)?;
+            let result = run_pack_counterfactual(&pack).map_err(CliError::PackCounterfactualRun)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
             write_output(output, parse_output_flag(tail)?)
         }
         [_bin, command, path, tail @ ..] if command == "run-counterfactual" => {
@@ -204,9 +223,12 @@ fn usage() -> String {
         "Usage:",
         "  composure inspect-pack <path>",
         "  composure inspect-counterfactual <path>",
+        "  composure inspect-counterfactual-result <path>",
+        "  composure inspect-pack-counterfactual <path>",
         "  composure validate-pack <path>",
         "  composure validate-counterfactual <path>",
         "  composure run-pack <path> [--output <path>]",
+        "  composure run-pack-counterfactual <path> [--output <path>]",
         "  composure run-counterfactual <path> [--output <path>]",
         "  composure inspect-bundle <path>",
         "  composure export-bundle-markdown <path> [--output <path>]",
@@ -229,9 +251,12 @@ fn usage() -> String {
         "Commands:",
         "  inspect-pack   Read a pack directory or manifest and print a compiled summary",
         "  inspect-counterfactual   Read a CounterfactualDefinition JSON artifact and print a summary",
+        "  inspect-counterfactual-result   Read a CounterfactualResult JSON artifact and print a summary",
+        "  inspect-pack-counterfactual   Resolve and print the pack-managed counterfactual summary",
         "  validate-pack  Validate a pack directory or manifest and its referenced artifacts",
         "  validate-counterfactual  Validate a CounterfactualDefinition JSON artifact",
         "  run-pack  Execute a pack with its built-in runtime model and emit an ExperimentBundle artifact",
+        "  run-pack-counterfactual  Execute a pack-managed counterfactual definition and emit a CounterfactualResult artifact",
         "  run-counterfactual  Execute a CounterfactualDefinition JSON artifact and emit a CounterfactualResult artifact",
         "  inspect-bundle   Read an ExperimentBundle JSON artifact and print a summary",
         "  export-bundle-markdown  Convert an ExperimentBundle JSON artifact into markdown",
@@ -418,6 +443,8 @@ enum CliError {
     RunNotFound { bundle_path: String, run_id: String },
     #[error("run {run_id} in bundle {bundle_path} does not have an outcome")]
     MissingRunOutcome { bundle_path: String, run_id: String },
+    #[error("pack does not define a counterfactual_definition")]
+    MissingPackCounterfactual,
     #[error("missing value for flag {0}")]
     MissingFlagValue(String),
     #[error("unknown flag {0}")]
@@ -430,6 +457,8 @@ enum CliError {
     Pack(composure_runtime::PackError),
     #[error("pack execution error: {0}")]
     PackRun(composure_runtime::PackRunError),
+    #[error("pack counterfactual execution error: {0}")]
+    PackCounterfactualRun(composure_runtime::PackCounterfactualRunError),
     #[error("counterfactual spec error: {0}")]
     CounterfactualSpec(composure_runtime::CounterfactualSpecError),
     #[error("counterfactual execution error: {0}")]
@@ -1460,6 +1489,19 @@ mod tests {
         path
     }
 
+    fn write_sample_pack_with_counterfactual(dir: &std::path::Path) {
+        write_sample_pack(dir);
+        write_sample_counterfactual(dir);
+        let mut manifest: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(dir.join("pack.json")).unwrap()).unwrap();
+        manifest["counterfactual_definition"] = serde_json::json!("counterfactual.json");
+        fs::write(
+            dir.join("pack.json"),
+            serde_json::to_string_pretty(&manifest).unwrap(),
+        )
+        .unwrap();
+    }
+
     #[test]
     fn test_run_inspect_pack_outputs_summary() {
         let dir = temp_pack_dir("inspect-pack");
@@ -1493,6 +1535,21 @@ mod tests {
     }
 
     #[test]
+    fn test_run_inspect_pack_shows_counterfactual_presence() {
+        let dir = temp_pack_dir("inspect-pack-with-counterfactual");
+        write_sample_pack_with_counterfactual(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "inspect-pack".into(),
+            dir.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Counterfactual definition: yes"));
+    }
+
+    #[test]
     fn test_run_inspect_counterfactual_outputs_summary() {
         let dir = temp_pack_dir("inspect-counterfactual");
         let path = write_sample_counterfactual(&dir);
@@ -1522,6 +1579,50 @@ mod tests {
         .unwrap();
 
         assert_eq!(output, "Counterfactual valid: Recovery branch (cf-1)");
+    }
+
+    #[test]
+    fn test_run_inspect_counterfactual_result_outputs_summary() {
+        let dir = temp_pack_dir("inspect-counterfactual-result");
+        let path = write_sample_counterfactual(&dir);
+        let result_path = dir.join("counterfactual-result.json");
+
+        let output = run(&[
+            "composure".into(),
+            "run-counterfactual".into(),
+            path.display().to_string(),
+            "--output".into(),
+            result_path.display().to_string(),
+        ])
+        .unwrap();
+        assert!(output.contains("Wrote artifact"));
+
+        let inspect = run(&[
+            "composure".into(),
+            "inspect-counterfactual-result".into(),
+            result_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(inspect.contains("Counterfactual result:"));
+        assert!(inspect.contains("Baseline summary:"));
+        assert!(inspect.contains("Candidate summary:"));
+    }
+
+    #[test]
+    fn test_run_inspect_pack_counterfactual_outputs_summary() {
+        let dir = temp_pack_dir("inspect-pack-counterfactual");
+        write_sample_pack_with_counterfactual(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "inspect-pack-counterfactual".into(),
+            dir.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Counterfactual: Recovery branch (cf-1)"));
+        assert!(output.contains("Baseline: No change (baseline)"));
     }
 
     #[test]
@@ -1562,6 +1663,63 @@ mod tests {
         let result: composure_core::CounterfactualResult = serde_json::from_str(&written).unwrap();
         assert_eq!(result.baseline.branch_id, "baseline");
         assert_eq!(result.candidate.branch_id, "candidate");
+    }
+
+    #[test]
+    fn test_run_run_pack_counterfactual_outputs_json() {
+        let dir = temp_pack_dir("run-pack-counterfactual");
+        write_sample_pack_with_counterfactual(&dir);
+
+        let output = run(&[
+            "composure".into(),
+            "run-pack-counterfactual".into(),
+            dir.display().to_string(),
+        ])
+        .unwrap();
+
+        let result: composure_core::CounterfactualResult = serde_json::from_str(&output).unwrap();
+        assert_eq!(result.baseline.branch_id, "baseline");
+        assert_eq!(result.candidate.branch_id, "candidate");
+        assert!(result.comparison.metrics.end_delta > 0.0);
+    }
+
+    #[test]
+    fn test_run_run_pack_counterfactual_writes_output_file() {
+        let dir = temp_pack_dir("run-pack-counterfactual-output");
+        write_sample_pack_with_counterfactual(&dir);
+        let output_path = dir.join("pack-counterfactual-result.json");
+
+        let output = run(&[
+            "composure".into(),
+            "run-pack-counterfactual".into(),
+            dir.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        let result: composure_core::CounterfactualResult = serde_json::from_str(&written).unwrap();
+        assert_eq!(result.baseline.branch_id, "baseline");
+        assert_eq!(result.candidate.branch_id, "candidate");
+    }
+
+    #[test]
+    fn test_run_run_pack_counterfactual_requires_counterfactual_definition() {
+        let dir = temp_pack_dir("run-pack-counterfactual-missing");
+        write_sample_pack(&dir);
+
+        let err = run(&[
+            "composure".into(),
+            "run-pack-counterfactual".into(),
+            dir.display().to_string(),
+        ])
+        .unwrap_err();
+
+        assert!(err
+            .to_string()
+            .contains("pack does not define a counterfactual_definition"));
     }
 
     #[test]

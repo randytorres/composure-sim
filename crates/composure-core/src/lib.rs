@@ -63,10 +63,14 @@ pub use experiment::{
 };
 pub use monte_carlo::{
     run_monte_carlo, run_monte_carlo_checked, run_scenario_monte_carlo,
-    run_scenario_monte_carlo_checked, MonteCarloConfig, MonteCarloError, MonteCarloResult,
-    PathResult,
+    run_scenario_monte_carlo_checked, ConditionalActionState, MonteCarloConfig, MonteCarloError,
+    MonteCarloResult, PathResult, ScheduledConditionalAction,
 };
-pub use replay::{EventEntry, EventKind, EventLog, ReplayRun, StateSnapshot};
+pub use replay::{
+    run_replay_counterfactual, run_scenario_replay, run_scenario_replay_checked, EventEntry,
+    EventKind, EventLog, ReplayContinuation, ReplayCounterfactualConfig, ReplayCounterfactualError,
+    ReplayError, ReplayRun, StateSnapshot,
+};
 pub use report::{
     build_deterministic_report, ArchetypeChange, BandChangeDirection, BreakPointShift,
     ComparisonSnapshot, DeterministicReport, PercentileBandChange, RecoveryShift, SummaryDelta,

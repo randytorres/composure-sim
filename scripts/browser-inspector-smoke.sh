@@ -5,8 +5,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOST="${HOST:-127.0.0.1}"
 PORT="${PORT:-43123}"
 URL="http://${HOST}:${PORT}/examples/browser-inspector/"
-SESSION="${PLAYWRIGHT_CLI_SESSION:-composure-browser-smoke-$$_${RANDOM:-0}}"
+SESSION="${PLAYWRIGHT_CLI_SESSION:-composure-browser-smoke-$(date +%s)-${RANDOM:-0}}"
 SERVER_LOG="$(mktemp -t composure-browser-inspector.XXXXXX.log)"
+COUNTERFACTUAL_RESULT_PATH="$(mktemp "${TMPDIR:-/tmp}/composure-counterfactual-result.XXXXXX.json")"
 
 export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 export PWCLI="${PWCLI:-$CODEX_HOME/skills/playwright/scripts/playwright_cli.sh}"
@@ -23,6 +24,11 @@ fi
 
 if ! command -v curl >/dev/null 2>&1; then
   echo "curl is required to poll the local browser inspector server." >&2
+  exit 1
+fi
+
+if ! command -v cargo >/dev/null 2>&1; then
+  echo "cargo is required to generate the counterfactual smoke artifact." >&2
   exit 1
 fi
 
@@ -56,6 +62,7 @@ cleanup() {
 
   rm -rf "$ROOT_DIR/.playwright-cli"
   rm -f "$SERVER_LOG"
+  rm -f "$COUNTERFACTUAL_RESULT_PATH"
   exit "$exit_code"
 }
 
@@ -77,8 +84,18 @@ if ! curl -fsS "$URL" >/dev/null 2>&1; then
   exit 1
 fi
 
+cargo run -q -p composure-cli -- run-counterfactual \
+  "$ROOT_DIR/examples/artifacts/counterfactual-definition.json" \
+  --output "$COUNTERFACTUAL_RESULT_PATH"
+
+find "${TMPDIR:-/tmp}/playwright-cli" -type s \
+  \( -name "$SESSION" -o -name "$SESSION.sock" -o -name "$SESSION.*" \) \
+  -delete 2>/dev/null || true
+
 artifacts=(
   "$ROOT_DIR/examples/artifacts/run-summary.json"
+  "$ROOT_DIR/examples/artifacts/counterfactual-definition.json"
+  "$COUNTERFACTUAL_RESULT_PATH"
   "$ROOT_DIR/examples/artifacts/report.json"
   "$ROOT_DIR/examples/artifacts/calibration-result.json"
   "$ROOT_DIR/examples/artifacts/experiment-bundle-with-output.json"
@@ -87,10 +104,15 @@ artifacts=(
 
 expected_text=(
   "RunSummary"
+  "CounterfactualDefinition"
+  "CounterfactualResult"
   "DeterministicReport"
   "CalibrationResult"
   "ExperimentBundle"
   "SweepExecutionResult"
+  "Counterfactual Setup"
+  "Counterfactual Overview"
+  "Runtime Model"
   "Calibration Candidates"
   "Scored Samples"
   "Bundle Overview"
@@ -121,6 +143,8 @@ for (const expected of expectedText) {
 const badgeText = await page.locator(".badge").allInnerTexts();
 for (const expected of [
   "RunSummary",
+  "CounterfactualDefinition",
+  "CounterfactualResult",
   "DeterministicReport",
   "CalibrationResult",
   "ExperimentBundle",

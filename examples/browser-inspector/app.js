@@ -4,6 +4,8 @@ const resultsNode = document.querySelector("#results");
 
 const ARTIFACT_TYPES = {
   RUN_SUMMARY: "RunSummary",
+  COUNTERFACTUAL_RESULT: "CounterfactualResult",
+  COUNTERFACTUAL_DEFINITION: "CounterfactualDefinition",
   TRAJECTORY_COMPARISON: "TrajectoryComparison",
   DETERMINISTIC_REPORT: "DeterministicReport",
   CALIBRATION_RESULT: "CalibrationResult",
@@ -50,6 +52,29 @@ async function readArtifactFile(file) {
 function detectArtifactType(data) {
   if (!isObject(data)) {
     return null;
+  }
+
+  if (
+    isObject(data.baseline) &&
+    isObject(data.candidate) &&
+    isObject(data.comparison) &&
+    isObject(data.report) &&
+    isObject(data.baseline.summary) &&
+    isObject(data.candidate.summary)
+  ) {
+    return ARTIFACT_TYPES.COUNTERFACTUAL_RESULT;
+  }
+
+  if (
+    typeof data.id === "string" &&
+    typeof data.name === "string" &&
+    isObject(data.branch_state) &&
+    isObject(data.baseline) &&
+    isObject(data.candidate) &&
+    isObject(data.config) &&
+    isObject(data.runtime_model)
+  ) {
+    return ARTIFACT_TYPES.COUNTERFACTUAL_DEFINITION;
   }
 
   if (
@@ -125,7 +150,7 @@ function renderArtifactCard(fileName, artifactType, data) {
   if (!artifactType) {
     body.innerHTML = `
       <p class="error">This JSON does not match one of the supported composure artifact shapes.</p>
-      <div class="callout">Expected a RunSummary, TrajectoryComparison, DeterministicReport, CalibrationResult, ExperimentBundle, or SweepExecutionResult artifact.</div>
+      <div class="callout">Expected a RunSummary, CounterfactualResult, CounterfactualDefinition, TrajectoryComparison, DeterministicReport, CalibrationResult, ExperimentBundle, or SweepExecutionResult artifact.</div>
     `;
   } else {
     body.appendChild(renderArtifactBody(artifactType, data));
@@ -139,6 +164,10 @@ function renderArtifactBody(artifactType, data) {
   switch (artifactType) {
     case ARTIFACT_TYPES.RUN_SUMMARY:
       return renderRunSummary(data);
+    case ARTIFACT_TYPES.COUNTERFACTUAL_RESULT:
+      return renderCounterfactualResult(data);
+    case ARTIFACT_TYPES.COUNTERFACTUAL_DEFINITION:
+      return renderCounterfactualDefinition(data);
     case ARTIFACT_TYPES.TRAJECTORY_COMPARISON:
       return renderTrajectoryComparison(data);
     case ARTIFACT_TYPES.DETERMINISTIC_REPORT:
@@ -199,6 +228,191 @@ function renderRunSummary(summary) {
         ${metric("Residual Damage", num(composure.residual_damage))}
         ${metric("Break Point", fmt(composure.break_point))}
       </div>
+    `));
+  }
+
+  return wrapper;
+}
+
+function renderCounterfactualResult(result) {
+  const comparisonMetrics = result.comparison?.metrics || {};
+  const divergence = result.comparison?.divergence;
+  const wrapper = document.createElement("div");
+  wrapper.className = "section";
+
+  wrapper.appendChild(section("Counterfactual Overview", `
+    <div class="grid">
+      ${metric("Baseline", labelPair(result.baseline?.intervention_label, result.baseline?.branch_id))}
+      ${metric("Candidate", labelPair(result.candidate?.intervention_label, result.candidate?.branch_id))}
+      ${metric("Branch From t", fmt(result.baseline?.branch_from_t ?? result.candidate?.branch_from_t))}
+      ${metric("End Delta", num(comparisonMetrics.end_delta))}
+      ${metric("RMSE", num(comparisonMetrics.rmse))}
+      ${metric("Improved Steps", fmt(comparisonMetrics.improved_steps))}
+      ${metric("Regressed Steps", fmt(comparisonMetrics.regressed_steps))}
+      ${metric("Failure Shift", fmt(result.report?.comparison?.failure_shift))}
+      ${metric("Divergence Window", divergence ? `${fmt(divergence.start_t)}-${fmt(divergence.end_t)}` : "none")}
+    </div>
+  `));
+
+  wrapper.appendChild(htmlBlock(`
+    <div class="callout ${comparisonMetrics.end_delta >= 0 ? "good" : "bad"}">
+      ${escapeHtml(buildComparisonHeadline(comparisonMetrics))}
+    </div>
+  `));
+
+  wrapper.appendChild(renderCounterfactualBranchSection("Baseline Branch", result.baseline));
+  wrapper.appendChild(renderCounterfactualBranchSection("Candidate Branch", result.candidate));
+  wrapper.appendChild(renderTrajectoryComparison(result.comparison));
+  wrapper.appendChild(renderDeterministicReport(result.report));
+  return wrapper;
+}
+
+function renderCounterfactualBranchSection(title, branch) {
+  const summary = branch?.summary || {};
+  const monteCarlo = summary.monte_carlo;
+  const composure = summary.composure;
+
+  return section(title, `
+    <div class="grid">
+      ${metric("Branch", labelPair(branch?.intervention_label, branch?.branch_id))}
+      ${metric("From t", fmt(branch?.branch_from_t))}
+      ${metric("Paths", fmt(monteCarlo?.num_paths))}
+      ${metric("Time Steps", fmt(monteCarlo?.time_steps))}
+      ${metric("Start", num(monteCarlo?.start))}
+      ${metric("End", num(monteCarlo?.end))}
+      ${metric("AUC", num(monteCarlo?.auc))}
+      ${metric("Archetype", fmt(composure?.archetype))}
+      ${metric("Slope", num(composure?.slope))}
+      ${metric("Band Width", num(monteCarlo?.final_band_width))}
+    </div>
+  `);
+}
+
+function renderCounterfactualDefinition(definition) {
+  const branchState = definition.branch_state || {};
+  const baseline = definition.baseline || {};
+  const candidate = definition.candidate || {};
+  const config = definition.config || {};
+  const runtimeModel = definition.runtime_model || {};
+  const conditionalRules = [
+    ...collectConditionalRules("Baseline", baseline.conditional_actions),
+    ...collectConditionalRules("Candidate", candidate.conditional_actions),
+  ];
+  const runtimeDimensions = Array.isArray(runtimeModel.dimensions) ? runtimeModel.dimensions.slice(0, 4) : [];
+  const wrapper = document.createElement("div");
+  wrapper.className = "section";
+
+  wrapper.appendChild(section("Counterfactual Setup", `
+    <div class="grid">
+      ${metric("Definition", labelPair(definition.name, definition.id))}
+      ${metric("Branch State t", fmt(branchState.t))}
+      ${metric("State Dimensions", fmt(branchState.z?.length))}
+      ${metric("Baseline", labelPair(baseline.intervention_label, baseline.branch_id))}
+      ${metric("Candidate", labelPair(candidate.intervention_label, candidate.branch_id))}
+      ${metric("Paths", fmt(config.monte_carlo?.num_paths))}
+      ${metric("Time Steps", fmt(config.monte_carlo?.time_steps))}
+      ${metric("Failure Threshold", num(config.comparison?.failure_threshold))}
+      ${metric("Divergence Threshold", num(config.comparison?.divergence_threshold))}
+      ${metric("Retain Paths", boolLabel(config.execution?.retain_paths))}
+      ${metric("Analyze Composure", boolLabel(config.execution?.analyze_composure))}
+      ${metric("Runtime Model", fmt(runtimeModel.kind))}
+    </div>
+  `));
+
+  if (definition.description) {
+    wrapper.appendChild(htmlBlock(`
+      <div class="callout">
+        ${escapeHtml(definition.description)}
+      </div>
+    `));
+  }
+
+  wrapper.appendChild(section("Branch State", `
+    <div class="grid">
+      ${metric("z", arrayPreview(branchState.z))}
+      ${metric("m", arrayPreview(branchState.m))}
+      ${metric("u", arrayPreview(branchState.u))}
+    </div>
+  `));
+
+  wrapper.appendChild(section("Branch Inputs", `
+    <table>
+      <thead>
+        <tr>
+          <th>Branch</th>
+          <th>Label</th>
+          <th>Actions</th>
+          <th>Conditional Rules</th>
+          <th>Action Mix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Baseline</td>
+          <td>${escapeHtml(labelPair(baseline.intervention_label, baseline.branch_id))}</td>
+          <td>${escapeHtml(fmt(baseline.actions?.length))}</td>
+          <td>${escapeHtml(fmt(baseline.conditional_actions?.length))}</td>
+          <td>${escapeHtml(actionTypeSummary(baseline.actions))}</td>
+        </tr>
+        <tr>
+          <td>Candidate</td>
+          <td>${escapeHtml(labelPair(candidate.intervention_label, candidate.branch_id))}</td>
+          <td>${escapeHtml(fmt(candidate.actions?.length))}</td>
+          <td>${escapeHtml(fmt(candidate.conditional_actions?.length))}</td>
+          <td>${escapeHtml(actionTypeSummary(candidate.actions))}</td>
+        </tr>
+      </tbody>
+    </table>
+  `));
+
+  if (conditionalRules.length) {
+    const rows = conditionalRules.slice(0, 6).map((rule) => `
+      <div class="list-row">
+        <strong>${escapeHtml(rule.branch)} · ${escapeHtml(rule.id)}</strong>
+        <div>${escapeHtml(rule.summary)}</div>
+      </div>
+    `).join("");
+    wrapper.appendChild(section("Conditional Rules", `<div class="list">${rows}</div>`));
+  }
+
+  wrapper.appendChild(section("Runtime Model", `
+    <div class="grid">
+      ${metric("Dimensions", fmt(runtimeModel.dimensions?.length))}
+      ${metric("Noise Scale", num(runtimeModel.noise_scale))}
+      ${metric("Aggregate Weights", arrayPreview(runtimeModel.aggregate_weights))}
+      ${metric("Intervention Scale", num(runtimeModel.action_type_scales?.intervention))}
+      ${metric("Stressor Onset Scale", num(runtimeModel.action_type_scales?.stressor_onset))}
+      ${metric("Hold Scale", num(runtimeModel.action_type_scales?.hold))}
+      ${metric("Custom Action Types", fmt(Object.keys(runtimeModel.action_type_scales?.custom || {}).length))}
+    </div>
+  `));
+
+  if (runtimeDimensions.length) {
+    const rows = runtimeDimensions.map((dimension, index) => `
+      <tr>
+        <td>${escapeHtml(fmt(index))}</td>
+        <td>${escapeHtml(num(dimension.drift))}</td>
+        <td>${escapeHtml(num(dimension.action_gain))}</td>
+        <td>${escapeHtml(num(dimension.memory_decay))}</td>
+        <td>${escapeHtml(num(dimension.memory_to_state))}</td>
+        <td>${escapeHtml(num(dimension.min_value))}-${escapeHtml(num(dimension.max_value))}</td>
+      </tr>
+    `).join("");
+
+    wrapper.appendChild(section("Runtime Dimensions", `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Drift</th>
+            <th>Action Gain</th>
+            <th>Memory Decay</th>
+            <th>Memory To State</th>
+            <th>Clamp</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
     `));
   }
 
@@ -909,6 +1123,18 @@ function buildComparisonHeadline(metricsData) {
   return `Candidate finishes ${direction} baseline by ${num(metricsData.end_delta)} with RMSE ${num(metricsData.rmse)}.`;
 }
 
+function collectConditionalRules(branchLabel, rules) {
+  if (!Array.isArray(rules)) {
+    return [];
+  }
+
+  return rules.map((rule, index) => ({
+    branch: branchLabel,
+    id: fmt(rule?.id || `${branchLabel.toLowerCase()}-rule-${index + 1}`),
+    summary: `${triggerSummary(rule?.trigger)} -> ${actionSummary(rule?.action)} · ${ruleWindowSummary(rule)}`,
+  }));
+}
+
 function pointSummary(point) {
   if (!isObject(point)) {
     return "n/a";
@@ -958,6 +1184,39 @@ function parameterSummary(parameters) {
   return details === "n/a" ? "No parameter details available." : `Parameters: ${details}`;
 }
 
+function arrayPreview(values, maxItems = 4) {
+  if (!Array.isArray(values) || !values.length) {
+    return "n/a";
+  }
+  const preview = values.slice(0, maxItems).map((value) => (
+    typeof value === "number" ? num(value) : fmt(value)
+  ));
+  return values.length > maxItems ? `${preview.join(", ")}, ...` : preview.join(", ");
+}
+
+function boolLabel(value) {
+  if (value === null || value === undefined) {
+    return "n/a";
+  }
+  return value ? "yes" : "no";
+}
+
+function actionTypeSummary(actions) {
+  if (!Array.isArray(actions) || !actions.length) {
+    return "none";
+  }
+
+  const counts = new Map();
+  for (const action of actions) {
+    const actionType = fmt(action?.action_type);
+    counts.set(actionType, (counts.get(actionType) || 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .map(([actionType, count]) => `${actionType} x${count}`)
+    .join(", ");
+}
+
 function parameterDetails(parameters) {
   if (!isObject(parameters)) {
     return "n/a";
@@ -978,6 +1237,36 @@ function renderParameterValue(value) {
     return JSON.stringify(value);
   }
   return fmt(value);
+}
+
+function triggerSummary(trigger) {
+  if (!isObject(trigger)) {
+    return "trigger n/a";
+  }
+
+  const details = Object.entries(trigger)
+    .filter(([key]) => key !== "kind")
+    .map(([key, value]) => `${key}=${fmt(value)}`);
+  return details.length ? `${fmt(trigger.kind)} (${details.join(", ")})` : fmt(trigger.kind);
+}
+
+function actionSummary(action) {
+  if (!isObject(action)) {
+    return "action n/a";
+  }
+  return `${fmt(action.action_type)} dim=${fmt(action.dimension)} mag=${num(action.magnitude)}`;
+}
+
+function ruleWindowSummary(rule) {
+  if (!isObject(rule)) {
+    return "delay=n/a";
+  }
+  return [
+    `delay=${fmt(rule.delay_steps)}`,
+    `cooldown=${fmt(rule.cooldown_steps)}`,
+    `priority=${fmt(rule.priority)}`,
+    `max=${fmt(rule.max_fires)}`,
+  ].join(", ");
 }
 
 function countRunStatuses(runs) {

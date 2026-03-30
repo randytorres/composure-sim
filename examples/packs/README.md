@@ -8,6 +8,7 @@ Each pack includes:
 - `pack.json`
 - `scenario.json`
 - `experiment-spec.json`
+- `counterfactual-definition.json`
 - `sweep-definition.json`
 - `observed-trajectory.json`
 - `README.md`
@@ -31,12 +32,15 @@ Typical flow for any pack:
    `runtime_model` in `pack.json`.
    `scenario.json` can also include `conditional_actions`, and `run-pack` will
    execute them through the same scenario-aware Monte Carlo path used in core.
-4. Load `experiment-spec.json` into `ExperimentSpec`.
-5. Load `sweep-definition.json` into `SweepDefinition`.
-6. Load `observed-trajectory.json` into `ObservedTrajectory`.
-7. Map each `SweepCase` into an `ExperimentParameterSet` inside your domain adapter.
-8. Run `execute_experiment_sweep` and/or `calibrate_experiment`.
-9. Inspect the resulting artifacts with the `composure` CLI or the browser inspector.
+4. Run `composure inspect-pack-counterfactual path/to/pack.json`.
+5. Run `composure run-pack-counterfactual path/to/pack.json --output /tmp/counterfactual-result.json`.
+6. Run `composure inspect-counterfactual-result /tmp/counterfactual-result.json`.
+7. Load `experiment-spec.json` into `ExperimentSpec`.
+8. Load `sweep-definition.json` into `SweepDefinition`.
+9. Load `observed-trajectory.json` into `ObservedTrajectory`.
+10. Map each `SweepCase` into an `ExperimentParameterSet` inside your domain adapter.
+11. Run `execute_experiment_sweep` and/or `calibrate_experiment`.
+12. Inspect the resulting artifacts with the `composure` CLI or the browser inspector.
 
 The downstream artifact tooling is shared:
 

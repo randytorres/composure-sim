@@ -19,6 +19,7 @@ Files:
 - [`pack.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/pack.json)
 - [`scenario.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/scenario.json)
 - [`experiment-spec.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/experiment-spec.json)
+- [`counterfactual-definition.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/counterfactual-definition.json)
 - [`sweep-definition.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/sweep-definition.json)
 - [`observed-trajectory.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/observed-trajectory.json)
 
@@ -27,10 +28,13 @@ Suggested workflow:
 1. Validate the manifest with `composure validate-pack examples/packs/health-recovery/pack.json`.
 2. Inspect the compiled pack with `composure inspect-pack examples/packs/health-recovery/pack.json`.
 3. Run the built-in reference runtime with `composure run-pack examples/packs/health-recovery/pack.json`.
-   This scenario now includes a `conditional_actions` recovery backstop in
+   This scenario includes a `conditional_actions` recovery backstop in
    [`scenario.json`](/Users/randytorres/Projects/composure-sim/examples/packs/health-recovery/scenario.json),
    so the executable pack demonstrates reactive intervention logic as well as the baseline timeline.
-4. Replace the reference runtime with a health-specific `Simulator` when you need richer physiology logic.
-5. Use `execute_experiment_sweep` to rank intervention mixes by end-state recovery.
-6. Use `calibrate_experiment` against the observed trajectory to find the closest parameter set.
-7. Build a `DeterministicReport` from baseline and candidate summaries, then inspect it with the CLI.
+4. Inspect the pack-managed branch plan with `composure inspect-pack-counterfactual examples/packs/health-recovery/pack.json`.
+5. Execute the pack-managed branch plan with `composure run-pack-counterfactual examples/packs/health-recovery/pack.json --output /tmp/health-recovery-counterfactual-result.json`.
+6. Inspect the saved branch result with `composure inspect-counterfactual-result /tmp/health-recovery-counterfactual-result.json`.
+7. Replace the reference runtime with a health-specific `Simulator` when you need richer physiology logic.
+8. Use `execute_experiment_sweep` to rank intervention mixes by end-state recovery.
+9. Use `calibrate_experiment` against the observed trajectory to find the closest parameter set.
+10. Build a `DeterministicReport` from baseline and candidate summaries, then inspect it with the CLI.

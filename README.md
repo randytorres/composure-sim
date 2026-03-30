@@ -276,9 +276,18 @@ The `composure` CLI can inspect saved artifacts, transform them into summaries, 
 cargo run -p composure-cli -- validate-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- inspect-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- run-pack examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- inspect-pack-counterfactual examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- inspect-counterfactual examples/artifacts/counterfactual-definition.json
+cargo run -p composure-cli -- inspect-counterfactual-result examples/artifacts/counterfactual-result.json
 cargo run -p composure-cli -- validate-counterfactual examples/artifacts/counterfactual-definition.json
-cargo run -p composure-cli -- run-counterfactual examples/artifacts/counterfactual-definition.json
+cargo run -p composure-cli -- run-counterfactual \
+  examples/artifacts/counterfactual-definition.json \
+  --output /tmp/counterfactual-result.json
+cargo run -p composure-cli -- run-pack-counterfactual \
+  examples/packs/health-recovery/pack.json \
+  --output /tmp/pack-counterfactual-result.json
+cargo run -p composure-cli -- inspect-counterfactual-result /tmp/counterfactual-result.json
+cargo run -p composure-cli -- inspect-counterfactual-result /tmp/pack-counterfactual-result.json
 cargo run -p composure-cli -- inspect-summary examples/artifacts/run-summary.json
 cargo run -p composure-cli -- inspect-report examples/artifacts/report.json
 cargo run -p composure-cli -- export-report-markdown examples/artifacts/report.json
@@ -334,6 +343,9 @@ python3 -m http.server 8000
 ```
 
 Then open `http://127.0.0.1:8000/examples/browser-inspector/` and load saved JSON artifacts.
+The browser inspector supports `RunSummary`, `CounterfactualResult`,
+`CounterfactualDefinition`, `TrajectoryComparison`, `DeterministicReport`,
+`CalibrationResult`, `ExperimentBundle`, and `SweepExecutionResult`.
 
 For an automated browser smoke pass that serves the repo locally and validates
 the interactive inspector with Playwright CLI:
@@ -352,12 +364,18 @@ Typed input packs for multiple domains live under [`examples/packs`](/Users/rand
 
 Each pack now includes a `pack.json` manifest that the CLI can validate and
 compile into a pack summary, and the checked-in examples now include a
-constrained built-in linear runtime model:
+constrained built-in linear runtime model plus a pack-local
+`counterfactual-definition.json`:
 
 ```bash
 cargo run -p composure-cli -- validate-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- inspect-pack examples/packs/health-recovery/pack.json
 cargo run -p composure-cli -- run-pack examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- inspect-pack-counterfactual examples/packs/health-recovery/pack.json
+cargo run -p composure-cli -- run-pack-counterfactual \
+  examples/packs/health-recovery/pack.json \
+  --output /tmp/health-pack-counterfactual-result.json
+cargo run -p composure-cli -- inspect-counterfactual-result /tmp/health-pack-counterfactual-result.json
 ```
 
 The built-in runtime is intentionally simple. It is useful for executable

@@ -86,7 +86,7 @@ impl CounterfactualDefinition {
                 self.config.monte_carlo.time_steps,
                 self.config.analysis_failure_threshold,
             ))
-            .map_err(CounterfactualSpecError::InvalidRuntimeModel)?;
+            .map_err(|source| CounterfactualSpecError::InvalidRuntimeModel(Box::new(source)))?;
 
         Ok(())
     }
@@ -99,6 +99,7 @@ pub struct PackDefinition {
     pub description: Option<String>,
     pub scenario: String,
     pub experiment_spec: Option<String>,
+    pub counterfactual_definition: Option<String>,
     pub sweep_definition: Option<String>,
     pub observed_trajectory: Option<String>,
     pub runtime_model: Option<PackRuntimeModel>,
@@ -113,6 +114,9 @@ impl PackDefinition {
 
         if let Some(path) = &self.experiment_spec {
             validate_non_empty(path, PackError::EmptyExperimentSpecPath)?;
+        }
+        if let Some(path) = &self.counterfactual_definition {
+            validate_non_empty(path, PackError::EmptyCounterfactualDefinitionPath)?;
         }
         if let Some(path) = &self.sweep_definition {
             validate_non_empty(path, PackError::EmptySweepDefinitionPath)?;
@@ -293,6 +297,7 @@ pub struct CompiledPack {
     pub definition: PackDefinition,
     pub scenario: Scenario,
     pub experiment_spec: Option<ExperimentSpec>,
+    pub counterfactual_definition: Option<CompiledCounterfactual>,
     pub sweep_definition: Option<SweepDefinition>,
     pub observed_trajectory: Option<ObservedTrajectory>,
     pub dimension_labels: Vec<String>,
@@ -327,6 +332,10 @@ impl CompiledPack {
             format!(
                 "Sweep definition: {}",
                 yes_no(self.sweep_definition.is_some())
+            ),
+            format!(
+                "Counterfactual definition: {}",
+                yes_no(self.counterfactual_definition.is_some())
             ),
             format!(
                 "Observed trajectory: {}",
@@ -403,9 +412,7 @@ pub fn load_counterfactual(
     path: impl AsRef<Path>,
 ) -> Result<CompiledCounterfactual, CounterfactualSpecError> {
     let path = path.as_ref().to_path_buf();
-    let definition = read_counterfactual_json::<CounterfactualDefinition>(&path)?;
-    definition.validate()?;
-    Ok(CompiledCounterfactual { path, definition })
+    load_counterfactual_from_path(&path)
 }
 
 pub fn load_pack_for_run(path: impl AsRef<Path>) -> Result<CompiledPack, PackError> {
@@ -451,6 +458,14 @@ fn compile_pack_with_mode(
         .as_ref()
         .map(|path| read_json::<ExperimentSpec>(&root.join(path)))
         .transpose()?;
+    let counterfactual_definition = definition
+        .counterfactual_definition
+        .as_ref()
+        .map(|path| {
+            load_counterfactual_from_path(&root.join(path))
+                .map_err(|source| PackError::InvalidCounterfactualDefinition(Box::new(source)))
+        })
+        .transpose()?;
 
     let sweep_definition = match mode {
         PackLoadMode::Full => definition
@@ -488,6 +503,22 @@ fn compile_pack_with_mode(
         }
     }
 
+    if let Some(counterfactual) = &counterfactual_definition {
+        if counterfactual.definition.branch_state.dimensions()
+            != scenario.initial_state.dimensions()
+        {
+            return Err(PackError::CounterfactualDimensionsMismatch {
+                expected: scenario.initial_state.dimensions(),
+                actual: counterfactual.definition.branch_state.dimensions(),
+            });
+        }
+        if let Some(runtime_model) = &definition.runtime_model {
+            if !json_equal(runtime_model, &counterfactual.definition.runtime_model) {
+                return Err(PackError::CounterfactualRuntimeModelMismatch);
+            }
+        }
+    }
+
     if let Some(definition) = &sweep_definition {
         definition.validate().map_err(PackError::InvalidSweep)?;
     }
@@ -516,6 +547,7 @@ fn compile_pack_with_mode(
         definition,
         scenario,
         experiment_spec,
+        counterfactual_definition,
         sweep_definition,
         observed_trajectory,
         dimension_labels,
@@ -566,6 +598,16 @@ pub fn run_counterfactual_definition(
         &definition.definition.config,
     )
     .map_err(CounterfactualRunError::Execute)
+}
+
+pub fn run_pack_counterfactual(
+    pack: &CompiledPack,
+) -> Result<CounterfactualResult, PackCounterfactualRunError> {
+    let counterfactual = pack
+        .counterfactual_definition
+        .as_ref()
+        .ok_or(PackCounterfactualRunError::MissingCounterfactualDefinition)?;
+    run_counterfactual_definition(counterfactual).map_err(PackCounterfactualRunError::Execute)
 }
 
 #[derive(Debug, Clone)]
@@ -711,6 +753,17 @@ where
     })
 }
 
+fn load_counterfactual_from_path(
+    path: &Path,
+) -> Result<CompiledCounterfactual, CounterfactualSpecError> {
+    let definition = read_counterfactual_json::<CounterfactualDefinition>(path)?;
+    definition.validate()?;
+    Ok(CompiledCounterfactual {
+        path: path.to_path_buf(),
+        definition,
+    })
+}
+
 fn counterfactual_runtime_scenario(
     branch_state: &SimState,
     time_steps: usize,
@@ -785,6 +838,8 @@ pub enum PackError {
     EmptyScenarioPath,
     #[error("experiment spec path cannot be empty")]
     EmptyExperimentSpecPath,
+    #[error("counterfactual definition path cannot be empty")]
+    EmptyCounterfactualDefinitionPath,
     #[error("sweep definition path cannot be empty")]
     EmptySweepDefinitionPath,
     #[error("observed trajectory path cannot be empty")]
@@ -805,6 +860,8 @@ pub enum PackError {
     InvalidScenario(ScenarioError),
     #[error("invalid experiment spec: {0}")]
     InvalidExperimentSpec(ExperimentError),
+    #[error("invalid counterfactual definition: {0}")]
+    InvalidCounterfactualDefinition(Box<CounterfactualSpecError>),
     #[error("invalid sweep definition: {0}")]
     InvalidSweep(SensitivityError),
     #[error("invalid observed trajectory: {0}")]
@@ -815,6 +872,12 @@ pub enum PackError {
         "default Monte Carlo time steps must match scenario time steps (expected {expected}, got {actual})"
     )]
     MonteCarloTimeStepsMismatch { expected: usize, actual: usize },
+    #[error(
+        "counterfactual branch-state dimensions must match scenario dimensions (expected {expected}, got {actual})"
+    )]
+    CounterfactualDimensionsMismatch { expected: usize, actual: usize },
+    #[error("pack runtime_model must match counterfactual runtime_model")]
+    CounterfactualRuntimeModelMismatch,
     #[error(
         "observed trajectory length must match scenario time steps (expected {expected}, got {actual})"
     )]
@@ -872,6 +935,14 @@ pub enum PackRunError {
 }
 
 #[derive(Debug, Error)]
+pub enum PackCounterfactualRunError {
+    #[error("pack does not define a counterfactual_definition")]
+    MissingCounterfactualDefinition,
+    #[error("pack counterfactual execution failed: {0}")]
+    Execute(CounterfactualRunError),
+}
+
+#[derive(Debug, Error)]
 pub enum CounterfactualSpecError {
     #[error("counterfactual ID cannot be empty")]
     EmptyCounterfactualId,
@@ -903,7 +974,7 @@ pub enum CounterfactualSpecError {
         source: ScenarioError,
     },
     #[error("invalid runtime model: {0}")]
-    InvalidRuntimeModel(PackError),
+    InvalidRuntimeModel(Box<PackError>),
 }
 
 #[derive(Debug, Error)]
@@ -990,6 +1061,7 @@ mod tests {
             description: None,
             scenario: "scenario.json".into(),
             experiment_spec: Some("experiment-spec.json".into()),
+            counterfactual_definition: None,
             sweep_definition: Some("sweep-definition.json".into()),
             observed_trajectory: Some("observed-trajectory.json".into()),
             runtime_model: with_runtime.then(|| {
@@ -1138,6 +1210,19 @@ mod tests {
         )
         .unwrap();
         path
+    }
+
+    fn write_pack_with_counterfactual(dir: &Path, with_runtime: bool) {
+        write_pack(dir, with_runtime);
+        write_counterfactual(dir);
+        let mut manifest: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(dir.join("pack.json")).unwrap()).unwrap();
+        manifest["counterfactual_definition"] = serde_json::json!("counterfactual.json");
+        fs::write(
+            dir.join("pack.json"),
+            serde_json::to_string_pretty(&manifest).unwrap(),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -1294,10 +1379,14 @@ mod tests {
         let err = load_counterfactual(&path).unwrap_err();
         assert!(matches!(
             err,
-            CounterfactualSpecError::InvalidRuntimeModel(PackError::RuntimeDimensionsMismatch {
+            CounterfactualSpecError::InvalidRuntimeModel(source)
+                if matches!(
+                    source.as_ref(),
+                    PackError::RuntimeDimensionsMismatch {
                 expected: 2,
                 actual: 1,
-            })
+                    }
+                )
         ));
     }
 
@@ -1314,5 +1403,50 @@ mod tests {
         assert!(result.comparison.metrics.end_delta > 0.0);
         assert!(result.baseline.outcome.monte_carlo.is_some());
         assert!(result.candidate.outcome.monte_carlo.is_some());
+    }
+
+    #[test]
+    fn test_load_pack_reads_counterfactual_definition() {
+        let dir = temp_pack_dir("pack-counterfactual");
+        write_pack_with_counterfactual(&dir, true);
+
+        let pack = load_pack(dir.join("pack.json")).unwrap();
+        assert!(pack.counterfactual_definition.is_some());
+        assert_eq!(
+            pack.counterfactual_definition
+                .as_ref()
+                .unwrap()
+                .definition
+                .id,
+            "cf-1"
+        );
+        assert!(pack.summary().contains("Counterfactual definition: yes"));
+    }
+
+    #[test]
+    fn test_run_pack_counterfactual_returns_result() {
+        let dir = temp_pack_dir("run-pack-counterfactual");
+        write_pack_with_counterfactual(&dir, true);
+
+        let pack = load_pack_for_run(dir.join("pack.json")).unwrap();
+        let result = run_pack_counterfactual(&pack).unwrap();
+
+        assert_eq!(result.baseline.branch_id, "baseline");
+        assert_eq!(result.candidate.branch_id, "candidate");
+        assert!(result.comparison.metrics.end_delta > 0.0);
+    }
+
+    #[test]
+    fn test_run_pack_counterfactual_requires_definition() {
+        let dir = temp_pack_dir("run-pack-counterfactual-missing");
+        write_pack(&dir, true);
+
+        let pack = load_pack_for_run(dir.join("pack.json")).unwrap();
+        let err = run_pack_counterfactual(&pack).unwrap_err();
+
+        assert!(matches!(
+            err,
+            PackCounterfactualRunError::MissingCounterfactualDefinition
+        ));
     }
 }

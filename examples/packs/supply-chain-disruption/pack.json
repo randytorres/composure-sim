@@ -3,6 +3,7 @@
   "name": "Supply Chain Disruption Pack",
   "scenario": "scenario.json",
   "experiment_spec": "experiment-spec.json",
+  "counterfactual_definition": "counterfactual-definition.json",
   "sweep_definition": "sweep-definition.json",
   "observed_trajectory": "observed-trajectory.json",
   "runtime_model": {

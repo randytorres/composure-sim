@@ -1,7 +1,7 @@
 use composure_calibration::CalibrationResult;
 use composure_core::{
-    DeterministicReport, ExperimentBundle, ExperimentRunStatus, ParameterValue, RunSummary,
-    SensitivityKind, SweepExecutionResult, TrajectoryComparison,
+    CounterfactualResult, DeterministicReport, ExperimentBundle, ExperimentRunStatus,
+    ParameterValue, RunSummary, SensitivityKind, SweepExecutionResult, TrajectoryComparison,
 };
 
 pub(crate) fn format_bundle(bundle: &ExperimentBundle) -> String {
@@ -209,6 +209,45 @@ pub(crate) fn format_report(report: &DeterministicReport) -> String {
     }
 
     lines.join("\n")
+}
+
+pub(crate) fn format_counterfactual_result(result: &CounterfactualResult) -> String {
+    [
+        format!(
+            "Counterfactual result: baseline={} ({}) vs candidate={} ({})",
+            result.baseline.intervention_label,
+            result.baseline.branch_id,
+            result.candidate.intervention_label,
+            result.candidate.branch_id
+        ),
+        format!("Baseline branch_from_t: {}", result.baseline.branch_from_t),
+        format!(
+            "Candidate branch_from_t: {}",
+            result.candidate.branch_from_t
+        ),
+        format!("End delta: {:.4}", result.comparison.metrics.end_delta),
+        format!(
+            "Divergence: {:?}",
+            result
+                .comparison
+                .divergence
+                .as_ref()
+                .map(|window| (window.start_t, window.end_t))
+        ),
+        format!(
+            "Failure shift: {:?}",
+            result
+                .report
+                .comparison
+                .as_ref()
+                .and_then(|comparison| comparison.failure_shift)
+        ),
+        "Baseline summary:".into(),
+        format_summary(&result.baseline.summary),
+        "Candidate summary:".into(),
+        format_summary(&result.candidate.summary),
+    ]
+    .join("\n")
 }
 
 pub(crate) fn format_calibration(result: &CalibrationResult) -> String {

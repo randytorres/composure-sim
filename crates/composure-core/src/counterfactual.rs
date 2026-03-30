@@ -61,6 +61,16 @@ impl CounterfactualConfig {
             analysis_failure_threshold: None,
         }
     }
+
+    pub fn validate(&self) -> Result<(), CounterfactualError> {
+        self.monte_carlo
+            .validate()
+            .map_err(|source| CounterfactualError::InvalidMonteCarloConfig { source })?;
+        self.comparison
+            .validate()
+            .map_err(CounterfactualError::Compare)?;
+        Ok(())
+    }
 }
 
 /// Run two matched-seed branches from the same explicit state and compare the
@@ -77,6 +87,7 @@ pub fn run_counterfactual<S: Simulator>(
     candidate: &CounterfactualBranchInput,
     config: &CounterfactualConfig,
 ) -> Result<CounterfactualResult, CounterfactualError> {
+    config.validate()?;
     validate_branch_input(state_at_branch, baseline)?;
     validate_branch_input(state_at_branch, candidate)?;
 
@@ -199,7 +210,7 @@ fn execute_branch<S: Simulator>(
     })
 }
 
-fn validate_branch_input(
+pub(crate) fn validate_branch_input(
     state_at_branch: &SimState,
     input: &CounterfactualBranchInput,
 ) -> Result<(), CounterfactualError> {
@@ -266,6 +277,8 @@ pub enum CounterfactualError {
         branch_id: String,
         action_index: usize,
     },
+    #[error("invalid counterfactual Monte Carlo configuration: {source}")]
+    InvalidMonteCarloConfig { source: MonteCarloError },
     #[error("counterfactual branch {branch_id} is invalid: {source}")]
     InvalidScenario {
         branch_id: String,

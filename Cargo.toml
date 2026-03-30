@@ -20,6 +20,7 @@ description = "Domain-agnostic simulation engine: Monte Carlo, Composure Curve, 
 
 [workspace.dependencies]
 rand = "0.8"
+rand_chacha = { version = "0.3", features = ["serde1"] }
 rayon = "1.10"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

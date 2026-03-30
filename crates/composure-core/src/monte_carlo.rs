@@ -176,29 +176,36 @@ pub fn run_scenario_monte_carlo_checked<S: Simulator>(
     Ok(build_result(path_results, config, retain_paths))
 }
 
-#[derive(Debug, Clone)]
-struct ConditionalActionState {
-    next_eligible_step: Vec<usize>,
-    fire_counts: Vec<usize>,
-    scheduled_actions: Vec<ScheduledConditionalAction>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConditionalActionState {
+    pub next_eligible_step: Vec<usize>,
+    pub fire_counts: Vec<usize>,
+    pub scheduled_actions: Vec<ScheduledConditionalAction>,
 }
 
 impl ConditionalActionState {
-    fn new(rule_count: usize) -> Self {
+    pub(crate) fn new(rule_count: usize) -> Self {
         Self {
             next_eligible_step: vec![0; rule_count],
             fire_counts: vec![0; rule_count],
             scheduled_actions: Vec::new(),
         }
     }
+
+    pub(crate) fn extend_rules(&mut self, additional_rules: usize) {
+        self.next_eligible_step
+            .extend(std::iter::repeat(0).take(additional_rules));
+        self.fire_counts
+            .extend(std::iter::repeat(0).take(additional_rules));
+    }
 }
 
-#[derive(Debug, Clone)]
-struct ScheduledConditionalAction {
-    apply_at: usize,
-    priority: i32,
-    rule_index: usize,
-    action: Action,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScheduledConditionalAction {
+    pub apply_at: usize,
+    pub priority: i32,
+    pub rule_index: usize,
+    pub action: Action,
 }
 
 #[derive(Debug, Clone)]
@@ -208,7 +215,7 @@ struct StepAction {
     action: Action,
 }
 
-fn actions_for_step(
+pub(crate) fn actions_for_step(
     scenario: &Scenario,
     step: usize,
     conditional_state: &mut ConditionalActionState,
@@ -240,7 +247,7 @@ fn actions_for_step(
     actions.into_iter().map(|entry| entry.action).collect()
 }
 
-fn schedule_conditional_actions<S: Simulator>(
+pub(crate) fn schedule_conditional_actions<S: Simulator>(
     sim: &S,
     scenario: &Scenario,
     previous_state: &SimState,
@@ -280,7 +287,7 @@ fn schedule_conditional_actions<S: Simulator>(
     }
 }
 
-fn take_due_actions(
+pub(crate) fn take_due_actions(
     step: usize,
     conditional_state: &mut ConditionalActionState,
 ) -> Vec<ScheduledConditionalAction> {
@@ -299,7 +306,7 @@ fn take_due_actions(
     due
 }
 
-fn trigger_matches<S: Simulator>(
+pub(crate) fn trigger_matches<S: Simulator>(
     sim: &S,
     previous_state: &SimState,
     next_state: &SimState,
