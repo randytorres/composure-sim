@@ -3,6 +3,7 @@ members = [
     "crates/composure-calibration",
     "crates/composure-cli",
     "crates/composure-core",
+    "crates/composure-marketing",
     "crates/composure-py",
     "crates/composure-runtime",
     "crates/composure-wasm",

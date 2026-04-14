@@ -8,6 +8,10 @@ use composure_core::{
     CounterfactualResult, DeterministicReport, ExperimentBundle, ExperimentExecutionConfig,
     MonteCarloResult, RunSummary, SweepExecutionResult, TrajectoryComparison,
 };
+use composure_marketing::{
+    simulate_marketing, simulate_marketing_v2, MarketingSimulationRequest,
+    MarketingSimulationRequestV2,
+};
 use composure_runtime::{
     default_run_id, load_counterfactual, load_pack, load_pack_for_run,
     run_counterfactual_definition, run_pack, run_pack_counterfactual,
@@ -213,6 +217,18 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let output = serde_json::to_string_pretty(&report).map_err(CliError::SerializeJson)?;
             write_output(output, options.output_path.as_deref())
         }
+        [_bin, command, path, tail @ ..] if command == "simulate-marketing" => {
+            let request = read_json::<MarketingSimulationRequest>(path)?;
+            let result = simulate_marketing(&request).map_err(CliError::MarketingSimulation)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "simulate-marketing-v2" => {
+            let request = read_json::<MarketingSimulationRequestV2>(path)?;
+            let result = simulate_marketing_v2(&request).map_err(CliError::MarketingSimulation)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, ..] => Err(CliError::UnknownCommand { usage: usage() }),
         [] => Err(CliError::Usage(usage())),
     }
@@ -247,6 +263,8 @@ fn usage() -> String {
         "  composure export-sweep-samples-markdown <path> [--output <path>]",
         "  composure compare-monte-carlo <baseline-path> <candidate-path> [flags] [--output <path>]",
         "  composure build-report <baseline-summary-path> <candidate-summary-path> [--comparison <path>] [--output <path>]",
+        "  composure simulate-marketing <request-path> [--output <path>]",
+        "  composure simulate-marketing-v2 <request-path> [--output <path>]",
         "",
         "Commands:",
         "  inspect-pack   Read a pack directory or manifest and print a compiled summary",
@@ -275,7 +293,8 @@ fn usage() -> String {
         "  export-sweep-samples-markdown  Convert a SweepExecutionResult JSON artifact into markdown",
         "  compare-monte-carlo  Compare two MonteCarloResult JSON artifacts and emit JSON",
         "  build-report   Build a DeterministicReport JSON artifact from two RunSummary artifacts",
-        "",
+        "  simulate-marketing   Execute the marketing adapter against a request JSON payload",
+        "  simulate-marketing-v2   Execute the marketing V2 adapter against a request JSON payload",
         "Compare/build flags:",
         "  --divergence-threshold <float>",
         "  --sustained-steps <usize>",
@@ -463,6 +482,8 @@ enum CliError {
     CounterfactualSpec(composure_runtime::CounterfactualSpecError),
     #[error("counterfactual execution error: {0}")]
     CounterfactualRun(composure_runtime::CounterfactualRunError),
+    #[error("marketing simulation error: {0}")]
+    MarketingSimulation(composure_marketing::MarketingSimulationError),
     #[error("failed to serialize JSON output: {0}")]
     SerializeJson(serde_json::Error),
 }
@@ -956,7 +977,59 @@ mod tests {
         assert!(output.contains("export-calibration-candidates-markdown"));
         assert!(output.contains("summarize-bundle-run"));
         assert!(output.contains("build-report"));
+        assert!(output.contains("simulate-marketing"));
+        assert!(output.contains("simulate-marketing-v2"));
         assert!(output.contains("--output <path>"));
+    }
+
+    #[test]
+    fn test_run_simulate_marketing_v2_recognizes_command() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-marketing-v2.json");
+        fs::write(
+            &request_path,
+            serde_json::json!({
+                "project": {
+                    "name": "Composure",
+                    "description": "Deterministic simulation for campaigns",
+                    "platform_context": ["twitter", "linkedin"]
+                },
+                "personas": [
+                    {
+                        "id": "dev",
+                        "name": "Pragmatic Dev",
+                        "type": "developer",
+                        "relationship": "existing customer",
+                        "preferences": ["practical examples", "clear frameworks"],
+                        "objections": ["vague marketing", "tool sprawl"]
+                    }
+                ],
+                "approaches": [
+                    {
+                        "id": "specific",
+                        "angle": "Show founders how to rank hooks before publishing",
+                        "format": "Twitter thread",
+                        "channels": ["twitter"],
+                        "tone": "direct and contrarian",
+                        "target": "technical founders"
+                    }
+                ],
+                "simulation_size": 8
+            })
+            .to_string(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "simulate-marketing-v2".into(),
+            request_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("\"approach_results\""));
+
+        let _ = fs::remove_file(request_path);
     }
 
     #[test]
