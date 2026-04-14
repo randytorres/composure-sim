@@ -1,0 +1,50 @@
+{
+  "seed_data": {
+    "personas": [
+      {
+        "name": "Pragmatic Dev",
+        "type": "developer",
+        "psychographics": {
+          "goals": ["ship faster", "learn practical systems"]
+        },
+        "relationship": "existing customer",
+        "preferences": ["practical examples", "clear frameworks"],
+        "objections": ["vague marketing", "tool sprawl"]
+      },
+      {
+        "name": "Skeptical Founder",
+        "type": "founder",
+        "psychographics": {
+          "goals": ["distribution", "credibility"]
+        },
+        "relationship": "aware but unconvinced",
+        "preferences": ["proof", "positioning"],
+        "objections": ["hype", "too broad"]
+      }
+    ],
+    "competitors": ["generic ai tools"],
+    "project_name": "Composure",
+    "project_description": "Deterministic simulation for campaigns",
+    "platform_context": ["twitter", "linkedin"]
+  },
+  "approaches": [
+    {
+      "id": "approach_1",
+      "angle": "Show founders how to rank hooks before publishing",
+      "format": "Twitter thread",
+      "channels": ["twitter"],
+      "tone": "direct and contrarian",
+      "target": "technical founders"
+    },
+    {
+      "id": "approach_2",
+      "angle": "AI can help everyone do marketing better",
+      "format": "blog post",
+      "channels": ["twitter", "linkedin", "reddit"],
+      "tone": "friendly",
+      "target": "everyone"
+    }
+  ],
+  "simulation_size": 64,
+  "platforms": ["twitter", "linkedin"]
+}

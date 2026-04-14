@@ -1,0 +1,110 @@
+{
+  "project": {
+    "name": "Composure",
+    "description": "Deterministic simulation for campaigns",
+    "category": "developer tools",
+    "competitors": ["generic ai tools"],
+    "platform_context": ["twitter", "linkedin", "community"],
+    "constraints": ["no hype"],
+    "tags": ["simulation", "campaign planning"]
+  },
+  "personas": [
+    {
+      "id": "dev",
+      "name": "Pragmatic Dev",
+      "type": "developer",
+      "psychographics": {
+        "goals": ["ship faster", "learn practical systems"]
+      },
+      "relationship": "existing customer",
+      "jobs": ["ship faster", "learn practical systems"],
+      "preferences": ["practical examples", "clear frameworks"],
+      "objections": ["vague marketing", "tool sprawl"],
+      "channels": ["twitter"],
+      "conversion_barriers": ["vague marketing"],
+      "trust_signals": ["proof", "examples"],
+      "price_sensitivity": 0.2,
+      "proof_threshold": 0.35,
+      "privacy_sensitivity": 0.1
+    },
+    {
+      "id": "founder",
+      "name": "Skeptical Founder",
+      "type": "founder",
+      "psychographics": {
+        "goals": ["distribution", "credibility"]
+      },
+      "relationship": "aware but unconvinced",
+      "jobs": ["distribution", "credibility"],
+      "preferences": ["proof", "positioning"],
+      "objections": ["hype", "too broad"],
+      "channels": ["linkedin", "twitter"],
+      "conversion_barriers": ["too broad", "hype"],
+      "trust_signals": ["proof", "credible"],
+      "price_sensitivity": 0.35,
+      "proof_threshold": 0.75,
+      "privacy_sensitivity": 0.15
+    }
+  ],
+  "approaches": [
+    {
+      "id": "specific",
+      "angle": "Show founders how to rank hooks before publishing",
+      "format": "Twitter thread",
+      "channels": ["twitter"],
+      "tone": "direct and contrarian",
+      "target": "technical founders"
+    },
+    {
+      "id": "community-proof",
+      "angle": "Bring operators into a live teardown where they see winning hooks and share their own",
+      "format": "community event",
+      "channels": ["twitter", "community"],
+      "tone": "credible and energizing",
+      "target": "operators who want proof and peers"
+    }
+  ],
+  "channels": [
+    {
+      "channel": "twitter",
+      "norms": ["direct", "threads"],
+      "constraints": ["fast feedback"],
+      "relative_weight": 1.0
+    },
+    {
+      "channel": "linkedin",
+      "norms": ["credibility"],
+      "constraints": [],
+      "relative_weight": 0.8
+    },
+    {
+      "channel": "community",
+      "norms": ["peer proof", "participation"],
+      "constraints": ["smaller reach"],
+      "relative_weight": 0.7
+    }
+  ],
+  "audience_weighting": [
+    {
+      "persona_id": "dev",
+      "weight": 0.9
+    },
+    {
+      "persona_id": "founder",
+      "weight": 1.1
+    }
+  ],
+  "scenario": {
+    "name": "Community activation",
+    "description": "Example V2 request with persona weighting and scenario-family dynamics",
+    "scenario_type": "community_activation",
+    "time_steps": 6,
+    "objectives": []
+  },
+  "output": {
+    "include_persona_breakdown": true,
+    "include_metric_breakdown": true,
+    "include_mean_trajectory": true
+  },
+  "simulation_size": 64
+}

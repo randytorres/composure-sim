@@ -11,11 +11,32 @@ Use this to simulate any system that degrades and recovers under stress — heal
 | `composure-calibration` | Deterministic fitting utilities that score sweep candidates against observed trajectories |
 | `composure-cli` | Minimal CLI for inspecting, summarizing, and comparing saved simulation artifacts |
 | `composure-core` | Core library: SimState, Simulator trait, Monte Carlo (rayon parallel), Composure Curve (archetype classification), event-sourced replay, comparison, experiment bundles, execution, sweep runner, sensitivity, run summaries |
+| `composure-marketing` | Optional marketing adapter that turns audience/content inputs into deterministic approach-level simulation outputs |
 | `composure-py` | PyO3 Python bindings |
 | `composure-runtime` | Pack manifests, cross-artifact validation, and runtime foundations for executable packs |
 | `composure-wasm` | WASM bindings for browser |
 
 Roadmap and next-step feature plan: [docs/roadmap.md](/Users/randytorres/Projects/composure-sim/docs/roadmap.md)
+
+Marketing-system planning docs:
+
+- [docs/marketing-sim-system-roadmap.md](/Users/randytorres/Projects/composure-sim/docs/marketing-sim-system-roadmap.md)
+- [docs/composure-marketing-v2-spec.md](/Users/randytorres/Projects/composure-sim/docs/composure-marketing-v2-spec.md)
+
+## Marketing Adapter
+
+`composure-sim` stays domain-agnostic at the core, but the repo now ships an
+optional marketing-facing adapter for teams that want a practical entry point
+without inventing a custom simulator first.
+
+It includes:
+
+- `composure-marketing` request/response types and deterministic scoring logic
+- `composure simulate-marketing <request.json>` for one-shot execution
+- `composure simulate-marketing-v2 <request.json>` for persona-aware scorecards and scenario families
+- a reusable JSON artifact workflow for projects replacing Mirofish-style scoring flows
+
+Example payloads live in [`examples/marketing`](/Users/randytorres/Projects/composure-sim/examples/marketing/README.md).
 
 ## Core Concepts
 

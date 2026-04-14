@@ -15,6 +15,7 @@ path = "src/main.rs"
 [dependencies]
 composure-calibration = { path = "../composure-calibration" }
 composure-core = { path = "../composure-core" }
+composure-marketing = { path = "../composure-marketing" }
 composure-runtime = { path = "../composure-runtime" }
 serde.workspace = true
 serde_json.workspace = true

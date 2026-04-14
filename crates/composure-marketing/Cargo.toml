@@ -1,0 +1,16 @@
+[package]
+name = "composure-marketing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+description = "Marketing simulation adapter built on composure-core"
+
+[dependencies]
+composure-core = { path = "../composure-core" }
+rand.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
