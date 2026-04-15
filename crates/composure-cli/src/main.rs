@@ -471,19 +471,14 @@ fn load_synthetic_market_package_dir(path: &str) -> Result<SyntheticMarketPackag
     let friction_path = format!("{path}/config/mirrorlife-product-friction-priors.json");
     let channels_path = format!("{path}/config/mirrorlife-channel-assumptions.json");
     let variants_path = format!("{path}/config/mirrorlife-campaign-variants.json");
-    let observed_outcomes_path =
-        format!("{path}/observed-outcomes/mirrorlife-observed-outcomes.template.json");
+    let observed_outcomes_dir = format!("{path}/observed-outcomes");
     let scenarios_dir = format!("{path}/scenarios");
 
     let segments = read_json::<SyntheticSegmentsFile>(&segments_path)?;
     let friction = read_json::<SyntheticFrictionFile>(&friction_path)?;
     let channels = read_json::<SyntheticChannelsFile>(&channels_path)?;
     let variants = read_json::<SyntheticVariantsFile>(&variants_path)?;
-    let observed_outcomes = if std::path::Path::new(&observed_outcomes_path).exists() {
-        read_json::<SyntheticObservedOutcomesFile>(&observed_outcomes_path)?.outcomes
-    } else {
-        Vec::new()
-    };
+    let observed_outcomes = load_synthetic_observed_outcomes(&observed_outcomes_dir)?;
 
     let mut scenario_paths = fs::read_dir(&scenarios_dir)
         .map_err(|source| CliError::ReadFile {
@@ -517,6 +512,59 @@ fn load_synthetic_market_package_dir(path: &str) -> Result<SyntheticMarketPackag
     })
 }
 
+fn load_synthetic_observed_outcomes(
+    observed_outcomes_dir: &str,
+) -> Result<Vec<SyntheticObservedOutcome>, CliError> {
+    let dir_path = std::path::Path::new(observed_outcomes_dir);
+    if !dir_path.exists() {
+        return Ok(Vec::new());
+    }
+
+    let mut json_paths = fs::read_dir(dir_path)
+        .map_err(|source| CliError::ReadFile {
+            path: observed_outcomes_dir.into(),
+            source,
+        })?
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().and_then(|ext| ext.to_str()) == Some("json"))
+        .collect::<Vec<_>>();
+    json_paths.sort();
+
+    let has_live_files = json_paths.iter().any(|path| {
+        !path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or_default()
+            .ends_with(".template.json")
+    });
+
+    let selected_paths = json_paths
+        .into_iter()
+        .filter(|path| {
+            let is_template = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or_default()
+                .ends_with(".template.json");
+            if has_live_files {
+                !is_template
+            } else {
+                is_template
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let mut outcomes = Vec::new();
+    for path in selected_paths {
+        let file_path = path.to_string_lossy().to_string();
+        let parsed = read_json::<SyntheticObservedOutcomesFile>(&file_path)?;
+        outcomes.extend(parsed.outcomes);
+    }
+
+    Ok(outcomes)
+}
+
 fn format_synthetic_market_package(package: &SyntheticMarketPackage) -> String {
     let scenario_ids = package
         .scenarios
@@ -525,12 +573,13 @@ fn format_synthetic_market_package(package: &SyntheticMarketPackage) -> String {
         .collect::<Vec<_>>()
         .join(", ");
     format!(
-        "Synthetic Market: {} ({})\nSegments: {}\nVariants: {}\nScenarios: {}\nScenario IDs: {}",
+        "Synthetic Market: {} ({})\nSegments: {}\nVariants: {}\nScenarios: {}\nObserved outcomes: {}\nScenario IDs: {}",
         package.market.name,
         package.market.version.as_deref().unwrap_or("unknown"),
         package.segments.len(),
         package.campaign_variants.len(),
         package.scenarios.len(),
+        package.observed_outcomes.len(),
         scenario_ids
     )
 }
@@ -1540,6 +1589,59 @@ mod tests {
                 "Control is strong on receptivity but weak on subscription readiness.".into(),
             ],
         }
+    }
+
+    #[test]
+    fn test_load_synthetic_observed_outcomes_prefers_live_files_over_template() {
+        let temp_dir = std::env::temp_dir().join(format!(
+            "composure-cli-observed-outcomes-{}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let observed_dir = temp_dir.join("observed-outcomes");
+        fs::create_dir_all(&observed_dir).unwrap();
+
+        fs::write(
+            observed_dir.join("mirrorlife-observed-outcomes.template.json"),
+            r#"{
+              "outcomes": [
+                {
+                  "experiment_id": "template-1",
+                  "scenario_id": "immediate_wedge_testing",
+                  "approach_id": "template_variant",
+                  "metrics": {}
+                }
+              ]
+            }"#,
+        )
+        .unwrap();
+
+        fs::write(
+            observed_dir.join("mirrorlife-observed-outcomes.json"),
+            r#"{
+              "outcomes": [
+                {
+                  "experiment_id": "live-1",
+                  "scenario_id": "immediate_wedge_testing",
+                  "approach_id": "live_variant",
+                  "metrics": {
+                    "signup_rate": 0.21
+                  }
+                }
+              ]
+            }"#,
+        )
+        .unwrap();
+
+        let outcomes =
+            load_synthetic_observed_outcomes(&observed_dir.display().to_string()).unwrap();
+        assert_eq!(outcomes.len(), 1);
+        assert_eq!(outcomes[0].experiment_id, "live-1");
+        assert_eq!(outcomes[0].variant_id, "live_variant");
+
+        let _ = fs::remove_dir_all(temp_dir);
     }
 
     fn sample_sweep_result() -> SweepExecutionResult {
