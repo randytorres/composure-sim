@@ -9,16 +9,14 @@ use composure_core::{
     CounterfactualResult, DeterministicReport, ExperimentBundle, ExperimentExecutionConfig,
     MonteCarloResult, RunSummary, SweepExecutionResult, TrajectoryComparison,
 };
-use composure_market::{
-    MarketSimulationConfig, MarketSimulationResult, MarketSimEngine, Validate,
-};
+use composure_market::{MarketSimEngine, MarketSimulationConfig, MarketSimulationResult, Validate};
 use composure_marketing::{
-    simulate_marketing, simulate_marketing_v2, simulate_synthetic_market, CampaignVariantDefinition,
-    ChannelAssumption, EvaluatorConfig, MarketingSimulationRequest,
-    MarketingSimulationRequestV2, MarketingSimulationResultV2, MetricKind,
-    ProductFrictionPrior, SegmentBlueprint, SegmentOverlapAssumption,
-    SyntheticMarketMetadata, SyntheticMarketPackage, SyntheticObservedOutcome,
-    SyntheticScenarioDefinition, ValueDriverPrior,
+    simulate_marketing, simulate_marketing_v2, simulate_synthetic_market,
+    CampaignVariantDefinition, ChannelAssumption, EvaluatorConfig, MarketingSimulationRequest,
+    MarketingSimulationRequestV2, MarketingSimulationResultV2, MetricKind, ProductFrictionPrior,
+    SegmentBlueprint, SegmentOverlapAssumption, SyntheticMarketMetadata, SyntheticMarketPackage,
+    SyntheticMarketSimulationResult, SyntheticObservedOutcome, SyntheticScenarioDefinition,
+    ValueDriverPrior,
 };
 use composure_runtime::{
     default_run_id, load_counterfactual, load_pack, load_pack_for_run,
@@ -29,9 +27,9 @@ use render::{
     format_bundle, format_calibration, format_comparison, format_counterfactual_result,
     format_report, format_summary, format_sweep, render_bundle_markdown, render_calibration_csv,
     render_calibration_markdown, render_market_report_markdown,
-    render_marketing_v2_compare_markdown,
-    render_marketing_v2_report_markdown, render_report_markdown, render_sweep_csv,
-    render_sweep_markdown, render_sweep_summary_markdown,
+    render_marketing_v2_compare_markdown, render_marketing_v2_report_markdown,
+    render_report_markdown, render_sweep_csv, render_sweep_markdown, render_sweep_summary_markdown,
+    render_synthetic_market_report_markdown,
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -285,6 +283,13 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let output = render_marketing_v2_report_markdown(&result);
             write_output(output, parse_output_flag(tail)?)
         }
+        [_bin, command, path, tail @ ..]
+            if command == "export-synthetic-market-report-markdown" =>
+        {
+            let result = read_json::<SyntheticMarketSimulationResult>(path)?;
+            let output = render_synthetic_market_report_markdown(&result);
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, command, path, tail @ ..] if command == "export-marketing-v2-compare-markdown" => {
             let report = read_json::<MarketingV2ComparisonReport>(path)?;
             let output = render_marketing_v2_compare_markdown(&report);
@@ -294,7 +299,10 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let config = read_json::<MarketSimulationConfig>(path)?;
             let errors = config.validate();
             if !errors.is_empty() {
-                let messages: Vec<String> = errors.iter().map(|e| format!("{}: {}", e.field, e.message)).collect();
+                let messages: Vec<String> = errors
+                    .iter()
+                    .map(|e| format!("{}: {}", e.field, e.message))
+                    .collect();
                 return Err(CliError::MarketSimulation(messages.join("; ")));
             }
             let options = parse_market_sim_options(tail)?;
@@ -350,6 +358,7 @@ fn usage() -> String {
         "  composure simulate-synthetic-market <dir> <scenario-id> [--output <path>]",
         "  composure compare-marketing-v2-assisted <request-path> <request-path> [more-paths...] [--provider <name>] [--model <name>] [--reasoning-effort <level>] [--output <path>]",
         "  composure export-marketing-v2-report-markdown <path> [--output <path>]",
+        "  composure export-synthetic-market-report-markdown <path> [--output <path>]",
         "  composure export-marketing-v2-compare-markdown <path> [--output <path>]",
         "  composure market-sim <config-path> [--output <path>]",
         "  composure export-market-report <result-path> [--output <path>]",
@@ -389,6 +398,7 @@ fn usage() -> String {
         "  simulate-synthetic-market   Execute the synthetic market cohort simulator for one scenario",
         "  compare-marketing-v2-assisted   Execute multiple assisted marketing V2 scenarios and rank them side by side",
         "  export-marketing-v2-report-markdown   Convert a MarketingSimulationResultV2 JSON artifact into markdown",
+        "  export-synthetic-market-report-markdown   Convert a SyntheticMarketSimulationResult JSON artifact into markdown",
         "  export-marketing-v2-compare-markdown   Convert a MarketingV2ComparisonReport JSON artifact into markdown",
         "  market-sim   Execute the buyer-level market simulation kernel",
         "  export-market-report   Convert a MarketSimulationResult JSON artifact into markdown",
@@ -489,7 +499,9 @@ fn load_synthetic_market_package_dir(path: &str) -> Result<SyntheticMarketPackag
     let mut scenarios = Vec::new();
     for scenario_path in scenario_paths {
         let scenario_path_string = scenario_path.to_string_lossy().to_string();
-        scenarios.push(read_json::<SyntheticScenarioDefinition>(&scenario_path_string)?);
+        scenarios.push(read_json::<SyntheticScenarioDefinition>(
+            &scenario_path_string,
+        )?);
     }
 
     Ok(SyntheticMarketPackage {
@@ -1392,6 +1404,141 @@ mod tests {
                 failure_mode: CalibrationFailureMode::Continue,
                 ..CalibrationConfig::default()
             },
+        }
+    }
+
+    fn sample_synthetic_market_result() -> SyntheticMarketSimulationResult {
+        SyntheticMarketSimulationResult {
+            market_name: "Mirrorlife".into(),
+            scenario_id: "immediate_wedge_testing".into(),
+            scenario_goal: "Determine the best immediate acquisition wedge.".into(),
+            scenario_decision: "Choose control and challenger.".into(),
+            total_buyers_simulated: 2048,
+            market_funnel: composure_marketing::AggregateFunnelMetrics {
+                buyers: 2048,
+                clicks: 1515,
+                signups: 833,
+                activations: 248,
+                retained: 42,
+                paid_conversions: 0,
+                click_rate: 0.76,
+                signup_rate: 0.44,
+                activation_rate: 0.14,
+                retention_rate: 0.02,
+                paid_conversion_rate: 0.0,
+            },
+            observed_data_summary: composure_marketing::ObservedDataSummary {
+                records: 1,
+                usable_records: 0,
+                placeholder_records: 1,
+                total_usable_sample_size: None,
+                organic_sources: vec!["organic_waitlist".into()],
+                paid_sources: vec![],
+                acquisition_motion: "organic_only".into(),
+                data_status: "placeholder_only".into(),
+            },
+            calibration_summary: vec![composure_marketing::SyntheticCalibrationSummary {
+                variant_id: "peptide_glp1_wedge".into(),
+                observed_records: 1,
+                usable_observed_records: 0,
+                placeholder_records: 1,
+                observed_sample_size: None,
+                compared_metrics: vec![],
+                click_gap: None,
+                signup_gap: None,
+                activation_gap: None,
+                retention_gap: None,
+                paid_conversion_gap: None,
+                note:
+                    "Only placeholder outcomes exist for this variant; calibration is not live yet."
+                        .into(),
+            }],
+            business_readiness: composure_marketing::BusinessReadinessSummary {
+                acquisition_motion: "organic_only".into(),
+                observed_data_status: "placeholder_only".into(),
+                organic_readiness_score: 31,
+                paid_readiness_score: 9,
+                subscription_readiness_score: 5,
+                current_focus: "Stay focused on organic channels and onboarding proof.".into(),
+                gating_factors: vec![
+                    "Observed outcomes are placeholders only.".into(),
+                    "Activation is still too soft for scale.".into(),
+                ],
+            },
+            recommended_control: "peptide_glp1_wedge".into(),
+            recommended_challenger: Some("stack_intelligence".into()),
+            ranked_variants: vec![composure_marketing::VariantScenarioScore {
+                variant_id: "peptide_glp1_wedge".into(),
+                role: Some("control".into()),
+                overall_score: 91,
+                weighted_segment_share: 0.29,
+                funnel: composure_marketing::AggregateFunnelMetrics {
+                    buyers: 2048,
+                    clicks: 1515,
+                    signups: 833,
+                    activations: 248,
+                    retained: 42,
+                    paid_conversions: 0,
+                    click_rate: 0.76,
+                    signup_rate: 0.44,
+                    activation_rate: 0.14,
+                    retention_rate: 0.02,
+                    paid_conversion_rate: 0.0,
+                },
+                strongest_segments: vec!["glp1_outcomes".into()],
+                weakest_segments: vec!["privacy_first_tracker".into()],
+                risk_flags: vec!["logging_risk".into()],
+                segment_scores: vec![],
+            }],
+            segment_summaries: vec![composure_marketing::SegmentScenarioSummary {
+                segment_id: "glp1_outcomes".into(),
+                segment_name: "GLP-1 Outcomes Seeker".into(),
+                effective_weight: 0.15,
+                buyers_simulated: 800,
+                best_variant_funnel: composure_marketing::AggregateFunnelMetrics {
+                    buyers: 800,
+                    clicks: 620,
+                    signups: 360,
+                    activations: 115,
+                    retained: 21,
+                    paid_conversions: 0,
+                    click_rate: 0.77,
+                    signup_rate: 0.45,
+                    activation_rate: 0.14,
+                    retention_rate: 0.03,
+                    paid_conversion_rate: 0.0,
+                },
+                best_variant_id: "peptide_glp1_wedge".into(),
+                best_score: 94,
+                runner_up_variant_id: Some("stack_intelligence".into()),
+                runner_up_score: Some(70),
+            }],
+            sampled_buyers: vec![composure_marketing::SyntheticBuyerSample {
+                buyer_id: "buyer-1".into(),
+                segment_id: "glp1_outcomes".into(),
+                strongest_variant_id: "peptide_glp1_wedge".into(),
+                strongest_variant_score: 94,
+                runner_up_variant_id: Some("stack_intelligence".into()),
+                runner_up_score: Some(70),
+                proof_hunger: 82,
+                manual_logging_tolerance: 61,
+                privacy_sensitivity: 55,
+                wearable_ownership: 34,
+                subscription_willingness: 49,
+                click_probability: 76,
+                signup_probability: 44,
+                activation_probability: 14,
+                retention_probability: 2,
+                paid_conversion_probability: 0,
+                clicked: true,
+                signed_up: true,
+                activated: true,
+                retained: false,
+                converted_paid: false,
+            }],
+            notes: vec![
+                "Control is strong on receptivity but weak on subscription readiness.".into(),
+            ],
         }
     }
 
@@ -2495,6 +2642,37 @@ mod tests {
         assert!(output.contains("Wrote artifact"));
         let written = fs::read_to_string(&output_path).unwrap();
         assert!(written.contains("# Deterministic Report"));
+
+        let _ = fs::remove_file(input_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_export_synthetic_market_report_markdown_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let input_path = temp_dir.join("composure-cli-synthetic-market-input.json");
+        let output_path = temp_dir.join("composure-cli-synthetic-market-output.md");
+
+        fs::write(
+            &input_path,
+            serde_json::to_string(&sample_synthetic_market_result()).unwrap(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "export-synthetic-market-report-markdown".into(),
+            input_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("# Synthetic Market Report"));
+        assert!(written.contains("`peptide_glp1_wedge`"));
+        assert!(written.contains("Organic readiness"));
 
         let _ = fs::remove_file(input_path);
         let _ = fs::remove_file(output_path);

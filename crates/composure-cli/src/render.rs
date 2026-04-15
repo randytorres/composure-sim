@@ -5,7 +5,9 @@ use composure_core::{
     ParameterValue, RunSummary, SensitivityKind, SweepExecutionResult, TrajectoryComparison,
 };
 use composure_market::MarketSimulationResult;
-use composure_marketing::{MarketingSimulationResultV2, MetricKind};
+use composure_marketing::{
+    MarketingSimulationResultV2, MetricKind, SyntheticMarketSimulationResult,
+};
 
 pub(crate) fn format_bundle(bundle: &ExperimentBundle) -> String {
     let completed = bundle
@@ -1830,7 +1832,9 @@ pub(crate) fn render_market_report_markdown(result: &MarketSimulationResult) -> 
     if !result.cohorts.is_empty() {
         lines.push("## Cohort Breakdown".into());
         lines.push(String::new());
-        lines.push("| Cohort | Archetype | Buyers | Signup% | Activation% | Churn% | Avg LTV |".into());
+        lines.push(
+            "| Cohort | Archetype | Buyers | Signup% | Activation% | Churn% | Avg LTV |".into(),
+        );
         lines.push("| --- | --- | --- | --- | --- | --- | --- |".into());
 
         for cohort in &result.cohorts {
@@ -1870,6 +1874,208 @@ pub(crate) fn render_market_report_markdown(result: &MarketSimulationResult) -> 
         if result.buyers.len() > 20 {
             lines.push(String::new());
             lines.push(format!("... ({} more buyers)", result.buyers.len() - 20));
+        }
+    }
+
+    lines.join("\n")
+}
+
+pub(crate) fn render_synthetic_market_report_markdown(
+    result: &SyntheticMarketSimulationResult,
+) -> String {
+    let mut lines = vec![
+        "# Synthetic Market Report".into(),
+        String::new(),
+        format!("Market: `{}`", result.market_name),
+        format!("Scenario: `{}`", result.scenario_id),
+        format!("Goal: {}", result.scenario_goal),
+        format!("Decision: {}", result.scenario_decision),
+        format!("Buyers simulated: {}", result.total_buyers_simulated),
+        String::new(),
+        "## Recommendation".into(),
+        format!("- Control: `{}`", result.recommended_control),
+    ];
+
+    if let Some(challenger) = &result.recommended_challenger {
+        lines.push(format!("- Challenger: `{challenger}`"));
+    }
+
+    lines.push(String::new());
+    lines.push("## Business Readiness".into());
+    lines.push(format!(
+        "- Organic readiness: `{}`",
+        result.business_readiness.organic_readiness_score
+    ));
+    lines.push(format!(
+        "- Paid readiness: `{}`",
+        result.business_readiness.paid_readiness_score
+    ));
+    lines.push(format!(
+        "- Subscription readiness: `{}`",
+        result.business_readiness.subscription_readiness_score
+    ));
+    lines.push(format!(
+        "- Current focus: {}",
+        result.business_readiness.current_focus
+    ));
+    for factor in &result.business_readiness.gating_factors {
+        lines.push(format!("- Gating factor: {factor}"));
+    }
+    lines.push(String::new());
+
+    lines.push("## Market Funnel".into());
+    lines.push("| Metric | Value |".into());
+    lines.push("| --- | --- |".into());
+    lines.push(format!("| Buyers | {} |", result.market_funnel.buyers));
+    lines.push(format!("| Clicks | {} |", result.market_funnel.clicks));
+    lines.push(format!("| Signups | {} |", result.market_funnel.signups));
+    lines.push(format!(
+        "| Activations | {} |",
+        result.market_funnel.activations
+    ));
+    lines.push(format!("| Retained | {} |", result.market_funnel.retained));
+    lines.push(format!(
+        "| Paid conversions | {} |",
+        result.market_funnel.paid_conversions
+    ));
+    lines.push(format!(
+        "| Click rate | {:.2}% |",
+        result.market_funnel.click_rate * 100.0
+    ));
+    lines.push(format!(
+        "| Signup rate | {:.2}% |",
+        result.market_funnel.signup_rate * 100.0
+    ));
+    lines.push(format!(
+        "| Activation rate | {:.2}% |",
+        result.market_funnel.activation_rate * 100.0
+    ));
+    lines.push(format!(
+        "| Retention rate | {:.2}% |",
+        result.market_funnel.retention_rate * 100.0
+    ));
+    lines.push(format!(
+        "| Paid conversion rate | {:.2}% |",
+        result.market_funnel.paid_conversion_rate * 100.0
+    ));
+    lines.push(String::new());
+
+    lines.push("## Observed Data Status".into());
+    lines.push(format!(
+        "- Records: `{}` (`{}` usable, `{}` placeholders)",
+        result.observed_data_summary.records,
+        result.observed_data_summary.usable_records,
+        result.observed_data_summary.placeholder_records
+    ));
+    lines.push(format!(
+        "- Acquisition motion: `{}`",
+        result.observed_data_summary.acquisition_motion
+    ));
+    lines.push(format!(
+        "- Data status: `{}`",
+        result.observed_data_summary.data_status
+    ));
+    if let Some(sample_size) = result.observed_data_summary.total_usable_sample_size {
+        lines.push(format!("- Usable sample size: `{sample_size}`"));
+    }
+    if !result.observed_data_summary.organic_sources.is_empty() {
+        lines.push(format!(
+            "- Organic sources: {}",
+            result.observed_data_summary.organic_sources.join(", ")
+        ));
+    }
+    if !result.observed_data_summary.paid_sources.is_empty() {
+        lines.push(format!(
+            "- Paid sources: {}",
+            result.observed_data_summary.paid_sources.join(", ")
+        ));
+    }
+    lines.push(String::new());
+
+    lines.push("## Variant Leaderboard".into());
+    lines.push(String::new());
+    lines.push(
+        "| Rank | Variant | Role | Score | Click | Signup | Activation | Retention | Risks |"
+            .into(),
+    );
+    lines.push("| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |".into());
+    for (index, variant) in result.ranked_variants.iter().enumerate() {
+        lines.push(format!(
+            "| {} | `{}` | {} | {} | {:.2}% | {:.2}% | {:.2}% | {:.2}% | {} |",
+            index + 1,
+            variant.variant_id,
+            variant.role.as_deref().unwrap_or("n/a"),
+            variant.overall_score,
+            variant.funnel.click_rate * 100.0,
+            variant.funnel.signup_rate * 100.0,
+            variant.funnel.activation_rate * 100.0,
+            variant.funnel.retention_rate * 100.0,
+            if variant.risk_flags.is_empty() {
+                "none".into()
+            } else {
+                variant.risk_flags.join(", ")
+            }
+        ));
+    }
+    lines.push(String::new());
+
+    if !result.segment_summaries.is_empty() {
+        lines.push("## Segment Winners".into());
+        lines.push(String::new());
+        lines.push("| Segment | Weight | Buyers | Winner | Score | Runner-up |".into());
+        lines.push("| --- | ---: | ---: | --- | ---: | --- |".into());
+        for segment in &result.segment_summaries {
+            lines.push(format!(
+                "| {} | {:.2}% | {} | `{}` | {} | {} |",
+                segment.segment_name,
+                segment.effective_weight * 100.0,
+                segment.buyers_simulated,
+                segment.best_variant_id,
+                segment.best_score,
+                segment.runner_up_variant_id.as_deref().unwrap_or("n/a")
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    if !result.calibration_summary.is_empty() {
+        lines.push("## Calibration Summary".into());
+        lines.push(String::new());
+        for item in &result.calibration_summary {
+            lines.push(format!("- `{}`: {}", item.variant_id, item.note));
+        }
+        lines.push(String::new());
+    }
+
+    if !result.notes.is_empty() {
+        lines.push("## Notes".into());
+        lines.push(String::new());
+        for note in &result.notes {
+            lines.push(format!("- {note}"));
+        }
+        lines.push(String::new());
+    }
+
+    if !result.sampled_buyers.is_empty() {
+        lines.push("## Sampled Buyers".into());
+        lines.push(String::new());
+        lines.push(
+            "| Buyer | Segment | Best Variant | Score | Clicked | Signed Up | Activated | Retained |"
+                .into(),
+        );
+        lines.push("| --- | --- | --- | ---: | --- | --- | --- | --- |".into());
+        for buyer in result.sampled_buyers.iter().take(12) {
+            lines.push(format!(
+                "| `{}` | `{}` | `{}` | {} | {} | {} | {} | {} |",
+                buyer.buyer_id,
+                buyer.segment_id,
+                buyer.strongest_variant_id,
+                buyer.strongest_variant_score,
+                buyer.clicked,
+                buyer.signed_up,
+                buyer.activated,
+                buyer.retained
+            ));
         }
     }
 
