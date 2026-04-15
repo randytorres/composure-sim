@@ -184,7 +184,8 @@ impl SocialGraphGenerator {
         }
 
         // Step 4: Creator-follower edges
-        let creators_vec: Vec<&String> = creators.iter().collect();
+        let mut creators_vec: Vec<&String> = creators.iter().collect();
+        creators_vec.sort();
         let followers_total =
             (self.config.avg_follower_per_creator * creators_vec.len() as f64) as usize;
         for _ in 0..followers_total {
