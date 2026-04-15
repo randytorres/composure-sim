@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use std::time::Instant;
+use std::io::{BufRead, BufReader, Read};
+use std::time::{Duration, Instant};
 
 use composure_marketing::{
     simulate_marketing_v2, ApproachDefinition, ApproachLlmAnalysis, LlmEvaluatorTrace,
@@ -13,6 +14,9 @@ use thiserror::Error;
 
 const DEFAULT_CLIPROXYAPI_BASE_URL: &str = "http://127.0.0.1:8317/v1";
 const DEFAULT_OPENAI_BASE_URL: &str = "https://api.openai.com/v1";
+const DEFAULT_LLM_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
+const DEFAULT_LLM_READ_TIMEOUT: Duration = Duration::from_secs(180);
+const DEFAULT_LLM_WRITE_TIMEOUT: Duration = Duration::from_secs(30);
 
 const DEFAULT_SYSTEM_PROMPT: &str = "You are a frontier GTM simulation analyst. Use the deterministic simulation as the anchor, not as something to ignore. Preserve numeric outputs, avoid fake certainty, call out realism gaps, and recommend experiments that could improve the model with real data. When calibration evidence exists, explain where the deterministic model is overpredicting, underpredicting, or tracking closely before offering advice.";
 
@@ -798,7 +802,8 @@ fn call_llm(
     }
 
     let payload = enrich_payload(payload, reasoning_effort, max_output_tokens, false);
-    let response = ureq::post(&url)
+    let response = http_agent()
+        .post(&url)
         .set("Authorization", &format!("Bearer {api_key}"))
         .set("Content-Type", "application/json")
         .send_json(payload.clone());
@@ -875,15 +880,14 @@ fn call_llm_streaming(
     api_key: &str,
     payload: Value,
 ) -> Result<StreamingCallRecord, MarketingLlmError> {
-    let response = ureq::post(url)
+    let response = http_agent()
+        .post(url)
         .set("Authorization", &format!("Bearer {api_key}"))
         .set("Content-Type", "application/json")
         .send_json(payload);
 
-    let body = match response {
-        Ok(response) => response
-            .into_string()
-            .map_err(|err| MarketingLlmError::Http(err.to_string()))?,
+    match response {
+        Ok(response) => parse_streaming_response_reader(response.into_reader()),
         Err(ureq::Error::Status(code, response)) => {
             let body = response
                 .into_string()
@@ -893,9 +897,7 @@ fn call_llm_streaming(
             )));
         }
         Err(err) => return Err(MarketingLlmError::Http(err.to_string())),
-    };
-
-    parse_streaming_response_body(&body)
+    }
 }
 
 fn synthesize_response_json(response_json: Option<Value>, output_text: &str) -> Value {
@@ -932,11 +934,46 @@ fn synthesize_response_json(response_json: Option<Value>, output_text: &str) -> 
     }
 }
 
+#[cfg(test)]
 fn parse_streaming_response_body(body: &str) -> Result<StreamingCallRecord, MarketingLlmError> {
+    parse_streaming_lines(
+        body.lines().map(|line| line.to_string()),
+        Some(body.to_string()),
+    )
+}
+
+fn parse_streaming_response_reader(
+    reader: impl Read,
+) -> Result<StreamingCallRecord, MarketingLlmError> {
+    let mut raw_stream_text = String::new();
+    let mut lines = Vec::new();
+
+    for line in BufReader::new(reader).lines() {
+        let line = line.map_err(|err| MarketingLlmError::Http(err.to_string()))?;
+        raw_stream_text.push_str(&line);
+        raw_stream_text.push('\n');
+        let done = line.trim() == "data: [DONE]";
+        lines.push(line);
+        if done {
+            break;
+        }
+    }
+
+    parse_streaming_lines(lines, Some(raw_stream_text))
+}
+
+fn parse_streaming_lines(
+    lines: impl IntoIterator<Item = String>,
+    raw_stream_text: Option<String>,
+) -> Result<StreamingCallRecord, MarketingLlmError> {
     let mut deltas = String::new();
     let mut done_parts = Vec::new();
     let mut response_json = None;
-    for line in body.lines() {
+    for line in lines {
+        let trimmed = line.trim();
+        if trimmed == "data: [DONE]" {
+            break;
+        }
         let Some(json_payload) = line.strip_prefix("data: ") else {
             continue;
         };
@@ -987,8 +1024,16 @@ fn parse_streaming_response_body(body: &str) -> Result<StreamingCallRecord, Mark
     Ok(StreamingCallRecord {
         response_json,
         output_text,
-        raw_stream_text: body.to_string(),
+        raw_stream_text: raw_stream_text.unwrap_or_default(),
     })
+}
+
+fn http_agent() -> ureq::Agent {
+    ureq::builder()
+        .timeout_connect(DEFAULT_LLM_CONNECT_TIMEOUT)
+        .timeout_read(DEFAULT_LLM_READ_TIMEOUT)
+        .timeout_write(DEFAULT_LLM_WRITE_TIMEOUT)
+        .build()
 }
 
 fn validate_provider(provider: &str) -> Result<(), MarketingLlmError> {
@@ -1425,6 +1470,7 @@ fn strongest_personas(persona_results: &[PersonaApproachResult]) -> Vec<PromptPe
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Cursor;
 
     #[test]
     fn extracts_json_from_code_fence() {
@@ -1587,6 +1633,20 @@ mod tests {
         let parsed = parse_streaming_response_body(body).unwrap();
         assert!(parsed.output_text.contains("\"executive_summary\""));
         assert!(parsed.response_json.is_some());
+    }
+
+    #[test]
+    fn parse_streaming_response_reader_stops_at_done() {
+        let body = concat!(
+            "data: {\"type\":\"response.output_text.delta\",\"delta\":\"{\\\"executive_summary\\\":[]\"}\n",
+            "data: {\"type\":\"response.output_text.delta\",\"delta\":\",\\\"strategic_takeaways\\\":[],\\\"recommended_next_experiments\\\":[],\\\"confidence_notes\\\":[],\\\"approach_analyses\\\":[]}\"}\n",
+            "data: [DONE]\n",
+            "data: {\"type\":\"response.output_text.delta\",\"delta\":\"ignored\"}\n"
+        );
+
+        let parsed = parse_streaming_response_reader(Cursor::new(body)).unwrap();
+        assert!(parsed.output_text.contains("\"strategic_takeaways\""));
+        assert!(!parsed.output_text.contains("ignored"));
     }
 
     #[test]
