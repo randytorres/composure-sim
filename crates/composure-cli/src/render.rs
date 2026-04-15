@@ -4,6 +4,7 @@ use composure_core::{
     CounterfactualResult, DeterministicReport, ExperimentBundle, ExperimentRunStatus,
     ParameterValue, RunSummary, SensitivityKind, SweepExecutionResult, TrajectoryComparison,
 };
+use composure_market::MarketSimulationResult;
 use composure_marketing::{MarketingSimulationResultV2, MetricKind};
 
 pub(crate) fn format_bundle(bundle: &ExperimentBundle) -> String {
@@ -1797,4 +1798,80 @@ fn push_code_block(lines: &mut Vec<String>, language: &str, body: &str) {
     lines.push(format!("```{language}"));
     lines.push(body.to_string());
     lines.push("```".into());
+}
+
+pub(crate) fn render_market_report_markdown(result: &MarketSimulationResult) -> String {
+    let mt = &result.market_totals;
+
+    let mut lines = vec![
+        "# Market Simulation Report".into(),
+        String::new(),
+        format!("Config digest: `{}`", result.config_digest),
+        format!("Variants simulated: {}", result.variant_count),
+        format!("Time steps: {}", result.time_steps),
+        format!("Buyers sampled: {}", result.buyers.len()),
+        format!("Cohorts: {}", result.cohorts.len()),
+        String::new(),
+        "## Market Totals".into(),
+        format!("| Metric | Value |"),
+        format!("| --- | --- |"),
+        format!("| Total buyers | {} |", mt.total_buyers),
+        format!("| Total signups | {} |", mt.total_signups),
+        format!("| Total activations | {} |", mt.total_activations),
+        format!("| Total churns | {} |", mt.total_churns),
+        format!("| Total referrals | {} |", mt.total_referrals),
+        format!("| Total revenue (cents) | {:.2} |", mt.total_revenue_cents),
+        format!("| Market CTR | {:.4} |", mt.market_ctr),
+        format!("| Market CVR | {:.4} |", mt.market_cvr),
+        format!("| Average LTV (cents) | {:.2} |", mt.market_ltv),
+        String::new(),
+    ];
+
+    if !result.cohorts.is_empty() {
+        lines.push("## Cohort Breakdown".into());
+        lines.push(String::new());
+        lines.push("| Cohort | Archetype | Buyers | Signup% | Activation% | Churn% | Avg LTV |".into());
+        lines.push("| --- | --- | --- | --- | --- | --- | --- |".into());
+
+        for cohort in &result.cohorts {
+            lines.push(format!(
+                "| {} | {:?} | {} | {:.2} | {:.2} | {:.2} | {:.2} |",
+                cohort.segment_key,
+                cohort.archetype,
+                cohort.buyer_count,
+                cohort.signup_rate,
+                cohort.activation_rate,
+                cohort.churn_rate,
+                cohort.avg_ltv_cents
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    if !result.buyers.is_empty() {
+        lines.push("## Sampled Buyers (sample_rate controlled output)".into());
+        lines.push(String::new());
+        lines.push("| ID | Archetype | Signup | Activated | Churned | Referrals | LTV |".into());
+        lines.push("| --- | --- | --- | --- | --- | --- | --- |".into());
+
+        for buyer in result.buyers.iter().take(20) {
+            lines.push(format!(
+                "| {} | {:?} | {} | {} | {} | {} | {:.2} |",
+                buyer.buyer_id,
+                buyer.archetype,
+                buyer.reached_signup,
+                buyer.reached_activation,
+                buyer.churned,
+                buyer.referral_count,
+                buyer.lifetime_value_cents
+            ));
+        }
+
+        if result.buyers.len() > 20 {
+            lines.push(String::new());
+            lines.push(format!("... ({} more buyers)", result.buyers.len() - 20));
+        }
+    }
+
+    lines.join("\n")
 }

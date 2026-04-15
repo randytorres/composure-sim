@@ -1,0 +1,19 @@
+[package]
+name = "composure-market"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+description = "Buyer-level market simulation kernel: seeded population, cohort aggregation, market outcome scoring"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+rand = { workspace = true }
+sha2 = "0.10"
+
+[dev-dependencies]
+rand_chacha = { workspace = true }

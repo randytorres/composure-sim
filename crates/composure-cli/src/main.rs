@@ -9,6 +9,9 @@ use composure_core::{
     CounterfactualResult, DeterministicReport, ExperimentBundle, ExperimentExecutionConfig,
     MonteCarloResult, RunSummary, SweepExecutionResult, TrajectoryComparison,
 };
+use composure_market::{
+    MarketSimulationConfig, MarketSimulationResult, MarketSimEngine, Validate,
+};
 use composure_marketing::{
     simulate_marketing, simulate_marketing_v2, EvaluatorConfig, MarketingSimulationRequest,
     MarketingSimulationRequestV2, MarketingSimulationResultV2, MetricKind,
@@ -21,7 +24,8 @@ use marketing_llm::simulate_marketing_v2_assisted;
 use render::{
     format_bundle, format_calibration, format_comparison, format_counterfactual_result,
     format_report, format_summary, format_sweep, render_bundle_markdown, render_calibration_csv,
-    render_calibration_markdown, render_marketing_v2_compare_markdown,
+    render_calibration_markdown, render_market_report_markdown,
+    render_marketing_v2_compare_markdown,
     render_marketing_v2_report_markdown, render_report_markdown, render_sweep_csv,
     render_sweep_markdown, render_sweep_summary_markdown,
 };
@@ -258,6 +262,24 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let output = render_marketing_v2_compare_markdown(&report);
             write_output(output, parse_output_flag(tail)?)
         }
+        [_bin, command, path, tail @ ..] if command == "market-sim" => {
+            let config = read_json::<MarketSimulationConfig>(path)?;
+            let errors = config.validate();
+            if !errors.is_empty() {
+                let messages: Vec<String> = errors.iter().map(|e| format!("{}: {}", e.field, e.message)).collect();
+                return Err(CliError::MarketSimulation(messages.join("; ")));
+            }
+            let options = parse_market_sim_options(tail)?;
+            let mut engine = MarketSimEngine::new(config);
+            let result = engine.run();
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
+            write_output(output, options.output_path.as_deref())
+        }
+        [_bin, command, path, tail @ ..] if command == "export-market-report" => {
+            let result = read_json::<MarketSimulationResult>(path)?;
+            let output = render_market_report_markdown(&result);
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, ..] => Err(CliError::UnknownCommand { usage: usage() }),
         [] => Err(CliError::Usage(usage())),
     }
@@ -298,6 +320,8 @@ fn usage() -> String {
         "  composure compare-marketing-v2-assisted <request-path> <request-path> [more-paths...] [--provider <name>] [--model <name>] [--reasoning-effort <level>] [--output <path>]",
         "  composure export-marketing-v2-report-markdown <path> [--output <path>]",
         "  composure export-marketing-v2-compare-markdown <path> [--output <path>]",
+        "  composure market-sim <config-path> [--output <path>]",
+        "  composure export-market-report <result-path> [--output <path>]",
         "",
         "Commands:",
         "  inspect-pack   Read a pack directory or manifest and print a compiled summary",
@@ -332,6 +356,8 @@ fn usage() -> String {
         "  compare-marketing-v2-assisted   Execute multiple assisted marketing V2 scenarios and rank them side by side",
         "  export-marketing-v2-report-markdown   Convert a MarketingSimulationResultV2 JSON artifact into markdown",
         "  export-marketing-v2-compare-markdown   Convert a MarketingV2ComparisonReport JSON artifact into markdown",
+        "  market-sim   Execute the buyer-level market simulation kernel",
+        "  export-market-report   Convert a MarketSimulationResult JSON artifact into markdown",
         "Compare/build flags:",
         "  --divergence-threshold <float>",
         "  --sustained-steps <usize>",
@@ -378,6 +404,11 @@ struct MarketingV2AssistedOptions {
     provider: Option<String>,
     model: Option<String>,
     reasoning_effort: Option<String>,
+    output_path: Option<String>,
+}
+
+#[derive(Debug, Default)]
+struct MarketSimOptions {
     output_path: Option<String>,
 }
 
@@ -531,6 +562,29 @@ fn parse_marketing_v2_assisted_options(
             "--reasoning-effort" => {
                 options.reasoning_effort = Some(value.clone());
             }
+            "--output" => {
+                options.output_path = Some(value.clone());
+            }
+            _ => return Err(CliError::UnknownFlag(flag.clone())),
+        }
+
+        index += 2;
+    }
+
+    Ok(options)
+}
+
+fn parse_market_sim_options(args: &[String]) -> Result<MarketSimOptions, CliError> {
+    let mut options = MarketSimOptions::default();
+    let mut index = 0;
+
+    while index < args.len() {
+        let flag = &args[index];
+        let value = args
+            .get(index + 1)
+            .ok_or_else(|| CliError::MissingFlagValue(flag.clone()))?;
+
+        match flag.as_str() {
             "--output" => {
                 options.output_path = Some(value.clone());
             }
@@ -954,6 +1008,8 @@ enum CliError {
     CounterfactualRun(composure_runtime::CounterfactualRunError),
     #[error("marketing simulation error: {0}")]
     MarketingSimulation(composure_marketing::MarketingSimulationError),
+    #[error("market simulation error: {0}")]
+    MarketSimulation(String),
     #[error("marketing LLM error: {0}")]
     MarketingLlm(marketing_llm::MarketingLlmError),
     #[error("failed to serialize JSON output: {0}")]
