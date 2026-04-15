@@ -10,15 +10,10 @@ struct CohortBucket {
 }
 
 /// Build cohort outcomes from final buyer states and outcomes.
-pub fn aggregate_cohorts(
-    buyers: &[BuyerState],
-    outcomes: &[BuyerOutcome],
-) -> Vec<CohortOutcome> {
+pub fn aggregate_cohorts(buyers: &[BuyerState], outcomes: &[BuyerOutcome]) -> Vec<CohortOutcome> {
     // Build a lookup: buyer_id -> outcome
-    let outcomes_map: std::collections::HashMap<usize, &BuyerOutcome> = outcomes
-        .iter()
-        .map(|o| (o.buyer_id, o))
-        .collect();
+    let outcomes_map: std::collections::HashMap<usize, &BuyerOutcome> =
+        outcomes.iter().map(|o| (o.buyer_id, o)).collect();
 
     // Bucket buyers by archetype + signup week
     let mut buckets: std::collections::HashMap<CohortBucket, Vec<&BuyerState>> =
@@ -49,8 +44,16 @@ pub fn aggregate_cohorts(
         let activation_count = buyer_states.iter().filter(|b| b.activated_t >= 0).count();
         let churn_count = buyer_states.iter().filter(|b| b.churned_t >= 0).count();
 
-        let signup_rate = if n > 0 { signup_count as f64 / n as f64 } else { 0.0 };
-        let activation_rate = if n > 0 { activation_count as f64 / n as f64 } else { 0.0 };
+        let signup_rate = if n > 0 {
+            signup_count as f64 / n as f64
+        } else {
+            0.0
+        };
+        let activation_rate = if n > 0 {
+            activation_count as f64 / n as f64
+        } else {
+            0.0
+        };
         let churn_rate = if activation_count > 0 {
             churn_count as f64 / activation_count as f64
         } else {
@@ -60,7 +63,11 @@ pub fn aggregate_cohorts(
         // LTV from outcomes
         let total_ltv: f64 = buyer_states
             .iter()
-            .filter_map(|b| outcomes_map.get(&b.buyer_id).map(|o| o.lifetime_value_cents))
+            .filter_map(|b| {
+                outcomes_map
+                    .get(&b.buyer_id)
+                    .map(|o| o.lifetime_value_cents)
+            })
             .sum();
 
         let avg_ltv = if n > 0 { total_ltv / n as f64 } else { 0.0 };
@@ -173,7 +180,13 @@ mod tests {
     use super::*;
     use crate::schemas::BuyerState;
 
-    fn make_state(id: usize, arch: BuyerArchetype, signup_t: i32, activated_t: i32, churned: bool) -> BuyerState {
+    fn make_state(
+        id: usize,
+        arch: BuyerArchetype,
+        signup_t: i32,
+        activated_t: i32,
+        churned: bool,
+    ) -> BuyerState {
         BuyerState {
             buyer_id: id,
             archetype: arch,
@@ -187,7 +200,13 @@ mod tests {
         }
     }
 
-    fn make_outcome(id: usize, arch: BuyerArchetype, signup: bool, activated: bool, ltv: f64) -> BuyerOutcome {
+    fn make_outcome(
+        id: usize,
+        arch: BuyerArchetype,
+        signup: bool,
+        activated: bool,
+        ltv: f64,
+    ) -> BuyerOutcome {
         BuyerOutcome {
             buyer_id: id,
             archetype: arch,
@@ -259,19 +278,17 @@ mod tests {
 
     #[test]
     fn summarize_market_computes_averages() {
-        let cohorts = vec![
-            CohortOutcome {
-                segment_key: "HighIntent w0".into(),
-                archetype: BuyerArchetype::HighIntent,
-                buyer_count: 10,
-                signup_rate: 0.8,
-                activation_rate: 0.6,
-                churn_rate: 0.2,
-                avg_ltv_cents: 8000.0,
-                total_revenue_cents: 80_000.0,
-                referral_count: 0,
-            },
-        ];
+        let cohorts = vec![CohortOutcome {
+            segment_key: "HighIntent w0".into(),
+            archetype: BuyerArchetype::HighIntent,
+            buyer_count: 10,
+            signup_rate: 0.8,
+            activation_rate: 0.6,
+            churn_rate: 0.2,
+            avg_ltv_cents: 8000.0,
+            total_revenue_cents: 80_000.0,
+            referral_count: 0,
+        }];
         let totals = summarize_market(&cohorts);
         assert_eq!(totals.total_buyers, 10);
         assert_eq!(totals.total_signups, 8);

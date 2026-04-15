@@ -35,9 +35,8 @@ pub use cohort::{aggregate_cohorts, summarize_market};
 pub use engine::MarketSimEngine;
 pub use outputs::build_result;
 pub use schemas::{
-    config_digest, BuyerArchetype, BuyerOutcome, BuyerScores,
-    BuyerState, CampaignVariant, Channel, ChannelWeights, CohortOutcome,
-    ConversionEvent, ConversionEventType, CreativeMultipliers, MarketSimulationConfig,
-    MarketSimulationResult, MarketTotals, SyntheticPopulationConfig, Validate,
-    ValidationError, VariantResult, ARCHETYPE_VARIANTS,
+    config_digest, BuyerArchetype, BuyerOutcome, BuyerScores, BuyerState, CampaignVariant, Channel,
+    ChannelWeights, CohortOutcome, ConversionEvent, ConversionEventType, CreativeMultipliers,
+    MarketSimulationConfig, MarketSimulationResult, MarketTotals, SyntheticPopulationConfig,
+    Validate, ValidationError, ARCHETYPE_VARIANTS,
 };

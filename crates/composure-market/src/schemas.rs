@@ -153,7 +153,8 @@ impl ArchetypeWeights {
 
     /// Normalize weights so they sum to 1.0.
     pub fn normalized(&self) -> Self {
-        let sum = self.high_intent + self.browsers + self.deal_seekers + self.loyalists + self.dormant;
+        let sum =
+            self.high_intent + self.browsers + self.deal_seekers + self.loyalists + self.dormant;
         if sum == 0.0 {
             return Self::default();
         }
@@ -290,7 +291,7 @@ impl CreativeMultipliers {
     }
 }
 
-/// A single campaign variant (e.g. Control vs Treatment).
+/// A single campaign variant applied within the simulation timeline.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CampaignVariant {
     /// Unique identifier for this variant.
@@ -326,6 +327,7 @@ pub struct MarketSimulationConfig {
     #[serde(flatten)]
     pub population: SyntheticPopulationConfig,
     /// Campaign variants to simulate.
+    /// Variants are executed in deterministic `variant_id` sort order.
     pub variants: Vec<CampaignVariant>,
 }
 
@@ -536,6 +538,7 @@ pub struct CohortOutcome {
     /// Total revenue from this cohort in cents.
     pub total_revenue_cents: f64,
     /// Total referrals from this cohort.
+    #[serde(default)]
     pub referral_count: usize,
 }
 
@@ -553,18 +556,6 @@ pub struct MarketTotals {
     pub market_ltv: f64,
 }
 
-/// Per-variant result breakdown for A/B test comparison.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct VariantResult {
-    pub variant_id: String,
-    pub cohort_count: usize,
-    pub signup_count: usize,
-    pub activation_count: usize,
-    pub churn_count: usize,
-    pub referral_count: usize,
-    pub total_revenue_cents: f64,
-}
-
 /// Complete output of a market simulation run.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MarketSimulationResult {
@@ -572,8 +563,6 @@ pub struct MarketSimulationResult {
     pub buyers: Vec<BuyerOutcome>,
     /// Cohort-level aggregates.
     pub cohorts: Vec<CohortOutcome>,
-    /// Per-variant result breakdowns.
-    pub variant_results: Vec<VariantResult>,
     /// Market-wide totals.
     pub market_totals: MarketTotals,
     /// SHA-256 digest of the canonical JSON config for reproducibility verification.
@@ -615,10 +604,7 @@ impl Validate for SyntheticPopulationConfig {
             errors.push(invalid_field("population_size", "must be >= 1"));
         }
         if self.population_size > 1_000_000 {
-            errors.push(invalid_field(
-                "population_size",
-                "must be <= 1_000_000",
-            ));
+            errors.push(invalid_field("population_size", "must be <= 1_000_000"));
         }
 
         if self.time_steps == 0 {
@@ -638,10 +624,7 @@ impl Validate for SyntheticPopulationConfig {
         }
 
         if self.sample_rate < 0.0 || self.sample_rate > 1.0 {
-            errors.push(invalid_field(
-                "sample_rate",
-                "must be between 0.0 and 1.0",
-            ));
+            errors.push(invalid_field("sample_rate", "must be between 0.0 and 1.0"));
         }
 
         errors
@@ -682,11 +665,18 @@ impl Validate for CampaignVariant {
 
 impl Validate for MarketSimulationConfig {
     fn validate(&self) -> Vec<ValidationError> {
+        let mut seen_variant_ids = std::collections::HashSet::new();
         let mut errors = self.population.validate();
         for (i, variant) in self.variants.iter().enumerate() {
             for mut err in variant.validate() {
                 err.field = format!("variants[{i}].{}", err.field);
                 errors.push(err);
+            }
+            if !seen_variant_ids.insert(variant.variant_id.clone()) {
+                errors.push(invalid_field(
+                    &format!("variants[{i}].variant_id"),
+                    "must be unique",
+                ));
             }
         }
         if self.variants.is_empty() {
@@ -808,6 +798,28 @@ mod tests {
         let errors = config.validate();
         assert!(!errors.is_empty());
         assert!(errors.iter().any(|e| e.field == "variants"));
+    }
+
+    #[test]
+    fn market_config_validate_rejects_duplicate_variant_ids() {
+        let config = MarketSimulationConfig {
+            variants: vec![
+                CampaignVariant {
+                    variant_id: "dup".into(),
+                    spend_budget: 1000.0,
+                    ..Default::default()
+                },
+                CampaignVariant {
+                    variant_id: "dup".into(),
+                    spend_budget: 1500.0,
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+
+        let errors = config.validate();
+        assert!(errors.iter().any(|e| e.message == "must be unique"));
     }
 
     #[test]
