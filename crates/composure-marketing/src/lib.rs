@@ -10,6 +10,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use thiserror::Error;
 
+mod synthetic_market;
+
+pub use synthetic_market::*;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MarketingSimulationRequest {
     pub seed_data: SeedData,

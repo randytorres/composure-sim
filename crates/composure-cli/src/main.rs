@@ -13,8 +13,12 @@ use composure_market::{
     MarketSimulationConfig, MarketSimulationResult, MarketSimEngine, Validate,
 };
 use composure_marketing::{
-    simulate_marketing, simulate_marketing_v2, EvaluatorConfig, MarketingSimulationRequest,
+    simulate_marketing, simulate_marketing_v2, simulate_synthetic_market, CampaignVariantDefinition,
+    ChannelAssumption, EvaluatorConfig, MarketingSimulationRequest,
     MarketingSimulationRequestV2, MarketingSimulationResultV2, MetricKind,
+    ProductFrictionPrior, SegmentBlueprint, SegmentOverlapAssumption,
+    SyntheticMarketMetadata, SyntheticMarketPackage, SyntheticObservedOutcome,
+    SyntheticScenarioDefinition, ValueDriverPrior,
 };
 use composure_runtime::{
     default_run_id, load_counterfactual, load_pack, load_pack_for_run,
@@ -69,6 +73,23 @@ fn run(args: &[String]) -> Result<String, CliError> {
             Ok(format!(
                 "Pack valid: {} ({})",
                 pack.definition.name, pack.definition.id
+            ))
+        }
+        [_bin, command, path] if command == "inspect-synthetic-market" => {
+            let package = load_synthetic_market_package_dir(path)?;
+            Ok(format_synthetic_market_package(&package))
+        }
+        [_bin, command, path] if command == "validate-synthetic-market" => {
+            let package = load_synthetic_market_package_dir(path)?;
+            package
+                .validate()
+                .map_err(CliError::SyntheticMarketValidation)?;
+            Ok(format!(
+                "Synthetic market valid: {} (segments={}, variants={}, scenarios={})",
+                package.market.name,
+                package.segments.len(),
+                package.campaign_variants.len(),
+                package.scenarios.len()
             ))
         }
         [_bin, command, path] if command == "inspect-pack-counterfactual" => {
@@ -246,6 +267,13 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
             write_output(output, options.output_path.as_deref())
         }
+        [_bin, command, path, scenario_id, tail @ ..] if command == "simulate-synthetic-market" => {
+            let package = load_synthetic_market_package_dir(path)?;
+            let result = simulate_synthetic_market(&package, scenario_id)
+                .map_err(CliError::SyntheticMarketSimulation)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, command, tail @ ..] if command == "compare-marketing-v2-assisted" => {
             let (request_paths, options) = parse_marketing_v2_compare_inputs(tail)?;
             let report = build_marketing_v2_compare_report(&request_paths, &options)?;
@@ -293,6 +321,8 @@ fn usage() -> String {
         "  composure inspect-counterfactual-result <path>",
         "  composure inspect-pack-counterfactual <path>",
         "  composure validate-pack <path>",
+        "  composure inspect-synthetic-market <dir>",
+        "  composure validate-synthetic-market <dir>",
         "  composure validate-counterfactual <path>",
         "  composure run-pack <path> [--output <path>]",
         "  composure run-pack-counterfactual <path> [--output <path>]",
@@ -317,6 +347,7 @@ fn usage() -> String {
         "  composure simulate-marketing <request-path> [--output <path>]",
         "  composure simulate-marketing-v2 <request-path> [--output <path>]",
         "  composure simulate-marketing-v2-assisted <request-path> [--provider <name>] [--model <name>] [--reasoning-effort <level>] [--output <path>]",
+        "  composure simulate-synthetic-market <dir> <scenario-id> [--output <path>]",
         "  composure compare-marketing-v2-assisted <request-path> <request-path> [more-paths...] [--provider <name>] [--model <name>] [--reasoning-effort <level>] [--output <path>]",
         "  composure export-marketing-v2-report-markdown <path> [--output <path>]",
         "  composure export-marketing-v2-compare-markdown <path> [--output <path>]",
@@ -329,6 +360,8 @@ fn usage() -> String {
         "  inspect-counterfactual-result   Read a CounterfactualResult JSON artifact and print a summary",
         "  inspect-pack-counterfactual   Resolve and print the pack-managed counterfactual summary",
         "  validate-pack  Validate a pack directory or manifest and its referenced artifacts",
+        "  inspect-synthetic-market  Read a synthetic market directory and print a summary",
+        "  validate-synthetic-market  Validate a synthetic market directory and its referenced scenario/config files",
         "  validate-counterfactual  Validate a CounterfactualDefinition JSON artifact",
         "  run-pack  Execute a pack with its built-in runtime model and emit an ExperimentBundle artifact",
         "  run-pack-counterfactual  Execute a pack-managed counterfactual definition and emit a CounterfactualResult artifact",
@@ -353,6 +386,7 @@ fn usage() -> String {
         "  simulate-marketing   Execute the marketing adapter against a request JSON payload",
         "  simulate-marketing-v2   Execute the marketing V2 adapter against a request JSON payload",
         "  simulate-marketing-v2-assisted   Execute the marketing V2 adapter and enrich the result with an LLM analysis",
+        "  simulate-synthetic-market   Execute the synthetic market cohort simulator for one scenario",
         "  compare-marketing-v2-assisted   Execute multiple assisted marketing V2 scenarios and rank them side by side",
         "  export-marketing-v2-report-markdown   Convert a MarketingSimulationResultV2 JSON artifact into markdown",
         "  export-marketing-v2-compare-markdown   Convert a MarketingV2ComparisonReport JSON artifact into markdown",
@@ -385,6 +419,108 @@ where
         path: path.into(),
         source,
     })
+}
+
+#[derive(Debug, Deserialize)]
+struct SyntheticSegmentsFile {
+    market: SyntheticMarketMetadata,
+    #[serde(default)]
+    segments: Vec<SegmentBlueprint>,
+    #[serde(default)]
+    overlap_assumptions: Vec<SegmentOverlapAssumption>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SyntheticFrictionFile {
+    #[serde(default)]
+    frictions: Vec<ProductFrictionPrior>,
+    #[serde(default)]
+    value_drivers: Vec<ValueDriverPrior>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SyntheticChannelsFile {
+    #[serde(default)]
+    channels: Vec<ChannelAssumption>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SyntheticVariantsFile {
+    #[serde(default)]
+    variants: Vec<CampaignVariantDefinition>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SyntheticObservedOutcomesFile {
+    #[serde(default)]
+    outcomes: Vec<SyntheticObservedOutcome>,
+}
+
+fn load_synthetic_market_package_dir(path: &str) -> Result<SyntheticMarketPackage, CliError> {
+    let segments_path = format!("{path}/config/mirrorlife-segment-blueprints.json");
+    let friction_path = format!("{path}/config/mirrorlife-product-friction-priors.json");
+    let channels_path = format!("{path}/config/mirrorlife-channel-assumptions.json");
+    let variants_path = format!("{path}/config/mirrorlife-campaign-variants.json");
+    let observed_outcomes_path =
+        format!("{path}/observed-outcomes/mirrorlife-observed-outcomes.template.json");
+    let scenarios_dir = format!("{path}/scenarios");
+
+    let segments = read_json::<SyntheticSegmentsFile>(&segments_path)?;
+    let friction = read_json::<SyntheticFrictionFile>(&friction_path)?;
+    let channels = read_json::<SyntheticChannelsFile>(&channels_path)?;
+    let variants = read_json::<SyntheticVariantsFile>(&variants_path)?;
+    let observed_outcomes = if std::path::Path::new(&observed_outcomes_path).exists() {
+        read_json::<SyntheticObservedOutcomesFile>(&observed_outcomes_path)?.outcomes
+    } else {
+        Vec::new()
+    };
+
+    let mut scenario_paths = fs::read_dir(&scenarios_dir)
+        .map_err(|source| CliError::ReadFile {
+            path: scenarios_dir.clone(),
+            source,
+        })?
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().and_then(|ext| ext.to_str()) == Some("json"))
+        .collect::<Vec<_>>();
+    scenario_paths.sort();
+
+    let mut scenarios = Vec::new();
+    for scenario_path in scenario_paths {
+        let scenario_path_string = scenario_path.to_string_lossy().to_string();
+        scenarios.push(read_json::<SyntheticScenarioDefinition>(&scenario_path_string)?);
+    }
+
+    Ok(SyntheticMarketPackage {
+        market: segments.market,
+        segments: segments.segments,
+        overlap_assumptions: segments.overlap_assumptions,
+        frictions: friction.frictions,
+        value_drivers: friction.value_drivers,
+        channels: channels.channels,
+        campaign_variants: variants.variants,
+        scenarios,
+        observed_outcomes,
+    })
+}
+
+fn format_synthetic_market_package(package: &SyntheticMarketPackage) -> String {
+    let scenario_ids = package
+        .scenarios
+        .iter()
+        .map(|scenario| scenario.scenario_id.as_str())
+        .collect::<Vec<_>>()
+        .join(", ");
+    format!(
+        "Synthetic Market: {} ({})\nSegments: {}\nVariants: {}\nScenarios: {}\nScenario IDs: {}",
+        package.market.name,
+        package.market.version.as_deref().unwrap_or("unknown"),
+        package.segments.len(),
+        package.campaign_variants.len(),
+        package.scenarios.len(),
+        scenario_ids
+    )
 }
 
 #[derive(Debug)]
@@ -1010,6 +1146,10 @@ enum CliError {
     MarketingSimulation(composure_marketing::MarketingSimulationError),
     #[error("market simulation error: {0}")]
     MarketSimulation(String),
+    #[error("synthetic market validation error: {0}")]
+    SyntheticMarketValidation(composure_marketing::SyntheticMarketValidationError),
+    #[error("synthetic market simulation error: {0}")]
+    SyntheticMarketSimulation(composure_marketing::SyntheticMarketSimulationError),
     #[error("marketing LLM error: {0}")]
     MarketingLlm(marketing_llm::MarketingLlmError),
     #[error("failed to serialize JSON output: {0}")]

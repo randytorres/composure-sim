@@ -768,9 +768,36 @@ fn call_llm(
         ]
     });
 
-    let payload = enrich_payload(payload, reasoning_effort, max_output_tokens, false);
     let url = format!("{}/responses", base_url.trim_end_matches('/'));
     let started = Instant::now();
+
+    if prefers_streaming(provider) {
+        let streamed = call_llm_streaming(
+            &url,
+            &api_key,
+            enrich_payload(payload, reasoning_effort, max_output_tokens, true),
+        )?;
+        let parsed = synthesize_response_json(streamed.response_json, &streamed.output_text);
+        extract_output_text(&parsed).ok_or(MarketingLlmError::MissingOutputText)?;
+        return Ok(LlmCallRecord {
+            base_url,
+            response_id: parsed
+                .get("id")
+                .and_then(Value::as_str)
+                .map(|value| value.to_string()),
+            status: parsed
+                .get("status")
+                .and_then(Value::as_str)
+                .map(|value| value.to_string()),
+            usage: extract_usage(&parsed),
+            response: parsed,
+            raw_stream_text: Some(streamed.raw_stream_text),
+            stream_fallback_used: true,
+            duration_ms: started.elapsed().as_millis() as u64,
+        });
+    }
+
+    let payload = enrich_payload(payload, reasoning_effort, max_output_tokens, false);
     let response = ureq::post(&url)
         .set("Authorization", &format!("Bearer {api_key}"))
         .set("Content-Type", "application/json")
@@ -791,20 +818,7 @@ fn call_llm(
                     enrich_payload(payload, reasoning_effort, max_output_tokens, true),
                 )?;
                 raw_stream_text = Some(streamed.raw_stream_text);
-                parsed = streamed.response_json.unwrap_or_else(|| {
-                    json!({
-                        "output": [
-                            {
-                                "content": [
-                                    {
-                                        "type": "output_text",
-                                        "text": streamed.output_text
-                                    }
-                                ]
-                            }
-                        ]
-                    })
-                });
+                parsed = synthesize_response_json(streamed.response_json, &streamed.output_text);
                 stream_fallback_used = true;
             }
 
@@ -884,6 +898,40 @@ fn call_llm_streaming(
     parse_streaming_response_body(&body)
 }
 
+fn synthesize_response_json(response_json: Option<Value>, output_text: &str) -> Value {
+    let content = json!([
+        {
+            "type": "output_text",
+            "text": output_text
+        }
+    ]);
+
+    match response_json {
+        Some(mut response) => {
+            let output_is_empty = response
+                .get("output")
+                .and_then(Value::as_array)
+                .map(|items| items.is_empty())
+                .unwrap_or(true);
+            if output_is_empty {
+                response["output"] = json!([
+                    {
+                        "content": content
+                    }
+                ]);
+            }
+            response
+        }
+        None => json!({
+            "output": [
+                {
+                    "content": content
+                }
+            ]
+        }),
+    }
+}
+
 fn parse_streaming_response_body(body: &str) -> Result<StreamingCallRecord, MarketingLlmError> {
     let mut deltas = String::new();
     let mut done_parts = Vec::new();
@@ -950,6 +998,10 @@ fn validate_provider(provider: &str) -> Result<(), MarketingLlmError> {
     }
 }
 
+fn prefers_streaming(provider: &str) -> bool {
+    matches!(provider, "cliproxyapi")
+}
+
 fn resolve_base_url(provider: &str) -> String {
     match provider {
         "cliproxyapi" => std::env::var("CLIPROXYAPI_BASE_URL")
@@ -961,9 +1013,12 @@ fn resolve_base_url(provider: &str) -> String {
 
 fn resolve_api_key(provider: &str) -> Result<String, MarketingLlmError> {
     match provider {
-        "cliproxyapi" => Ok(std::env::var("CLIPROXYAPI_API_KEY")
+        "cliproxyapi" => std::env::var("CLIPROXYAPI_API_KEY")
             .or_else(|_| std::env::var("OPENAI_API_KEY"))
-            .unwrap_or_else(|_| "sk-dummy".into())),
+            .map_err(|_| MarketingLlmError::MissingApiKey {
+                provider: provider.into(),
+                env_hint: "CLIPROXYAPI_API_KEY or OPENAI_API_KEY".into(),
+            }),
         _ => std::env::var("OPENAI_API_KEY").map_err(|_| MarketingLlmError::MissingApiKey {
             provider: provider.into(),
             env_hint: "OPENAI_API_KEY".into(),

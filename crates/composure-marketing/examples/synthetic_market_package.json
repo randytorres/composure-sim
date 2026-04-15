@@ -1,0 +1,121 @@
+{
+  "market": {
+    "name": "Mirrorlife",
+    "version": "0.1.0",
+    "currency": "USD",
+    "region": "US"
+  },
+  "segments": [
+    {
+      "segment_id": "glp1_outcomes",
+      "name": "GLP-1 Outcomes Seeker",
+      "priority": "primary",
+      "share_prior": 0.6,
+      "adjacent_to": [
+        "privacy_first_tracker"
+      ],
+      "description": "Users who want proof and less guesswork."
+    },
+    {
+      "segment_id": "privacy_first_tracker",
+      "name": "Privacy-First Tracker",
+      "priority": "secondary",
+      "share_prior": 0.4,
+      "adjacent_to": [
+        "glp1_outcomes"
+      ],
+      "description": "Users who convert only when the system feels private and worth the setup."
+    }
+  ],
+  "overlap_assumptions": [
+    {
+      "from_segment": "glp1_outcomes",
+      "to_segment": "privacy_first_tracker",
+      "overlap_score": 0.3
+    }
+  ],
+  "frictions": [
+    {
+      "friction_id": "manual_logging_burden",
+      "label": "Manual Logging Burden",
+      "description": "High logging requirements can suppress activation and retention.",
+      "default_impact": {
+        "signup_penalty": 0.08,
+        "activation_penalty": 0.18,
+        "retention_penalty": 0.22
+      },
+      "segment_modifiers": {
+        "glp1_outcomes": 1.0,
+        "privacy_first_tracker": 1.1
+      }
+    }
+  ],
+  "value_drivers": [
+    {
+      "driver_id": "weekly_proof",
+      "label": "Weekly Proof",
+      "description": "The system quickly shows what changed and what likely contributed.",
+      "segment_lift": {
+        "glp1_outcomes": 1.3,
+        "privacy_first_tracker": 0.9
+      }
+    }
+  ],
+  "channels": [
+    {
+      "channel_id": "landing_page",
+      "role": "conversion",
+      "fit_notes": [
+        "Must explain value fast"
+      ],
+      "reach_priority": "high",
+      "trust_base": 0.72,
+      "creator_lift": 0.0,
+      "friction_tolerance": 0.5
+    }
+  ],
+  "campaign_variants": [
+    {
+      "variant_id": "peptide_glp1_wedge",
+      "role": "control",
+      "summary": "Track what you're taking and see what is actually changing.",
+      "best_for_segments": [
+        "glp1_outcomes"
+      ],
+      "channel_fit": [
+        "landing_page"
+      ],
+      "supports_value_drivers": [
+        "weekly_proof"
+      ],
+      "exposed_frictions": [
+        "manual_logging_burden"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "immediate_wedge_testing",
+      "goal": "Determine the best immediate wedge.",
+      "decision": "Choose a control.",
+      "primary_segments": [
+        "glp1_outcomes"
+      ],
+      "secondary_segments": [
+        "privacy_first_tracker"
+      ],
+      "campaign_variants": [
+        "peptide_glp1_wedge"
+      ],
+      "channels": [
+        "landing_page"
+      ],
+      "key_questions": [
+        "Which wedge converts best?"
+      ],
+      "success_metrics": [
+        "signup_rate"
+      ]
+    }
+  ]
+}

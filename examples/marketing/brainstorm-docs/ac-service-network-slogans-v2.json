@@ -1,0 +1,327 @@
+{
+  "project": {
+    "name": "Advanced Cultivators — Service Network Slogans",
+    "description": "Brainstorm and rank slogan candidates for the AC brand. Each approach is a distinct slogan option evaluated against brand-fit personas representing core AC audiences: growers, dispensary partners, culture-forward consumers, community advocates, and tactical operators.",
+    "category": "cannabis brand",
+    "competitors": ["cookies", "jungle boys", "connected cannabis", "black rifle coffee (adjacent)"],
+    "platform_context": ["instagram", "in-store", "packaging", "merch", "event signage", "tactical/gym communities"],
+    "constraints": [
+      "no cannabis clichés (no 420 puns, no leaf iconography language)",
+      "must feel premium and editorial, never dispensary-generic",
+      "must honor Latino heritage without tokenizing",
+      "must resonate with first-responder service ethos and warrior/tactical mindset",
+      "should work equally well on a hoodie, a dispensary wall wrap, and a social post"
+    ],
+    "tags": ["slogan", "brand identity", "AC", "service network", "tactical"]
+  },
+
+  "personas": [
+    {
+      "id": "grower",
+      "name": "Head Grower",
+      "type": "operator",
+      "psychographics": {
+        "goals": ["recognition for craft", "industry credibility", "supply partnerships"]
+      },
+      "relationship": "core collaborator",
+      "jobs": ["validate quality claims", "signal expertise"],
+      "preferences": ["substance over flash", "grower-first language"],
+      "objections": ["lifestyle branding that ignores the plant", "hype without craft"],
+      "channels": ["instagram", "in-store"],
+      "conversion_barriers": ["brand feels corporate or fake"],
+      "trust_signals": ["founder grows", "genetics transparency"],
+      "price_sensitivity": 0.15,
+      "proof_threshold": 0.6,
+      "privacy_sensitivity": 0.05
+    },
+    {
+      "id": "dispensary-buyer",
+      "name": "Dispensary Buyer / Partner",
+      "type": "retail partner",
+      "psychographics": {
+        "goals": ["margin", "brand pull-through", "differentiation on shelf"]
+      },
+      "relationship": "prospective partner",
+      "jobs": ["curate top-shelf selection", "drive repeat visits"],
+      "preferences": ["clean branding", "sell-through data", "premium shelf presence"],
+      "objections": ["unproven brand", "niche audience only"],
+      "channels": ["in-store", "linkedin", "trade events"],
+      "conversion_barriers": ["slogan feels niche or alienating to broad customer base"],
+      "trust_signals": ["NECANN presence", "real sales velocity"],
+      "price_sensitivity": 0.4,
+      "proof_threshold": 0.7,
+      "privacy_sensitivity": 0.1
+    },
+    {
+      "id": "culture-consumer",
+      "name": "Culture-Forward Consumer",
+      "type": "end consumer",
+      "psychographics": {
+        "goals": ["identity expression", "quality experience", "community belonging"]
+      },
+      "relationship": "brand-curious",
+      "jobs": ["find a brand that represents me", "discover premium flower"],
+      "preferences": ["aesthetic excellence", "story-driven brands", "authenticity"],
+      "objections": ["tryhard vibes", "corporate cannabis", "cultural appropriation"],
+      "channels": ["instagram", "merch", "events"],
+      "conversion_barriers": ["slogan feels generic or forgettable"],
+      "trust_signals": ["founder story", "heritage connection", "community receipts"],
+      "price_sensitivity": 0.3,
+      "proof_threshold": 0.4,
+      "privacy_sensitivity": 0.15
+    },
+    {
+      "id": "community-advocate",
+      "name": "Community Advocate / First-Responder Ally",
+      "type": "community",
+      "psychographics": {
+        "goals": ["support mission-driven brands", "representation in the industry"]
+      },
+      "relationship": "values-aligned supporter",
+      "jobs": ["amplify brands that give back", "find authentic representation"],
+      "preferences": ["service language", "heritage pride", "action over words"],
+      "objections": ["performative DEI", "hollow slogans"],
+      "channels": ["instagram", "community events", "word of mouth"],
+      "conversion_barriers": ["slogan feels like marketing speak, not lived experience"],
+      "trust_signals": ["founder is a firefighter", "real community investment"],
+      "price_sensitivity": 0.2,
+      "proof_threshold": 0.55,
+      "privacy_sensitivity": 0.1
+    },
+    {
+      "id": "tactical-operator",
+      "name": "Tactical / Combat Athlete",
+      "type": "niche consumer",
+      "psychographics": {
+        "goals": ["performance recovery", "mental resilience", "challenge completion", "disciplined living"]
+      },
+      "relationship": "brand-curious",
+      "jobs": ["find recovery tools", "align with gritty, zero-excuse brands"],
+      "preferences": ["military aesthetic", "performance language", "stoicism", "grind mentality"],
+      "objections": ["lazy stoner tropes", "soft lifestyle branding", "unearned toughness"],
+      "channels": ["instagram", "gym/dojo word of mouth", "tactical events"],
+      "conversion_barriers": ["brand doesn't feel intense or serious enough"],
+      "trust_signals": ["veteran/responder owned", "Jocko/Goggins style communication", "shooting/combat sports proof points"],
+      "price_sensitivity": 0.2,
+      "proof_threshold": 0.8,
+      "privacy_sensitivity": 0.25
+    }
+  ],
+
+  "approaches": [
+    {
+      "id": "slogan-service-runs-deep",
+      "angle": "Service Runs Deep.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "merch", "in-store", "event signage"],
+      "tone": "stoic, earned authority",
+      "target": "all personas — grower credibility meets first-responder ethos",
+      "proof_points": ["founder is an active firefighter", "service as the brand's origin"],
+      "objection_handlers": ["grounded in founder's real life, not marketing invention"],
+      "cta": "brand recall / identity anchor"
+    },
+    {
+      "id": "slogan-built-by-hand-backed-by-fire",
+      "angle": "Built by Hand. Backed by Fire.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "merch", "in-store", "packaging"],
+      "tone": "gritty, premium, dual-meaning",
+      "target": "growers and culture consumers — craft + first-responder fusion",
+      "proof_points": ["hand-grown craft cannabis", "firefighter founder"],
+      "objection_handlers": ["fire is literal biography, not borrowed metaphor"],
+      "cta": "brand recall / merch hook"
+    },
+    {
+      "id": "slogan-from-the-roots",
+      "angle": "From the Roots.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "merch", "packaging", "event signage"],
+      "tone": "understated, heritage-forward, organic",
+      "target": "heritage-proud consumers + growers — dual meaning of botanical and cultural roots",
+      "proof_points": ["Latino heritage", "from-the-ground-up entrepreneurship", "actual plant cultivation"],
+      "objection_handlers": ["botanical accuracy + cultural authenticity, not a cliché"],
+      "cta": "brand recall / identity anchor"
+    },
+    {
+      "id": "slogan-where-craft-meets-culture",
+      "angle": "Where Craft Meets Culture.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "in-store", "event signage"],
+      "tone": "editorial, premium positioning",
+      "target": "dispensary partners + culture consumers — bridges quality and identity",
+      "proof_points": ["premium genetics program", "Mesoamerican/Mass Ave aesthetic"],
+      "objection_handlers": ["specific cultural grounding, not vague multiculturalism"],
+      "cta": "brand positioning / shelf differentiation"
+    },
+    {
+      "id": "slogan-grow-different",
+      "angle": "Grow Different.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "merch", "packaging"],
+      "tone": "defiant, concise, challenger brand energy",
+      "target": "culture consumers + advocates — signals disruption without cliché",
+      "proof_points": ["minority-owned in a whitewashed industry", "craft against corporate"],
+      "objection_handlers": ["echoes 'think different' energy without direct copy"],
+      "cta": "brand recall / movement rallying cry"
+    },
+    {
+      "id": "slogan-advanced-by-nature",
+      "angle": "Advanced by Nature.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "in-store", "packaging", "event signage"],
+      "tone": "confident, clean, name-integrated",
+      "target": "dispensary buyers + broad consumer — ties brand name to quality promise",
+      "proof_points": ["name integration", "implies genetics innovation and natural growing"],
+      "objection_handlers": ["name-derived slogans risk feeling corporate — needs strong visual pairing"],
+      "cta": "brand recall / packaging headline"
+    },
+    {
+      "id": "slogan-we-dont-cut-corners-we-grow-through-them",
+      "angle": "We Don't Cut Corners. We Grow Through Them.",
+      "format": "slogan / tagline (extended)",
+      "channels": ["instagram", "event signage", "about-us copy"],
+      "tone": "conversational grit, founder-voice",
+      "target": "growers + advocates — speaks to hustle and craft integrity",
+      "proof_points": ["bootstrapped brand", "hands-on growing process"],
+      "objection_handlers": ["slightly long for merch — best as campaign copy or hero text"],
+      "cta": "brand story / manifesto hook"
+    },
+    {
+      "id": "slogan-fuego-from-the-block",
+      "angle": "Fuego From the Block.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "merch", "event signage"],
+      "tone": "bilingual swagger, street-premium",
+      "target": "culture consumers + community advocates — bilingual heritage pride",
+      "proof_points": ["fuego = fire (literal firefighter tie)", "Mass Ave block identity"],
+      "objection_handlers": ["bilingual must feel earned, not borrowed — founders are Latino"],
+      "cta": "brand recall / merch hook / community rallying cry"
+    },
+    {
+      "id": "slogan-zero-compromise",
+      "angle": "Zero Compromise.",
+      "format": "slogan / tagline",
+      "channels": ["merch", "packaging", "instagram", "tactical events"],
+      "tone": "tactical, absolute, intense",
+      "target": "tactical operators + growers — signals military-grade standards",
+      "proof_points": ["first-responder precision", "craft genetics"],
+      "objection_handlers": ["applies directly to both combat training and cultivation standards"],
+      "cta": "brand recall / standard setting"
+    },
+    {
+      "id": "slogan-cultivated-by-discipline",
+      "angle": "Cultivated by Discipline.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "merch", "in-store"],
+      "tone": "process-oriented, stoic, grind-focused",
+      "target": "combat athletes + growers — equates fitness/training to grow room rigor",
+      "proof_points": ["relentless work ethic", "pheno hunting process"],
+      "objection_handlers": ["rejects the lazy stoner stereotype completely"],
+      "cta": "brand resonance / lifestyle alignment"
+    },
+    {
+      "id": "slogan-always-in-the-fight",
+      "angle": "Always in the Fight.",
+      "format": "slogan / tagline",
+      "channels": ["merch", "social hooks", "tactical events"],
+      "tone": "gritty, resilient, combat-focused",
+      "target": "tactical operators + community advocates — resilience under fire",
+      "proof_points": ["first-responder shifts", "bootstrapping a craft brand in a tough market"],
+      "objection_handlers": ["honors the struggle without being unearned"],
+      "cta": "community rallying cry"
+    },
+    {
+      "id": "slogan-earn-your-fire",
+      "angle": "Earn Your Fire.",
+      "format": "slogan / tagline",
+      "channels": ["instagram", "merch", "event signage", "gym collabs"],
+      "tone": "motivational, challenge-based",
+      "target": "tactical operators + culture consumers — reward after the grind",
+      "proof_points": ["fire = both literal product and inward drive/intensity"],
+      "objection_handlers": ["positions the product as a reward for hard work/training, not an escape"],
+      "cta": "challenge completion / merch hook"
+    },
+    {
+      "id": "slogan-forged-not-found",
+      "angle": "Forged, Not Found.",
+      "format": "slogan / tagline",
+      "channels": ["merch", "packaging", "social hooks"],
+      "tone": "premium, industrial, tactical",
+      "target": "growers + tactical operators — emphasizes the work behind the genetics",
+      "proof_points": ["hands-on pheno hunting", "no white-labeling"],
+      "objection_handlers": ["speaks to the gym/range mentality of building yourself vs buying it"],
+      "cta": "brand recall / packaging headline"
+    }
+  ],
+
+  "channels": [
+    {
+      "channel": "instagram",
+      "norms": ["visual-first", "story-driven", "aesthetic cohesion", "training clips"],
+      "constraints": ["glanceable", "must pair with strong imagery"],
+      "relative_weight": 1.0
+    },
+    {
+      "channel": "in-store",
+      "norms": ["wall-wrap scale", "shelf talkers", "premium environment"],
+      "constraints": ["must read from 6+ feet", "no fine print"],
+      "relative_weight": 0.9
+    },
+    {
+      "channel": "merch",
+      "norms": ["wearable", "identity signal", "conversation starter", "gym wear"],
+      "constraints": ["max ~4-5 words for hoodie/tee print"],
+      "relative_weight": 0.85
+    },
+    {
+      "channel": "packaging",
+      "norms": ["regulatory constraints", "small print area", "shelf standout"],
+      "constraints": ["must work at small scale", "compliant"],
+      "relative_weight": 0.8
+    },
+    {
+      "channel": "event signage",
+      "norms": ["NECANN booth scale", "banner readability", "crowd-stopping"],
+      "constraints": ["large format", "instant read"],
+      "relative_weight": 0.75
+    }
+  ],
+
+  "audience_weighting": [
+    { "persona_id": "grower", "weight": 1.0 },
+    { "persona_id": "dispensary-buyer", "weight": 0.9 },
+    { "persona_id": "culture-consumer", "weight": 1.1 },
+    { "persona_id": "community-advocate", "weight": 1.05 },
+    { "persona_id": "tactical-operator", "weight": 1.15 }
+  ],
+
+  "scenario": {
+    "name": "AC Service-Network Slogan Brainstorm (Expanded Tactical)",
+    "description": "Rank 13 candidate slogans against AC brand pillars: grower credibility, Latino heritage, first-responder service DNA, tactical/warrior mindset, and premium craft positioning. Identify which slogans resonate strongest across personas and channels.",
+    "scenario_type": "in_store_enablement",
+    "time_steps": 4,
+    "objectives": []
+  },
+
+  "evaluator": {
+    "provider": "cliproxyapi",
+    "model": "gpt-5.4",
+    "reasoning_effort": "high"
+  },
+
+  "llm_assist": {
+    "enabled": true,
+    "analysis_goal": "Rank the 13 slogan candidates by overall brand-fit across all personas. For each slogan, assess: (1) memorability, (2) alignment with AC's pillars (grower craft, Latino heritage, first-responder/veteran service, tactical mindset), (3) versatility, (4) cliché avoidance, and (5) emotional resonance. Recommend the top 3 slogans for the core brand and top 2 for tactical/gym subsets.",
+    "max_output_tokens": 2000
+  },
+
+  "observed_outcomes": [],
+
+  "output": {
+    "include_persona_breakdown": true,
+    "include_metric_breakdown": true,
+    "include_mean_trajectory": true
+  },
+
+  "simulation_size": 64
+}
