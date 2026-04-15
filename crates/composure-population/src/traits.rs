@@ -72,16 +72,33 @@ impl TraitDistribution {
             DistributionType::Uniform => {
                 let min = config.params.get("min").copied().unwrap_or(0.0);
                 let max = config.params.get("max").copied().unwrap_or(1.0);
+                if max < min {
+                    return Err(TraitError::InvalidRange {
+                        name: "Uniform".to_string(),
+                        min,
+                        max,
+                    });
+                }
                 Ok(Self::Uniform { min, max })
             }
             DistributionType::Normal => {
                 let mean = config.params.get("mean").copied().unwrap_or(0.5);
                 let stddev = config.params.get("stddev").copied().unwrap_or(0.2);
+                if stddev <= 0.0 {
+                    return Err(TraitError::InvalidStddev { name: "Normal".to_string(), value: stddev });
+                }
                 Ok(Self::Normal { mean, stddev })
             }
             DistributionType::Beta => {
                 let alpha = config.params.get("alpha").copied().unwrap_or(2.0);
                 let beta = config.params.get("beta").copied().unwrap_or(2.0);
+                if alpha <= 0.0 || beta <= 0.0 {
+                    return Err(TraitError::InvalidShape {
+                        name: "Beta".to_string(),
+                        alpha,
+                        beta,
+                    });
+                }
                 Ok(Self::Beta { alpha, beta })
             }
             DistributionType::TruncatedNormal => {
@@ -89,6 +106,19 @@ impl TraitDistribution {
                 let stddev = config.params.get("stddev").copied().unwrap_or(0.2);
                 let lo = config.params.get("lo").copied().unwrap_or(0.0);
                 let hi = config.params.get("hi").copied().unwrap_or(1.0);
+                if stddev <= 0.0 {
+                    return Err(TraitError::InvalidStddev {
+                        name: "TruncatedNormal".to_string(),
+                        value: stddev,
+                    });
+                }
+                if hi < lo {
+                    return Err(TraitError::InvalidRange {
+                        name: "TruncatedNormal".to_string(),
+                        min: lo,
+                        max: hi,
+                    });
+                }
                 Ok(Self::TruncatedNormal { mean, stddev, lo, hi })
             }
             DistributionType::Categorical => {
@@ -106,7 +136,52 @@ impl TraitDistribution {
                 if options.is_empty() {
                     return Err(TraitError::CategoricalNeedsOptions);
                 }
+                if options.iter().any(|(_, weight)| *weight <= 0.0) {
+                    return Err(TraitError::InvalidCategoricalWeight);
+                }
                 Ok(Self::Categorical { options })
+            }
+        }
+    }
+
+    /// Return (mean, stddev) estimate for each distribution type.
+    /// Used by the population generator to seed the correlated sampler.
+    pub fn mean_stddev(&self) -> (f64, f64) {
+        match self {
+            Self::Uniform { min, max } => ((min + max) / 2.0, (max - min) / (2.0 * 1.732_f64.sqrt())),
+            Self::Normal { mean, stddev } => (*mean, *stddev),
+            Self::Beta { alpha, beta } => {
+                let denom = alpha + beta;
+                (alpha / denom, (alpha * beta / (denom * denom * (denom + 1.0))).sqrt())
+            }
+            Self::TruncatedNormal { mean, stddev, .. } => (*mean, *stddev),
+            // Categorical: use weighted average of option values as proxy mean
+            Self::Categorical { options } => {
+                if options.is_empty() {
+                    return (0.5, 0.2);
+                }
+                let total: f64 = options.iter().map(|(_, w)| w).sum();
+                let mean = options.iter().map(|(name, w)| {
+                    // Map categorical index to a continuous value (0-1 scale)
+                    let idx = options.iter().position(|(n, _)| n == name).unwrap() as f64;
+                    let normalized = idx / (options.len() - 1).max(1) as f64;
+                    normalized * w / total
+                }).sum::<f64>();
+                (mean, 0.2)
+            }
+        }
+    }
+
+    /// Clamp a sampled continuous value into the distribution's supported range when known.
+    pub fn clamp_continuous(&self, value: f64) -> f64 {
+        match self {
+            Self::Uniform { min, max } => value.clamp(*min, *max),
+            Self::Beta { .. } => value.clamp(0.0, 1.0),
+            Self::TruncatedNormal { lo, hi, .. } => value.clamp(*lo, *hi),
+            Self::Normal { .. } => value,
+            Self::Categorical { options } => {
+                let max_index = options.len().saturating_sub(1) as f64;
+                value.clamp(0.0, max_index.max(1.0))
             }
         }
     }
@@ -115,9 +190,12 @@ impl TraitDistribution {
     pub fn sample<R: Rng>(&self, rng: &mut R) -> TraitValue {
         match self {
             Self::Uniform { min, max } => TraitValue::Continuous(min + rng.gen::<f64>() * (max - min)),
-            Self::Normal { mean, stddev } => TraitValue::Continuous(rng.sample(rand_distr::Normal::new(*mean, *stddev).unwrap())),
+            Self::Normal { mean, stddev } => {
+                let n = rand_distr::Normal::new(*mean, *stddev)
+                    .expect("Normal distribution created with validated params");
+                TraitValue::Continuous(rng.sample(n))
+            }
             Self::Beta { alpha, beta } => {
-                // Sample from Beta using gamma method
                 let x = sample_beta_internal(rng, *alpha, *beta);
                 TraitValue::Continuous(x)
             }
@@ -135,7 +213,6 @@ impl TraitDistribution {
                         return TraitValue::Categorical(name.clone());
                     }
                 }
-                // Fallback to last option
                 TraitValue::Categorical(options.last().unwrap().0.clone())
             }
         }
@@ -216,6 +293,14 @@ pub enum TraitError {
     UnknownDistribution(String),
     #[error("categorical distribution requires at least one option")]
     CategoricalNeedsOptions,
+    #[error("stddev must be positive, got {value} for trait `{name}`")]
+    InvalidStddev { name: String, value: f64 },
+    #[error("range is invalid for trait `{name}`: min={min}, max={max}")]
+    InvalidRange { name: String, min: f64, max: f64 },
+    #[error("shape parameters must be positive for trait `{name}`: alpha={alpha}, beta={beta}")]
+    InvalidShape { name: String, alpha: f64, beta: f64 },
+    #[error("categorical option weights must be positive")]
+    InvalidCategoricalWeight,
 }
 
 #[cfg(test)]
@@ -257,6 +342,21 @@ mod tests {
             let f = val.as_f64();
             assert!(f >= 0.0 && f <= 1.0);
         }
+    }
+
+    #[test]
+    fn test_invalid_stddev_rejected() {
+        let mut params = BTreeMap::new();
+        params.insert("mean".to_string(), 0.5);
+        params.insert("stddev".to_string(), 0.0);
+        let config = crate::blueprint::TraitDistributionConfig {
+            distribution_type: "normal".to_string(),
+            params,
+        };
+        assert!(matches!(
+            TraitDistribution::from_config(&config),
+            Err(TraitError::InvalidStddev { .. })
+        ));
     }
 
     #[test]

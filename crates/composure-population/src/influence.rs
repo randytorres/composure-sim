@@ -131,10 +131,12 @@ impl InfluencePropagator {
         // BFS-like propagation over hops
         let mut frontier: HashMap<String, f64> = seeds.iter().map(|id| (id.clone(), 1.0)).collect();
         let mut visited: std::collections::HashSet<String> = seeds.iter().cloned().collect();
+        let total_steps = num_steps.min(self.config.max_hops);
 
-        for hop in 1..=self.config.max_hops {
+        for hop in 1..=total_steps {
             let mut next_frontier: HashMap<String, f64> = HashMap::new();
-            let _magnitude = (self.config.hop_decay.powi(hop as i32 - 1)) as f64;
+            // hop_decay is applied: magnitude at hop H = hop_decay^(H-1)
+            let hop_decay_factor = self.config.hop_decay.powi(hop as i32 - 1);
 
             for (current_id, current_mag) in &frontier {
                 if let Some(neighbors) = graph.adjacency.get(current_id) {
@@ -150,7 +152,8 @@ impl InfluencePropagator {
                             .map(|e| e.weight)
                             .unwrap_or(0.5);
 
-                        let effective_mag = current_mag * weight * self.config.edge_weight_boost;
+                        // Apply hop_decay: influence decays per hop
+                        let effective_mag = current_mag * weight * self.config.edge_weight_boost * hop_decay_factor;
                         if effective_mag < 0.05 {
                             continue; // too weak to propagate
                         }
@@ -182,6 +185,15 @@ impl InfluencePropagator {
                     }
                 }
             }
+
+            // Only skepticism propagation should decay the accumulated skepticism
+            // state over time; other influence types should not mutate it.
+            if matches!(influence_type, InfluenceType::Skepticism) {
+                for state in buyer_states.values_mut() {
+                    state.skepticism_score *= self.config.skepticism_decay;
+                }
+            }
+
             frontier = next_frontier;
         }
 
@@ -189,6 +201,7 @@ impl InfluencePropagator {
     }
 
     /// Compute trust delta for each buyer based on their influence state.
+    /// skepticism_decay moderates how much accumulated skepticism penalizes trust.
     pub fn compute_trust_delta(
         &self,
         influence_state: &BuyerInfluenceState,
@@ -260,5 +273,23 @@ mod tests {
         // B should receive influence from A (weight=1.0, mag=1.0)
         let b_exp = states.get("B").unwrap().exposure_score;
         assert!(b_exp > 0.0, "B should receive influence from A");
+    }
+
+    #[test]
+    fn test_num_steps_caps_propagation_depth() {
+        let prop = InfluencePropagator::new(InfluenceConfig { max_hops: 3, ..Default::default() });
+        let mut rng = rand::rngs::StdRng::seed_from_u64(42);
+        let mut graph = SocialGraph::default();
+        graph.adjacency.insert("A".to_string(), vec!["B".to_string()]);
+        graph.adjacency.insert("B".to_string(), vec!["C".to_string()]);
+        graph.adjacency.insert("C".to_string(), vec![]);
+        graph.reverse_adjacency.insert("B".to_string(), vec!["A".to_string()]);
+        graph.reverse_adjacency.insert("C".to_string(), vec!["B".to_string()]);
+        graph.edges.push(Edge::new("A".to_string(), "B".to_string(), EdgeKind::Follow, 1.0));
+        graph.edges.push(Edge::new("B".to_string(), "C".to_string(), EdgeKind::Follow, 1.0));
+
+        let (_, states) = prop.propagate(&graph, &["A".to_string()], InfluenceType::Exposure, 1, &mut rng);
+        assert!(states.get("B").unwrap().exposure_score > 0.0);
+        assert_eq!(states.get("C").unwrap().exposure_score, 0.0);
     }
 }

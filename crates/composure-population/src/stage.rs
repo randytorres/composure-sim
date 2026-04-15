@@ -17,8 +17,10 @@ pub struct TransitionCondition {
     pub min_exposures: Option<usize>,
     /// Minimum proof score required (from influence propagator).
     pub min_proof_score: Option<f64>,
-    /// Minimum skepticism score before downgrade.
+    /// Minimum skepticism score required (for downgrade transitions).
     pub min_skepticism_score: Option<f64>,
+    /// Maximum skepticism score allowed (for upgrade transitions).
+    pub max_skepticism_score: Option<f64>,
     /// Buyer must have purchased at least this many times.
     pub min_purchases: Option<usize>,
     /// Number of churn events required to trigger downgrade.
@@ -76,6 +78,11 @@ impl TransitionRule {
         }
         if let Some(min_skep) = self.condition.min_skepticism_score {
             if skepticism_score < min_skep {
+                return None;
+            }
+        }
+        if let Some(max_skep) = self.condition.max_skepticism_score {
+            if skepticism_score > max_skep {
                 return None;
             }
         }
@@ -149,18 +156,23 @@ impl StageTransitionEngine {
                 condition: TransitionCondition { min_exposures: Some(5), ..Default::default() },
                 probability: 0.7,
             },
-            // ActiveTracker → Evaluator: seen proof, trust building
+            // ActiveTracker → Evaluator: trust building, proof accumulating
             TransitionRule {
                 from_stage: SegmentStage::ActiveTracker,
                 to_stage: SegmentStage::Evaluator,
                 condition: TransitionCondition { min_trust: Some(0.4), min_proof_score: Some(2.0), ..Default::default() },
                 probability: 0.6,
             },
-            // Evaluator → Buyer: trust high enough, skeptical not dominant
+            // Evaluator → Buyer: trust high enough, skepticism LOW enough (not skeptical-dominant)
             TransitionRule {
                 from_stage: SegmentStage::Evaluator,
                 to_stage: SegmentStage::Buyer,
-                condition: TransitionCondition { min_trust: Some(0.65), min_proof_score: Some(3.0), min_skepticism_score: Some(1.0), ..Default::default() },
+                condition: TransitionCondition {
+                    min_trust: Some(0.65),
+                    min_proof_score: Some(3.0),
+                    max_skepticism_score: Some(2.5),
+                    ..Default::default()
+                },
                 probability: 0.5,
             },
             // Buyer → Advocate: 2+ purchases, trust holds
@@ -170,31 +182,35 @@ impl StageTransitionEngine {
                 condition: TransitionCondition { min_purchases: Some(2), min_trust: Some(0.7), ..Default::default() },
                 probability: 0.4,
             },
-            // Any stage → ChurnRiskSkeptic: trust drops too low OR 2+ churn events
+            // Any stage → ChurnRiskSkeptic: 2+ churn events
             TransitionRule {
                 from_stage: SegmentStage::CuriousObserver,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
                 condition: TransitionCondition { min_churns: Some(2), ..Default::default() },
                 probability: 1.0,
             },
+            // ActiveTracker → ChurnRiskSkeptic: trust collapsed
             TransitionRule {
                 from_stage: SegmentStage::ActiveTracker,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
                 condition: TransitionCondition { max_trust: Some(0.15), ..Default::default() },
                 probability: 1.0,
             },
+            // Evaluator → ChurnRiskSkeptic: skepticism too dominant
             TransitionRule {
                 from_stage: SegmentStage::Evaluator,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
                 condition: TransitionCondition { min_skepticism_score: Some(5.0), ..Default::default() },
                 probability: 0.8,
             },
+            // Buyer → ChurnRiskSkeptic: churn or trust collapse
             TransitionRule {
                 from_stage: SegmentStage::Buyer,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
                 condition: TransitionCondition { min_churns: Some(1), max_trust: Some(0.2), ..Default::default() },
                 probability: 0.9,
             },
+            // Advocate → ChurnRiskSkeptic: multiple churn events or trust collapse
             TransitionRule {
                 from_stage: SegmentStage::Advocate,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
@@ -213,6 +229,7 @@ impl Default for TransitionCondition {
             min_exposures: None,
             min_proof_score: None,
             min_skepticism_score: None,
+            max_skepticism_score: None,
             min_purchases: None,
             min_churns: None,
         }
@@ -277,18 +294,18 @@ mod tests {
     }
 
     #[test]
-    fn test_evaluator_to_buyer() {
+    fn test_evaluator_to_buyer_low_skeptic() {
         let engine = StageTransitionEngine::biohacker_default();
-        // Evaluator → Buyer: trust >= 0.65, proof >= 3.0, skept >= 1.0, prob = 0.5
-        // Try multiple seeds until one fires the transition
+        // Evaluator → Buyer: trust >= 0.65, proof >= 3.0, skepticism <= 2.5
+        // A skeptical buyer (score=3.0) should NOT convert; a confident one (0.5) should
         for seed in [42u64, 7, 13, 99, 123, 456] {
             let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
             let new_stage = engine.evaluate(
                 SegmentStage::Evaluator,
-                0.7,
+                0.7,  // min_trust = 0.65 ✓
                 20,
-                4.0,
-                2.0,
+                4.0,  // min_proof_score = 3.0 ✓
+                1.5,  // max_skepticism_score = 2.5 ✓ (low skeptic passes)
                 0,
                 0,
                 &mut rng,
@@ -297,6 +314,50 @@ mod tests {
                 return;
             }
         }
-        panic!("no seed produced a Buyer transition");
+        panic!("no seed produced a Buyer transition for low-skepticism evaluator");
+    }
+
+    #[test]
+    fn test_evaluator_to_buyer_rejected_high_skeptic() {
+        let engine = StageTransitionEngine::biohacker_default();
+        // High skepticism (3.0) exceeds max_skepticism_score = 2.5 → must stay Evaluator
+        // Give many seeds; with max_skep=2.5, rule never fires
+        for seed in [42u64, 7, 13, 99, 123, 456] {
+            let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
+            let new_stage = engine.evaluate(
+                SegmentStage::Evaluator,
+                0.7,
+                20,
+                4.0,
+                3.0,  // exceeds max_skepticism_score = 2.5 → blocked
+                0,
+                0,
+                &mut rng,
+            );
+            // Cannot convert with high skepticism
+            assert!(!matches!(new_stage, SegmentStage::Buyer), "high skepticism should block conversion (seed={})", seed);
+        }
+    }
+
+    #[test]
+    fn test_evaluator_to_churn_requires_high_skepticism() {
+        let engine = StageTransitionEngine::biohacker_default();
+        for seed in [42u64, 7, 13, 99, 123, 456] {
+            let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
+            let new_stage = engine.evaluate(
+                SegmentStage::Evaluator,
+                0.6,
+                10,
+                2.0,
+                5.5,
+                0,
+                0,
+                &mut rng,
+            );
+            if matches!(new_stage, SegmentStage::ChurnRiskSkeptic) {
+                return;
+            }
+        }
+        panic!("no seed produced a churn-risk transition for a highly skeptical evaluator");
     }
 }

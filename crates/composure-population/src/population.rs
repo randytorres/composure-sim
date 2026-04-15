@@ -3,7 +3,9 @@
 //! Expands a set of `SegmentBlueprint`s into N buyers (10k–100k) with stable IDs
 //! and seeded reproducibility.
 
-use crate::{blueprint::SegmentBlueprint, buyer::Buyer, traits::TraitDistribution};
+use crate::correlated::CorrelatedTraitSampler;
+use crate::traits::TraitDistribution;
+use crate::{blueprint::SegmentBlueprint, buyer::Buyer};
 use rand::{Rng, RngCore, SeedableRng};
 use rand_chacha::ChaCha12Rng;
 use serde::{Deserialize, Serialize};
@@ -29,8 +31,8 @@ pub struct PopulationConfig {
     pub target_count: usize,
     /// Whether to use correlated trait sampling (per segment).
     pub use_correlation: bool,
-    /// If `use_correlation` is true, this maps segment id → correlation spec index.
-    /// Default behavior builds a zero-correlation sampler when not provided.
+    /// If `use_correlation` is true, maps segment id → correlation spec.
+    /// When a segment has no spec here, falls back to independent sampling.
     pub correlation_specs: BTreeMap<String, crate::correlated::CorrelationSpec>,
 }
 
@@ -78,6 +80,106 @@ pub struct SegmentSummary {
     pub trait_means: BTreeMap<String, f64>,
 }
 
+/// Per-segment sampler state kept during generation.
+struct SegmentSampler {
+    /// Independent distributions for every trait defined on the blueprint.
+    distributions: BTreeMap<String, TraitDistribution>,
+    /// Correlated sampler (if use_correlation is true and a spec is available).
+    correlated: Option<CorrelatedTraitSampler>,
+    /// Trait names covered by the correlated sampler, in stable order.
+    correlated_trait_names: Vec<String>,
+    /// Per-trait means used by the correlated sampler.
+    correlated_means: Vec<f64>,
+}
+
+impl SegmentSampler {
+    /// Build a sampler for a blueprint. Returns an error if any trait config is
+    /// invalid or the requested correlation spec is invalid.
+    fn new(
+        blueprint: &SegmentBlueprint,
+        use_correlation: bool,
+        spec: Option<&crate::correlated::CorrelationSpec>,
+    ) -> Result<Self, PopError> {
+        let mut distributions = BTreeMap::new();
+        for trait_name in blueprint.all_trait_names() {
+            let config = blueprint
+                .trait_distribution(&trait_name)
+                .ok_or_else(|| PopError::InvalidTraitConfig {
+                    trait_name: trait_name.clone(),
+                })?;
+            let dist = TraitDistribution::from_config(config).map_err(|_| PopError::InvalidTraitConfig {
+                trait_name: trait_name.clone(),
+            })?;
+            distributions.insert(trait_name, dist);
+        }
+
+        let correlated = if use_correlation {
+            if let Some(spec) = spec {
+                if spec.trait_names.is_empty() {
+                    return Err(PopError::InvalidCorrelationSpec(
+                        "correlation spec must include at least one trait".to_string(),
+                    ));
+                }
+                let mut stddevs = Vec::with_capacity(spec.trait_names.len());
+                let mut means = Vec::with_capacity(spec.trait_names.len());
+                for trait_name in &spec.trait_names {
+                    let dist = distributions.get(trait_name).ok_or_else(|| {
+                        PopError::InvalidCorrelationSpec(format!(
+                            "trait `{trait_name}` is not defined on blueprint `{}`",
+                            blueprint.id
+                        ))
+                    })?;
+                    let (mean, stddev) = dist.mean_stddev();
+                    means.push(mean);
+                    stddevs.push(stddev);
+                }
+                let sampler = CorrelatedTraitSampler::new(spec, &stddevs)
+                    .map_err(|e| PopError::InvalidCorrelationSpec(e.to_string()))?;
+                Some((sampler, spec.trait_names.clone(), means))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        let (correlated, correlated_trait_names, correlated_means) = correlated
+            .map(|(sampler, trait_names, means)| (Some(sampler), trait_names, means))
+            .unwrap_or_else(|| (None, Vec::new(), Vec::new()));
+
+        Ok(Self {
+            distributions,
+            correlated,
+            correlated_trait_names,
+            correlated_means,
+        })
+    }
+
+    /// Sample all traits for one buyer.
+    fn sample(&self, rng: &mut ChaCha12Rng) -> BTreeMap<String, f64> {
+        let mut traits = self
+            .distributions
+            .iter()
+            .map(|(name, dist)| (name.clone(), dist.sample(rng).as_f64()))
+            .collect::<BTreeMap<_, _>>();
+
+        if let Some(ref sampler) = self.correlated {
+            let correlated_values = sampler.sample(&self.correlated_means, rng);
+            for (trait_name, value) in self
+                .correlated_trait_names
+                .iter()
+                .zip(correlated_values.into_iter())
+            {
+                if let Some(dist) = self.distributions.get(trait_name) {
+                    traits.insert(trait_name.clone(), dist.clamp_continuous(value));
+                }
+            }
+        }
+
+        traits
+    }
+}
+
 /// Expand a set of blueprints into a `SyntheticPopulationSnapshot`.
 pub struct PopulationGenerator {
     config: PopulationConfig,
@@ -94,13 +196,21 @@ impl PopulationGenerator {
             return Err(PopError::NoBlueprints);
         }
 
-        // First pass: count total target
         let total_target: usize = blueprints.iter().map(|bp| bp.target_count).sum();
         if total_target == 0 {
             return Err(PopError::NoBlueprints);
         }
 
-        // Second pass: allocate buyers to blueprints proportionally
+        // Pre-build per-segment samplers
+        let segment_samplers: BTreeMap<String, SegmentSampler> = blueprints
+            .iter()
+            .map(|bp| {
+                let spec = self.config.correlation_specs.get(&bp.id);
+                let sampler = SegmentSampler::new(bp, self.config.use_correlation, spec)?;
+                Ok((bp.id.clone(), sampler))
+            })
+            .collect::<Result<_, _>>()?;
+
         let mut all_buyers: Vec<Buyer> = Vec::with_capacity(self.config.target_count);
         let mut segment_distribution: BTreeMap<String, usize> = BTreeMap::new();
         let mut global_idx = 0usize;
@@ -110,7 +220,8 @@ impl PopulationGenerator {
 
         for blueprint in blueprints {
             let count = self.proportional_count(blueprint.target_count, total_target);
-            let buyers = self.generate_for_blueprint(blueprint, count, &mut master_rng, global_idx);
+            let sampler = segment_samplers.get(&blueprint.id).expect("sampler built above");
+            let buyers = self.generate_for_blueprint(blueprint, count, sampler, &mut master_rng, global_idx);
             global_idx += buyers.len();
             segment_distribution.insert(blueprint.id.clone(), buyers.len());
             all_buyers.extend(buyers);
@@ -146,6 +257,7 @@ impl PopulationGenerator {
         &self,
         blueprint: &SegmentBlueprint,
         count: usize,
+        sampler: &SegmentSampler,
         master_rng: &mut ChaCha12Rng,
         start_idx: usize,
     ) -> Vec<Buyer> {
@@ -155,8 +267,8 @@ impl PopulationGenerator {
             let mut buyer_rng = ChaCha12Rng::seed_from_u64(buyer_seed);
             let buyer_id = BuyerId::new(&blueprint.id, start_idx + i);
 
-            // Sample traits
-            let traits = self.sample_traits(blueprint, &mut buyer_rng);
+            // Sample traits (correlated or independent based on config)
+            let traits = sampler.sample(&mut buyer_rng);
 
             // Sample budget
             let budget = blueprint.budget.sample(&mut buyer_rng);
@@ -191,33 +303,6 @@ impl PopulationGenerator {
         buyers
     }
 
-    fn sample_traits(&self, blueprint: &SegmentBlueprint, rng: &mut ChaCha12Rng) -> std::collections::BTreeMap<String, f64> {
-        let builtins = [
-            ("proof_hunger", &blueprint.proof_hunger),
-            ("privacy_sensitivity", &blueprint.privacy_sensitivity),
-            ("wearable_ownership", &blueprint.wearable_ownership),
-            ("peptide_openness", &blueprint.peptide_openness),
-            ("glp1_familiarity", &blueprint.glp1_familiarity),
-            ("logging_tolerance", &blueprint.logging_tolerance),
-            ("rigor_threshold", &blueprint.rigor_threshold),
-        ];
-        let mut traits: std::collections::BTreeMap<String, f64> = std::collections::BTreeMap::new();
-        for (name, config) in builtins {
-            let dist = match TraitDistribution::from_config(config) {
-                Ok(d) => d,
-                Err(_) => continue,
-            };
-            let val = dist.sample(rng).as_f64();
-            traits.insert(name.to_string(), val);
-        }
-        for (name, config) in &blueprint.extra_traits {
-            if let Ok(dist) = TraitDistribution::from_config(config) {
-                traits.insert(name.clone(), dist.sample(rng).as_f64());
-            }
-        }
-        traits
-    }
-
     fn sample_primary_channel(&self, blueprint: &SegmentBlueprint, rng: &mut ChaCha12Rng) -> String {
         let weights = blueprint.normalized_channel_weights();
         if weights.is_empty() {
@@ -242,11 +327,16 @@ pub enum PopError {
     NoBlueprints,
     #[error("target count must be > 0")]
     ZeroTarget,
+    #[error("invalid trait config for `{trait_name}`")]
+    InvalidTraitConfig { trait_name: String },
+    #[error("invalid correlation spec: {0}")]
+    InvalidCorrelationSpec(String),
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::correlated::{CorrelationSpec, TraitCorrelation};
 
     fn make_blueprint(id: &str, target: usize) -> SegmentBlueprint {
         let mut bp = SegmentBlueprint::default();
@@ -261,7 +351,6 @@ mod tests {
         let bps = vec![make_blueprint("a", 1), make_blueprint("b", 1)];
         let gen = PopulationGenerator::new(PopulationConfig { population_seed: 0, target_count: 100, ..Default::default() });
         let snap = gen.generate(&bps).unwrap();
-        // Both segments should get roughly equal buyers
         assert_eq!(snap.buyer_count, 100);
         let a = snap.segment_distribution.get("a").copied().unwrap_or(0);
         let b = snap.segment_distribution.get("b").copied().unwrap_or(0);
@@ -287,7 +376,7 @@ mod tests {
         let gen = PopulationGenerator::new(PopulationConfig { population_seed: 99, target_count: 200, ..Default::default() });
         let snap = gen.generate(&bps).unwrap();
         let ids: std::collections::HashSet<_> = snap.buyers.iter().map(|b| b.id.0.clone()).collect();
-        assert_eq!(ids.len(), snap.buyers.len()); // all unique
+        assert_eq!(ids.len(), snap.buyers.len());
     }
 
     #[test]
@@ -295,5 +384,50 @@ mod tests {
         let gen = PopulationGenerator::new(PopulationConfig::default());
         let result = gen.generate(&[]);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_correlated_sampling_is_used() {
+        let bp = make_blueprint("corr", 4_000);
+        let spec = CorrelationSpec {
+            trait_names: vec!["proof_hunger".to_string(), "glp1_familiarity".to_string()],
+            correlations: vec![TraitCorrelation::new("proof_hunger", "glp1_familiarity", 0.8)],
+        };
+        let mut cfg = PopulationConfig::default();
+        cfg.use_correlation = true;
+        cfg.target_count = 4_000;
+        cfg.correlation_specs.insert("corr".to_string(), spec);
+
+        let gen = PopulationGenerator::new(cfg);
+        let snap = gen.generate(&[bp]).unwrap();
+
+        let hunger: Vec<_> = snap.buyers.iter().map(|b| b.traits.get("proof_hunger").copied().unwrap_or(0.0)).collect();
+        let fam: Vec<_> = snap.buyers.iter().map(|b| b.traits.get("glp1_familiarity").copied().unwrap_or(0.0)).collect();
+
+        let n = hunger.len() as f64;
+        let h_mean = hunger.iter().sum::<f64>() / n;
+        let f_mean = fam.iter().sum::<f64>() / n;
+        let cov: f64 = hunger.iter().zip(fam.iter()).map(|(h, f)| (h - h_mean) * (f - f_mean)).sum::<f64>() / n;
+        assert!(cov > 0.01, "correlated traits should have positive covariance");
+    }
+
+    #[test]
+    fn test_invalid_extra_trait_config_returns_error() {
+        let mut bp = make_blueprint("invalid", 10);
+        bp.extra_traits.insert(
+            "bad_trait".to_string(),
+            crate::blueprint::TraitDistributionConfig {
+                distribution_type: "normal".to_string(),
+                params: BTreeMap::from([
+                    ("mean".to_string(), 0.5),
+                    ("stddev".to_string(), 0.0),
+                ]),
+            },
+        );
+        let gen = PopulationGenerator::new(PopulationConfig::default());
+        assert!(matches!(
+            gen.generate(&[bp]),
+            Err(PopError::InvalidTraitConfig { trait_name }) if trait_name == "bad_trait"
+        ));
     }
 }
