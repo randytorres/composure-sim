@@ -28,7 +28,7 @@ use crate::cohort::{aggregate_cohorts, summarize_market};
 use crate::outputs::build_result;
 use crate::schemas::{
     BuyerArchetype, BuyerState, BuyerOutcome, CampaignVariant,
-    MarketSimulationConfig, MarketSimulationResult,
+    MarketSimulationConfig, MarketSimulationResult, VariantResult,
 };
 use crate::transitions::{
     step_aware_to_considering, step_activated, step_considering_to_signup,
@@ -55,40 +55,81 @@ impl MarketSimEngine {
     }
 
     /// Run the full simulation and return the result.
+    ///
+    /// ## A/B test semantics
+    ///
+    /// Each variant is run independently on its own fresh copy of the population.
+    /// Identical seeds guarantee reproducible population generation for each arm.
     pub fn run(&mut self) -> MarketSimulationResult {
-        let mut buyers = self.generate_population();
         let time_steps = self.config.population.time_steps;
+        let sample_rate = self.config.population.sample_rate;
+        let revenue_per_referral = 500.0; // cents
         let variants = self.config.variants.clone();
 
-        // Run timesteps for each variant
+        // Run each variant on its own independent population copy
+        let mut variant_results: Vec<VariantResult> = Vec::new();
+        let mut all_outcomes: Vec<BuyerOutcome> = Vec::new();
+
         for variant in &variants {
+            // Clone fresh population for this variant arm
+            let base_pop = self.generate_population();
+            let mut buyers = base_pop;
+
+            // Run simulation for this arm
             run_timesteps(&mut buyers, &mut self.rng, &variant, time_steps);
+
+            // Collect outcomes for this arm
+            let arm_outcomes: Vec<BuyerOutcome> = buyers
+                .iter()
+                .map(|s| BuyerOutcome::from_state(s, revenue_per_referral))
+                .collect();
+
+            // Aggregate cohorts for this arm
+            let arm_cohorts = aggregate_cohorts(&buyers, &arm_outcomes);
+            let arm_totals = summarize_market(&arm_cohorts);
+
+            variant_results.push(VariantResult {
+                variant_id: variant.variant_id.clone(),
+                cohort_count: arm_cohorts.len(),
+                signup_count: arm_totals.total_signups,
+                activation_count: arm_totals.total_activations,
+                churn_count: arm_totals.total_churns,
+                referral_count: arm_totals.total_referrals,
+                total_revenue_cents: arm_totals.total_revenue_cents,
+            });
+
+            // Sample outcomes for this arm
+            let sampled = if sample_rate >= 1.0 {
+                arm_outcomes.clone()
+            } else if sample_rate <= 0.0 {
+                vec![]
+            } else {
+                sample_buyers(&arm_outcomes, sample_rate, &mut self.rng)
+            };
+
+            all_outcomes.extend(sampled);
         }
 
-        // Collect buyer outcomes
-        let revenue_per_referral = 500.0; // cents
-        let outcomes: Vec<BuyerOutcome> = buyers
+        // Also aggregate a combined view across all arms for market_totals
+        // Run the last variant to get a representative aggregate (no double-counting)
+        let final_pop = self.generate_population();
+        let mut final_buyers = final_pop;
+        if let Some(last_variant) = variants.last() {
+            run_timesteps(&mut final_buyers, &mut self.rng, &last_variant, time_steps);
+        }
+        let final_outcomes: Vec<BuyerOutcome> = final_buyers
             .iter()
             .map(|s| BuyerOutcome::from_state(s, revenue_per_referral))
             .collect();
-
-        // Aggregate to cohorts
-        let cohorts = aggregate_cohorts(&buyers, &outcomes);
+        let cohorts = aggregate_cohorts(&final_buyers, &final_outcomes);
         let market_totals = summarize_market(&cohorts);
 
-        // Sample buyer outcomes
-        let sample_rate = self.config.population.sample_rate;
-        let sampled = if sample_rate >= 1.0 {
-            outcomes.clone()
-        } else {
-            sample_buyers(&outcomes, sample_rate, &mut self.rng)
-        };
-
         build_result(
-            sampled,
+            all_outcomes,
             cohorts,
             market_totals,
             &self.config,
+            variant_results,
             self.config.variants.len(),
             self.config.population.time_steps,
         )
@@ -146,8 +187,11 @@ fn sample_buyers<R: Rng>(
     rate: f64,
     rng: &mut R,
 ) -> Vec<BuyerOutcome> {
-    if rate <= 0.0 || rate >= 1.0 {
+    if rate >= 1.0 {
         return outcomes.to_vec();
+    }
+    if rate <= 0.0 {
+        return vec![];
     }
 
     let n = outcomes.len();

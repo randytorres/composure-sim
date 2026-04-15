@@ -67,6 +67,8 @@ pub fn aggregate_cohorts(
 
         let total_revenue = total_ltv;
 
+        let referral_count: usize = buyer_states.iter().map(|b| b.referral_count).sum();
+
         let segment_key = if bucket.signup_bin == usize::MAX {
             format!("{:?} (no signup)", bucket.archetype)
         } else {
@@ -82,6 +84,7 @@ pub fn aggregate_cohorts(
             churn_rate,
             avg_ltv_cents: avg_ltv,
             total_revenue_cents: total_revenue,
+            referral_count,
         });
     }
 
@@ -117,7 +120,7 @@ pub fn summarize_market(cohorts: &[CohortOutcome]) -> MarketTotals {
         })
         .sum();
 
-    let total_referrals: usize = 0; // tracked in individual buyer outcomes
+    let total_referrals: usize = cohorts.iter().map(|c| c.referral_count).sum();
     let total_revenue_cents: f64 = cohorts.iter().map(|c| c.total_revenue_cents).sum();
 
     let market_ctr = if total_buyers > 0 {
@@ -266,6 +269,7 @@ mod tests {
                 churn_rate: 0.2,
                 avg_ltv_cents: 8000.0,
                 total_revenue_cents: 80_000.0,
+                referral_count: 0,
             },
         ];
         let totals = summarize_market(&cohorts);

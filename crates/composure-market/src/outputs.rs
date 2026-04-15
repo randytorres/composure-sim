@@ -2,7 +2,7 @@
 
 use crate::schemas::{
     config_digest, BuyerOutcome, CohortOutcome, MarketSimulationConfig,
-    MarketSimulationResult, MarketTotals,
+    MarketSimulationResult, MarketTotals, VariantResult,
 };
 
 /// Build the final output artifact from simulation components.
@@ -11,6 +11,7 @@ pub fn build_result(
     cohorts: Vec<CohortOutcome>,
     market_totals: MarketTotals,
     config: &MarketSimulationConfig,
+    variant_results: Vec<VariantResult>,
     variant_count: usize,
     time_steps: usize,
 ) -> MarketSimulationResult {
@@ -19,6 +20,7 @@ pub fn build_result(
         buyers,
         cohorts,
         market_totals,
+        variant_results,
         config_digest: digest,
         variant_count,
         time_steps,

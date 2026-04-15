@@ -535,6 +535,8 @@ pub struct CohortOutcome {
     pub avg_ltv_cents: f64,
     /// Total revenue from this cohort in cents.
     pub total_revenue_cents: f64,
+    /// Total referrals from this cohort.
+    pub referral_count: usize,
 }
 
 /// Aggregate market-level totals.
@@ -551,6 +553,18 @@ pub struct MarketTotals {
     pub market_ltv: f64,
 }
 
+/// Per-variant result breakdown for A/B test comparison.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VariantResult {
+    pub variant_id: String,
+    pub cohort_count: usize,
+    pub signup_count: usize,
+    pub activation_count: usize,
+    pub churn_count: usize,
+    pub referral_count: usize,
+    pub total_revenue_cents: f64,
+}
+
 /// Complete output of a market simulation run.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MarketSimulationResult {
@@ -558,6 +572,8 @@ pub struct MarketSimulationResult {
     pub buyers: Vec<BuyerOutcome>,
     /// Cohort-level aggregates.
     pub cohorts: Vec<CohortOutcome>,
+    /// Per-variant result breakdowns.
+    pub variant_results: Vec<VariantResult>,
     /// Market-wide totals.
     pub market_totals: MarketTotals,
     /// SHA-256 digest of the canonical JSON config for reproducibility verification.

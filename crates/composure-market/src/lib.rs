@@ -39,5 +39,5 @@ pub use schemas::{
     BuyerState, CampaignVariant, Channel, ChannelWeights, CohortOutcome,
     ConversionEvent, ConversionEventType, CreativeMultipliers, MarketSimulationConfig,
     MarketSimulationResult, MarketTotals, SyntheticPopulationConfig, Validate,
-    ValidationError, ARCHETYPE_VARIANTS,
+    ValidationError, VariantResult, ARCHETYPE_VARIANTS,
 };
