@@ -1,8 +1,10 @@
+use crate::MarketingV2ComparisonReport;
 use composure_calibration::CalibrationResult;
 use composure_core::{
     CounterfactualResult, DeterministicReport, ExperimentBundle, ExperimentRunStatus,
     ParameterValue, RunSummary, SensitivityKind, SweepExecutionResult, TrajectoryComparison,
 };
+use composure_marketing::{MarketingSimulationResultV2, MetricKind};
 
 pub(crate) fn format_bundle(bundle: &ExperimentBundle) -> String {
     let completed = bundle
@@ -909,6 +911,712 @@ pub(crate) fn render_calibration_markdown(result: &CalibrationResult) -> String 
     lines.join("\n")
 }
 
+pub(crate) fn render_marketing_v2_report_markdown(result: &MarketingSimulationResultV2) -> String {
+    let mut lines = vec![
+        "# Marketing Simulation Report".into(),
+        String::new(),
+        format!("Simulation ID: `{}`", result.simulation_id),
+        format!("Scenario: `{}`", result.scenario.name),
+        format!("Scenario Type: `{:?}`", result.scenario.scenario_type),
+        format!("Approaches: {}", result.approach_results.len()),
+        String::new(),
+        "## Overview".into(),
+    ];
+
+    for insight in &result.cross_approach_insights {
+        lines.push(format!("- {insight}"));
+    }
+    for summary in &result.calibration_summary {
+        lines.push(format!("- Calibration: {summary}"));
+    }
+    for recommendation in &result.recommended_next_experiments {
+        lines.push(format!("- Next: {recommendation}"));
+    }
+    lines.push(String::new());
+
+    if let Some(analysis) = &result.llm_analysis {
+        lines.push("## LLM Analysis".into());
+        lines.push(String::new());
+        lines.push(format!(
+            "- Model: `{}`{}{}",
+            analysis.model,
+            analysis
+                .provider
+                .as_ref()
+                .map(|provider| format!(" via `{provider}`"))
+                .unwrap_or_default(),
+            analysis
+                .reasoning_effort
+                .as_ref()
+                .map(|effort| format!(" (`{effort}` reasoning)"))
+                .unwrap_or_default()
+        ));
+        lines.push(format!(
+            "- Evaluator passes: `{}`",
+            analysis.evaluator_count
+        ));
+        for item in &analysis.executive_summary {
+            lines.push(format!("- Executive summary: {item}"));
+        }
+        for item in &analysis.consensus_summary {
+            lines.push(format!("- Consensus: {item}"));
+        }
+        for item in &analysis.strategic_takeaways {
+            lines.push(format!("- Strategic takeaway: {item}"));
+        }
+        for item in &analysis.confidence_notes {
+            lines.push(format!("- Confidence note: {item}"));
+        }
+        for item in &analysis.disagreement_notes {
+            lines.push(format!("- Disagreement note: {item}"));
+        }
+        lines.push(String::new());
+    }
+
+    if let Some(trace) = &result.llm_trace {
+        lines.push("## LLM Evidence".into());
+        lines.push(String::new());
+        if let Some(goal) = &trace.analysis_goal {
+            lines.push(format!("- Analysis goal: {goal}"));
+        }
+        lines.push(format!("- Prompt chars: `{}`", trace.prompt_char_count));
+        lines.push(format!(
+            "- Evaluators captured: `{}`",
+            trace.evaluators.len()
+        ));
+        lines.push(String::new());
+        lines.push("### System Prompt".into());
+        lines.push(String::new());
+        push_code_block(
+            &mut lines,
+            "text",
+            &truncate_for_markdown(&trace.system_prompt, 1600),
+        );
+        lines.push(String::new());
+        lines.push("### User Prompt".into());
+        lines.push(String::new());
+        push_code_block(
+            &mut lines,
+            "text",
+            &truncate_for_markdown(&trace.user_prompt, 2400),
+        );
+        lines.push(String::new());
+
+        for evaluator in &trace.evaluators {
+            lines.push(format!("### Evaluator {}", evaluator.evaluator_index));
+            lines.push(String::new());
+            lines.push(format!(
+                "- Model: `{}`{}{}",
+                evaluator.model,
+                evaluator
+                    .provider
+                    .as_ref()
+                    .map(|provider| format!(" via `{provider}`"))
+                    .unwrap_or_default(),
+                evaluator
+                    .reasoning_effort
+                    .as_ref()
+                    .map(|effort| format!(" (`{effort}` reasoning)"))
+                    .unwrap_or_default()
+            ));
+            lines.push(format!("- Base URL: `{}`", evaluator.base_url));
+            lines.push(format!("- Duration: `{}` ms", evaluator.duration_ms));
+            if let Some(response_id) = &evaluator.response_id {
+                lines.push(format!("- Response ID: `{response_id}`"));
+            }
+            lines.push(format!(
+                "- Stream fallback used: `{}`",
+                if evaluator.stream_fallback_used {
+                    "yes"
+                } else {
+                    "no"
+                }
+            ));
+            if let Some(usage) = &evaluator.usage {
+                lines.push(format!("- Usage: {}", format_llm_usage(usage)));
+            }
+            lines.push(String::new());
+            lines.push("- Parsed output preview:".into());
+            push_code_block(
+                &mut lines,
+                "json",
+                &truncate_for_markdown(
+                    &serde_json::to_string_pretty(
+                        evaluator
+                            .parsed_output
+                            .as_ref()
+                            .unwrap_or(&serde_json::Value::Null),
+                    )
+                    .unwrap_or_else(|_| "{}".into()),
+                    2400,
+                ),
+            );
+            lines.push(String::new());
+            lines.push("- Raw output preview:".into());
+            push_code_block(
+                &mut lines,
+                "text",
+                &truncate_for_markdown(&evaluator.raw_output_text, 1800),
+            );
+            if let Some(raw_stream_text) = evaluator
+                .raw_response
+                .get("raw_stream_text")
+                .and_then(serde_json::Value::as_str)
+            {
+                lines.push(String::new());
+                lines.push("- Raw stream preview:".into());
+                push_code_block(
+                    &mut lines,
+                    "text",
+                    &truncate_for_markdown(raw_stream_text, 1800),
+                );
+            }
+            lines.push(String::new());
+        }
+    }
+
+    if let Some(winner) = result
+        .approach_results
+        .iter()
+        .max_by_key(|approach| approach.primary_scorecard.overall_score)
+    {
+        lines.push("## Winner".into());
+        lines.push(String::new());
+        lines.push(format!(
+            "- Approach: `{}` with overall score `{}`",
+            winner.approach_id, winner.primary_scorecard.overall_score
+        ));
+        lines.push(format!("- Engagement: `{}`", winner.engagement_score));
+        lines.push(format!("- Viral potential: `{}`", winner.viral_potential));
+        for reason in &winner.win_reasons {
+            lines.push(format!("- Why it won: {reason}"));
+        }
+        for risk in &winner.loss_risks {
+            lines.push(format!("- Main risk: {risk}"));
+        }
+        lines.push(String::new());
+    }
+
+    lines.push("## Approach Leaderboard".into());
+    lines.push(String::new());
+    lines.push("| Rank | Approach | Overall | Engagement | Viral | Top Metric |".into());
+    lines.push("|---|---|---:|---:|---:|---|".into());
+    let mut ranked = result.approach_results.iter().collect::<Vec<_>>();
+    ranked.sort_by(|left, right| {
+        right
+            .primary_scorecard
+            .overall_score
+            .cmp(&left.primary_scorecard.overall_score)
+    });
+    for (index, approach) in ranked.iter().enumerate() {
+        let top_metric = approach
+            .primary_scorecard
+            .metrics
+            .iter()
+            .max_by_key(|metric| metric.score)
+            .map(|metric| metric.label.clone())
+            .unwrap_or_else(|| "n/a".into());
+        lines.push(format!(
+            "| {} | `{}` | {} | {} | {} | {} |",
+            index + 1,
+            approach.approach_id,
+            approach.primary_scorecard.overall_score,
+            approach.engagement_score,
+            approach.viral_potential,
+            top_metric
+        ));
+    }
+    lines.push(String::new());
+
+    let persona_rows = build_persona_rows(result);
+    if !persona_rows.is_empty() {
+        lines.push("## Persona Leaderboard".into());
+        lines.push(String::new());
+        lines.push("| Rank | Persona | Approach | Score | Weight |".into());
+        lines.push("|---|---|---|---:|---:|".into());
+        for (index, row) in persona_rows.iter().enumerate() {
+            lines.push(format!(
+                "| {} | {} | `{}` | {} | {:.2} |",
+                index + 1,
+                row.0,
+                row.1,
+                row.2,
+                row.3
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    let repeated_concerns = build_repeated_concerns(result);
+    if !repeated_concerns.is_empty() {
+        lines.push("## Repeated Concerns".into());
+        lines.push(String::new());
+        lines.push("| Concern | Count | Approaches |".into());
+        lines.push("|---|---:|---|".into());
+        for (concern, count, approaches) in repeated_concerns {
+            lines.push(format!(
+                "| {} | {} | {} |",
+                concern,
+                count,
+                approaches.join(", ")
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    lines.push("## Confidence Notes".into());
+    lines.push(String::new());
+    for approach in &ranked {
+        lines.push(format!("### `{}`", approach.approach_id));
+        for note in &approach.confidence_notes {
+            lines.push(format!("- {note}"));
+        }
+    }
+    lines.push(String::new());
+
+    if !result.calibration_summary.is_empty()
+        || result
+            .approach_results
+            .iter()
+            .any(|approach| !approach.calibration_notes.is_empty())
+    {
+        lines.push("## Calibration Notes".into());
+        lines.push(String::new());
+        for item in &result.calibration_summary {
+            lines.push(format!("- {item}"));
+        }
+        for approach in &ranked {
+            if !approach.calibration_notes.is_empty() {
+                lines.push(format!("### `{}`", approach.approach_id));
+                for note in &approach.calibration_notes {
+                    lines.push(format!("- {note}"));
+                }
+            }
+        }
+        lines.push(String::new());
+    }
+
+    lines.push("## Recommended Next Experiments".into());
+    lines.push(String::new());
+    for item in &result.recommended_next_experiments {
+        lines.push(format!("- {item}"));
+    }
+    lines.push(String::new());
+
+    lines.push("## Approach Notes".into());
+    lines.push(String::new());
+    for approach in ranked {
+        lines.push(format!("### `{}`", approach.approach_id));
+        lines.push(format!(
+            "- Overall / engagement / viral: `{}` / `{}` / `{}`",
+            approach.primary_scorecard.overall_score,
+            approach.engagement_score,
+            approach.viral_potential
+        ));
+        if let Some(metric) = approach
+            .primary_scorecard
+            .metrics
+            .iter()
+            .find(|metric| metric.metric == MetricKind::ObjectionPressure)
+        {
+            lines.push(format!("- Objection pressure: `{}`", metric.score));
+        }
+        for reason in &approach.win_reasons {
+            lines.push(format!("- Win reason: {reason}"));
+        }
+        for risk in &approach.loss_risks {
+            lines.push(format!("- Loss risk: {risk}"));
+        }
+        if let Some(analysis) = &approach.llm_analysis {
+            lines.push(format!("- LLM narrative: {}", analysis.narrative));
+            for item in &analysis.consensus_summary {
+                lines.push(format!("- LLM consensus: {item}"));
+            }
+            for persona in &analysis.strongest_personas {
+                lines.push(format!("- LLM strongest persona: {persona}"));
+            }
+            for item in &analysis.objections_to_resolve {
+                lines.push(format!("- LLM objection to resolve: {item}"));
+            }
+            for item in &analysis.realism_warnings {
+                lines.push(format!("- LLM realism warning: {item}"));
+            }
+            for item in &analysis.next_experiments {
+                lines.push(format!("- LLM next experiment: {item}"));
+            }
+            for item in &analysis.disagreement_notes {
+                lines.push(format!("- LLM disagreement note: {item}"));
+            }
+        }
+        if !approach.persona_results.is_empty() {
+            let mut persona_ranked = approach.persona_results.iter().collect::<Vec<_>>();
+            persona_ranked.sort_by(|left, right| {
+                right
+                    .primary_scorecard
+                    .overall_score
+                    .cmp(&left.primary_scorecard.overall_score)
+            });
+            let top = persona_ranked[0];
+            lines.push(format!(
+                "- Best persona: {} at `{}`",
+                top.persona_name, top.primary_scorecard.overall_score
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    lines.join("\n")
+}
+
+pub(crate) fn render_marketing_v2_compare_markdown(report: &MarketingV2ComparisonReport) -> String {
+    let mut lines = vec![
+        "# Marketing V2 Comparison".into(),
+        String::new(),
+        format!("Comparison ID: `{}`", report.comparison_id),
+        format!("Scenarios: {}", report.scenarios.len()),
+    ];
+
+    if let Some(model) = &report.model {
+        lines.push(format!(
+            "Evaluator: `{}`{}{}",
+            model,
+            report
+                .provider
+                .as_ref()
+                .map(|provider| format!(" via `{provider}`"))
+                .unwrap_or_default(),
+            report
+                .reasoning_effort
+                .as_ref()
+                .map(|effort| format!(" (`{effort}` reasoning)"))
+                .unwrap_or_default()
+        ));
+    }
+
+    lines.push(String::new());
+    if !report.portfolio_recommendation.is_empty() {
+        lines.push("## Portfolio Recommendation".into());
+        lines.push(String::new());
+        for item in &report.portfolio_recommendation {
+            lines.push(format!("- {item}"));
+        }
+        lines.push(String::new());
+    }
+
+    if !report.repeated_winner_patterns.is_empty() {
+        lines.push("## Repeated Winner Patterns".into());
+        lines.push(String::new());
+        for item in &report.repeated_winner_patterns {
+            lines.push(format!("- {item}"));
+        }
+        lines.push(String::new());
+    }
+
+    lines.push("## Leaderboard".into());
+    lines.push(String::new());
+    lines.push("| Rank | Scenario | Type | Overall | Winner | Winner Score | Gap | Strongest Metric | Best Delta | Weakest Delta |".into());
+    lines.push("|---|---|---|---:|---|---:|---:|---|---|---|".into());
+    for (index, scenario) in report.scenarios.iter().enumerate() {
+        lines.push(format!(
+            "| {} | {} | {} | {} | `{}` | {} | {} | {} | {} | {} |",
+            index + 1,
+            scenario.scenario_name,
+            scenario.scenario_type,
+            scenario.overall_score,
+            scenario.winner_approach_id,
+            scenario.winner_overall_score,
+            scenario
+                .score_gap_vs_runner_up
+                .map(|gap| gap.to_string())
+                .unwrap_or_else(|| "n/a".into()),
+            scenario.strongest_metric_label.as_deref().unwrap_or("n/a"),
+            scenario
+                .strongest_positive_delta_metric
+                .as_ref()
+                .zip(scenario.strongest_positive_delta_value)
+                .map(|(metric, delta)| format!("{metric} ({delta:+})"))
+                .unwrap_or_else(|| "n/a".into()),
+            scenario
+                .weakest_delta_metric
+                .as_ref()
+                .zip(scenario.weakest_delta_value)
+                .map(|(metric, delta)| format!("{metric} ({delta:+})"))
+                .unwrap_or_else(|| "n/a".into())
+        ));
+    }
+    lines.push(String::new());
+
+    if report
+        .scenarios
+        .iter()
+        .any(|scenario| !scenario.metric_deltas.is_empty())
+    {
+        let metric_labels = comparison_metric_labels(report);
+        let displayed_labels = metric_labels.iter().take(8).cloned().collect::<Vec<_>>();
+
+        if !displayed_labels.is_empty() {
+            lines.push("## Cross-Scenario Metric Delta Matrix".into());
+            lines.push(String::new());
+            lines.push(
+                "Each delta is measured against the compare-set average for that metric, using each scenario's aggregate primary scorecard."
+                    .into(),
+            );
+            lines.push(String::new());
+
+            let mut header = vec!["Metric".to_string(), "Max Swing".to_string()];
+            header.extend(
+                report
+                    .scenarios
+                    .iter()
+                    .map(|scenario| scenario.scenario_name.clone()),
+            );
+            lines.push(format!("| {} |", header.join(" | ")));
+            lines.push(format!(
+                "|{}|",
+                std::iter::repeat("---")
+                    .take(header.len())
+                    .collect::<Vec<_>>()
+                    .join("|")
+            ));
+
+            for label in displayed_labels {
+                let values = report
+                    .scenarios
+                    .iter()
+                    .map(|scenario| {
+                        scenario
+                            .metric_deltas
+                            .iter()
+                            .find(|metric| metric.label == label)
+                            .map(|metric| metric.delta_vs_compare_average)
+                    })
+                    .collect::<Vec<_>>();
+                let max_swing = metric_delta_swing(values.iter().flatten().copied());
+                let mut row = vec![label, max_swing.to_string()];
+                row.extend(values.into_iter().map(|value| {
+                    value
+                        .map(markdown_signed_delta)
+                        .unwrap_or_else(|| "n/a".into())
+                }));
+                lines.push(format!("| {} |", row.join(" | ")));
+            }
+            lines.push(String::new());
+
+            if metric_labels.len() > 8 {
+                lines.push(format!(
+                    "_Showing the 8 metrics with the largest cross-scenario swings out of {} total._",
+                    metric_labels.len()
+                ));
+                lines.push(String::new());
+            }
+
+            lines.push("## Metric Delta Leaders".into());
+            lines.push(String::new());
+            lines.push("| Metric | Most Above Average | Most Below Average |".into());
+            lines.push("|---|---|---|".into());
+            for label in metric_labels.iter().take(8) {
+                let mut ranked = report
+                    .scenarios
+                    .iter()
+                    .filter_map(|scenario| {
+                        scenario
+                            .metric_deltas
+                            .iter()
+                            .find(|metric| metric.label == *label)
+                            .map(|metric| {
+                                (
+                                    scenario.scenario_name.as_str(),
+                                    metric.delta_vs_compare_average,
+                                )
+                            })
+                    })
+                    .collect::<Vec<_>>();
+                ranked
+                    .sort_by(|left, right| right.1.cmp(&left.1).then_with(|| left.0.cmp(right.0)));
+                let strongest = ranked
+                    .first()
+                    .map(|(name, delta)| format!("{name} ({:+})", delta))
+                    .unwrap_or_else(|| "n/a".into());
+                let weakest = ranked
+                    .last()
+                    .map(|(name, delta)| format!("{name} ({:+})", delta))
+                    .unwrap_or_else(|| "n/a".into());
+                lines.push(format!("| {} | {} | {} |", label, strongest, weakest));
+            }
+            lines.push(String::new());
+        }
+    }
+
+    lines.push("## Scenario Notes".into());
+    lines.push(String::new());
+    for scenario in &report.scenarios {
+        lines.push(format!("### {}", scenario.scenario_name));
+        lines.push(format!("- Request: `{}`", scenario.request_path));
+        lines.push(format!("- Scenario type: `{}`", scenario.scenario_type));
+        lines.push(format!("- Overall score: `{}`", scenario.overall_score));
+        lines.push(format!(
+            "- Winner: `{}` at `{}`",
+            scenario.winner_approach_id, scenario.winner_overall_score
+        ));
+        if let Some(runner_up) = &scenario.runner_up_approach_id {
+            lines.push(format!(
+                "- Runner-up: `{}` at `{}`",
+                runner_up,
+                scenario
+                    .runner_up_overall_score
+                    .map(|score| score.to_string())
+                    .unwrap_or_else(|| "n/a".into())
+            ));
+        }
+        if let Some(gap) = scenario.score_gap_vs_runner_up {
+            lines.push(format!("- Gap vs runner-up: `{}`", gap));
+        }
+        if let Some(metric) = &scenario.strongest_metric_label {
+            lines.push(format!(
+                "- Strongest metric: `{}`{}",
+                metric,
+                scenario
+                    .strongest_metric_score
+                    .map(|score| format!(" at `{score}`"))
+                    .unwrap_or_default()
+            ));
+        }
+        if let (Some(metric), Some(delta)) = (
+            &scenario.strongest_positive_delta_metric,
+            scenario.strongest_positive_delta_value,
+        ) {
+            lines.push(format!(
+                "- Strongest cross-scenario delta: `{}` at `{:+}` vs compare average",
+                metric, delta
+            ));
+        }
+        if let (Some(metric), Some(delta)) =
+            (&scenario.weakest_delta_metric, scenario.weakest_delta_value)
+        {
+            lines.push(format!(
+                "- Weakest cross-scenario delta: `{}` at `{:+}` vs compare average",
+                metric, delta
+            ));
+        }
+        if !scenario.metric_deltas.is_empty() {
+            lines.push("- Metric deltas vs compare set:".into());
+            lines.push("| Metric | Score | Vs Avg | Vs Leader | Rank | Leader(s) |".into());
+            lines.push("|---|---:|---:|---:|---:|---|".into());
+            for metric in scenario.metric_deltas.iter().take(6) {
+                lines.push(format!(
+                    "| {} | {} | {:+} | {:+} | {}/{} | {} |",
+                    metric.label,
+                    metric.score,
+                    metric.delta_vs_compare_average,
+                    metric.delta_vs_compare_leader,
+                    metric.compare_set_rank,
+                    metric.compare_set_size,
+                    if metric.leading_scenarios.is_empty() {
+                        "n/a".into()
+                    } else {
+                        metric.leading_scenarios.join(", ")
+                    }
+                ));
+            }
+        }
+        for item in &scenario.llm_executive_summary {
+            lines.push(format!("- Executive summary: {item}"));
+        }
+        for item in &scenario.llm_consensus_summary {
+            lines.push(format!("- Consensus: {item}"));
+        }
+        for item in &scenario.recommended_next_experiments {
+            lines.push(format!("- Next experiment: {item}"));
+        }
+        lines.push(String::new());
+    }
+
+    lines.join("\n")
+}
+
+fn comparison_metric_labels(report: &MarketingV2ComparisonReport) -> Vec<String> {
+    let mut deltas_by_metric = std::collections::BTreeMap::<String, Vec<i32>>::new();
+    for scenario in &report.scenarios {
+        for metric in &scenario.metric_deltas {
+            deltas_by_metric
+                .entry(metric.label.clone())
+                .or_default()
+                .push(metric.delta_vs_compare_average);
+        }
+    }
+
+    let mut metrics = deltas_by_metric
+        .into_iter()
+        .map(|(label, deltas)| (label, metric_delta_swing(deltas.into_iter())))
+        .collect::<Vec<_>>();
+    metrics.sort_by(|left, right| right.1.cmp(&left.1).then_with(|| left.0.cmp(&right.0)));
+    metrics.into_iter().map(|(label, _)| label).collect()
+}
+
+fn metric_delta_swing(deltas: impl IntoIterator<Item = i32>) -> i32 {
+    let mut min_delta: Option<i32> = None;
+    let mut max_delta: Option<i32> = None;
+
+    for delta in deltas {
+        min_delta = Some(min_delta.map_or(delta, |current| current.min(delta)));
+        max_delta = Some(max_delta.map_or(delta, |current| current.max(delta)));
+    }
+
+    match (min_delta, max_delta) {
+        (Some(min_delta), Some(max_delta)) => max_delta - min_delta,
+        _ => 0,
+    }
+}
+
+fn build_persona_rows(result: &MarketingSimulationResultV2) -> Vec<(String, String, u32, f64)> {
+    let mut rows = result
+        .approach_results
+        .iter()
+        .flat_map(|approach| {
+            approach.persona_results.iter().map(|persona| {
+                (
+                    persona.persona_name.clone(),
+                    approach.approach_id.clone(),
+                    persona.primary_scorecard.overall_score,
+                    persona.audience_weight,
+                )
+            })
+        })
+        .collect::<Vec<_>>();
+    rows.sort_by(|left, right| right.2.cmp(&left.2).then_with(|| left.0.cmp(&right.0)));
+    rows.truncate(10);
+    rows
+}
+
+fn markdown_signed_delta(delta: i32) -> String {
+    if delta > 0 {
+        format!("+{delta}")
+    } else {
+        delta.to_string()
+    }
+}
+
+fn build_repeated_concerns(
+    result: &MarketingSimulationResultV2,
+) -> Vec<(String, usize, Vec<String>)> {
+    let mut buckets = std::collections::BTreeMap::<String, (usize, Vec<String>)>::new();
+    for approach in &result.approach_results {
+        for concern in &approach.concerns {
+            let entry = buckets.entry(concern.clone()).or_insert((0, Vec::new()));
+            entry.0 += 1;
+            if !entry.1.contains(&approach.approach_id) {
+                entry.1.push(approach.approach_id.clone());
+            }
+        }
+    }
+    let mut rows = buckets
+        .into_iter()
+        .map(|(concern, (count, approaches))| (concern, count, approaches))
+        .collect::<Vec<_>>();
+    rows.sort_by(|left, right| right.1.cmp(&left.1).then_with(|| left.0.cmp(&right.0)));
+    rows
+}
+
 fn format_delta(delta: &composure_core::SummaryDelta) -> String {
     format!(
         "baseline={:?}, candidate={:?}, delta={:?}",
@@ -1050,4 +1758,43 @@ where
     value
         .map(|value| format!("{value:?}"))
         .unwrap_or_else(|| "n/a".into())
+}
+
+fn format_llm_usage(usage: &composure_marketing::LlmUsage) -> String {
+    let mut parts = Vec::new();
+    if let Some(input) = usage.input_tokens {
+        parts.push(format!("input `{input}`"));
+    }
+    if let Some(output) = usage.output_tokens {
+        parts.push(format!("output `{output}`"));
+    }
+    if let Some(reasoning) = usage.reasoning_tokens {
+        parts.push(format!("reasoning `{reasoning}`"));
+    }
+    if let Some(total) = usage.total_tokens {
+        parts.push(format!("total `{total}`"));
+    }
+    if parts.is_empty() {
+        "n/a".into()
+    } else {
+        parts.join(", ")
+    }
+}
+
+fn truncate_for_markdown(text: &str, max_chars: usize) -> String {
+    let char_count = text.chars().count();
+    if char_count <= max_chars {
+        return text.to_string();
+    }
+    let truncated = text.chars().take(max_chars).collect::<String>();
+    format!(
+        "{truncated}\n\n...[truncated {} chars]",
+        char_count - max_chars
+    )
+}
+
+fn push_code_block(lines: &mut Vec<String>, language: &str, body: &str) {
+    lines.push(format!("```{language}"));
+    lines.push(body.to_string());
+    lines.push("```".into());
 }

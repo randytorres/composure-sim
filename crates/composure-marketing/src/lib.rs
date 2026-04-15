@@ -58,6 +58,14 @@ pub struct ApproachInput {
     pub channels: Vec<String>,
     pub tone: String,
     pub target: String,
+    #[serde(default)]
+    pub proof_points: Vec<String>,
+    #[serde(default)]
+    pub objection_handlers: Vec<String>,
+    #[serde(default)]
+    pub cta: Option<String>,
+    #[serde(default)]
+    pub sequence: Vec<SequenceStep>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -74,9 +82,39 @@ pub struct MarketingSimulationRequestV2 {
     #[serde(default)]
     pub scenario: ScenarioDefinition,
     #[serde(default)]
+    pub evaluator: Option<EvaluatorConfig>,
+    #[serde(default)]
+    pub llm_assist: Option<LlmAssistConfig>,
+    #[serde(default)]
+    pub observed_outcomes: Vec<ObservedOutcome>,
+    #[serde(default)]
     pub output: OutputOptions,
     #[serde(default = "default_simulation_size")]
     pub simulation_size: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EvaluatorConfig {
+    #[serde(default)]
+    pub provider: Option<String>,
+    #[serde(default)]
+    pub model: Option<String>,
+    #[serde(default)]
+    pub reasoning_effort: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmAssistConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default)]
+    pub evaluator_count: Option<usize>,
+    #[serde(default)]
+    pub analysis_goal: Option<String>,
+    #[serde(default)]
+    pub max_output_tokens: Option<u32>,
+    #[serde(default)]
+    pub system_prompt: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -137,7 +175,41 @@ pub struct ApproachDefinition {
     pub tone: String,
     pub target: String,
     #[serde(default)]
+    pub proof_points: Vec<String>,
+    #[serde(default)]
+    pub objection_handlers: Vec<String>,
+    #[serde(default)]
+    pub cta: Option<String>,
+    #[serde(default)]
+    pub sequence: Vec<SequenceStep>,
+    #[serde(default)]
     pub objectives: Vec<ObjectiveDefinition>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SequenceStep {
+    pub label: String,
+    #[serde(default)]
+    pub focus: SequenceFocus,
+    #[serde(default = "default_sequence_intensity")]
+    pub intensity: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum SequenceFocus {
+    Attention,
+    Resonance,
+    Share,
+    TrustRecovery,
+    Skepticism,
+    Conversion,
+}
+
+impl Default for SequenceFocus {
+    fn default() -> Self {
+        Self::Attention
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -177,6 +249,33 @@ pub struct ScenarioDefinition {
     pub time_steps: usize,
     #[serde(default)]
     pub objectives: Vec<ObjectiveDefinition>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ObservedOutcome {
+    pub approach_id: String,
+    #[serde(default)]
+    pub persona_id: Option<String>,
+    #[serde(default)]
+    pub source: Option<String>,
+    #[serde(default)]
+    pub creative_id: Option<String>,
+    #[serde(default)]
+    pub hook_id: Option<String>,
+    #[serde(default)]
+    pub landing_variant: Option<String>,
+    #[serde(default)]
+    pub waitlist_signup_rate: Option<f64>,
+    #[serde(default)]
+    pub activation_rate: Option<f64>,
+    #[serde(default)]
+    pub retention_d7: Option<f64>,
+    #[serde(default)]
+    pub paid_conversion_rate: Option<f64>,
+    #[serde(default)]
+    pub share_rate: Option<f64>,
+    #[serde(default)]
+    pub sample_size: Option<u32>,
 }
 
 impl Default for ScenarioDefinition {
@@ -219,6 +318,11 @@ pub enum ScenarioType {
     CampaignSequence,
     CommunityActivation,
     Retention,
+    LandingPage,
+    ShortFormVideo,
+    CommunityEvent,
+    InStoreEnablement,
+    PrivateRelationship,
     Custom,
 }
 
@@ -238,6 +342,11 @@ pub enum MetricKind {
     ConversionIntent,
     Shareability,
     TrustSignal,
+    Credibility,
+    ObjectionPressure,
+    RecommendationConfidence,
+    RetentionFit,
+    Belonging,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -253,6 +362,10 @@ pub struct EngineMetadata {
     pub name: String,
     pub version: String,
     pub model: String,
+    #[serde(default)]
+    pub provider: Option<String>,
+    #[serde(default)]
+    pub reasoning_effort: Option<String>,
     pub seed_base: u64,
     pub time_steps: usize,
     pub num_paths: usize,
@@ -279,6 +392,12 @@ pub struct MarketingSimulationResultV2 {
     pub primary_scorecard: PrimaryScorecard,
     pub approach_results: Vec<ApproachSimulationResultV2>,
     pub cross_approach_insights: Vec<String>,
+    pub recommended_next_experiments: Vec<String>,
+    pub calibration_summary: Vec<String>,
+    #[serde(default)]
+    pub llm_analysis: Option<MarketingLlmAnalysis>,
+    #[serde(default)]
+    pub llm_trace: Option<MarketingLlmTrace>,
     pub engine: EngineMetadata,
 }
 
@@ -293,9 +412,149 @@ pub struct ApproachSimulationResultV2 {
     pub emergent_behaviors: Vec<String>,
     pub top_reactions: Vec<String>,
     pub concerns: Vec<String>,
+    pub win_reasons: Vec<String>,
+    pub loss_risks: Vec<String>,
+    pub confidence_notes: Vec<String>,
+    pub calibration_notes: Vec<String>,
+    #[serde(default)]
+    pub llm_analysis: Option<ApproachLlmAnalysis>,
     pub composure_archetype: String,
     pub run_summary: RunSummary,
     pub mean_trajectory: Vec<f64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarketingLlmAnalysis {
+    pub provider: Option<String>,
+    pub model: String,
+    pub reasoning_effort: Option<String>,
+    #[serde(default)]
+    pub evaluator_count: usize,
+    pub executive_summary: Vec<String>,
+    #[serde(default)]
+    pub consensus_summary: Vec<String>,
+    pub strategic_takeaways: Vec<String>,
+    pub recommended_next_experiments: Vec<String>,
+    pub confidence_notes: Vec<String>,
+    #[serde(default)]
+    pub disagreement_notes: Vec<String>,
+    #[serde(default)]
+    pub evidence: Option<MarketingLlmEvidence>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ApproachLlmAnalysis {
+    pub narrative: String,
+    #[serde(default)]
+    pub consensus_summary: Vec<String>,
+    #[serde(default)]
+    pub strongest_personas: Vec<String>,
+    #[serde(default)]
+    pub objections_to_resolve: Vec<String>,
+    #[serde(default)]
+    pub realism_warnings: Vec<String>,
+    #[serde(default)]
+    pub next_experiments: Vec<String>,
+    #[serde(default)]
+    pub disagreement_notes: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarketingLlmTrace {
+    pub analysis_goal: Option<String>,
+    pub system_prompt: String,
+    pub user_prompt: String,
+    #[serde(default)]
+    pub prompt_char_count: usize,
+    #[serde(default)]
+    pub evaluators: Vec<LlmEvaluatorTrace>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmEvaluatorTrace {
+    pub evaluator_index: usize,
+    pub provider: Option<String>,
+    pub model: String,
+    pub reasoning_effort: Option<String>,
+    pub base_url: String,
+    #[serde(default)]
+    pub requested_max_output_tokens: Option<u32>,
+    #[serde(default)]
+    pub stream_fallback_used: bool,
+    #[serde(default)]
+    pub duration_ms: u64,
+    #[serde(default)]
+    pub response_id: Option<String>,
+    #[serde(default)]
+    pub usage: Option<LlmUsage>,
+    #[serde(default)]
+    pub raw_response: Value,
+    #[serde(default)]
+    pub raw_output_text: String,
+    #[serde(default)]
+    pub parsed_output: Option<Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmUsage {
+    #[serde(default)]
+    pub input_tokens: Option<u32>,
+    #[serde(default)]
+    pub output_tokens: Option<u32>,
+    #[serde(default)]
+    pub reasoning_tokens: Option<u32>,
+    #[serde(default)]
+    pub total_tokens: Option<u32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarketingLlmEvidence {
+    #[serde(default)]
+    pub prompt: Option<LlmPromptEvidence>,
+    #[serde(default)]
+    pub calls: Vec<LlmResponseEvidence>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmPromptEvidence {
+    pub system_prompt: String,
+    pub user_prompt: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmResponseEvidence {
+    #[serde(default)]
+    pub base_url: Option<String>,
+    #[serde(default)]
+    pub response_id: Option<String>,
+    #[serde(default)]
+    pub status: Option<String>,
+    #[serde(default)]
+    pub duration_ms: Option<u64>,
+    #[serde(default)]
+    pub raw_output_text: Option<String>,
+    #[serde(default)]
+    pub parsed_response_json: Option<Value>,
+    #[serde(default)]
+    pub raw_response_json: Option<Value>,
+    #[serde(default)]
+    pub raw_stream_text: Option<String>,
+    #[serde(default)]
+    pub usage: Option<LlmTokenUsage>,
+    #[serde(default)]
+    pub streamed_fallback_used: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmTokenUsage {
+    #[serde(default)]
+    pub input_tokens: Option<u64>,
+    #[serde(default)]
+    pub output_tokens: Option<u64>,
+    #[serde(default)]
+    pub reasoning_tokens: Option<u64>,
+    #[serde(default)]
+    pub total_tokens: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -462,6 +721,8 @@ pub fn simulate_marketing(
             name: "composure-marketing".into(),
             version: env!("CARGO_PKG_VERSION").into(),
             model: "deterministic_marketing_adapter_v1".into(),
+            provider: None,
+            reasoning_effort: None,
             seed_base,
             time_steps,
             num_paths: request.simulation_size,
@@ -538,7 +799,7 @@ pub fn simulate_marketing_v2(
                                 &request.scenario.scenario_type,
                                 Some(persona),
                                 approach,
-                                request.output.include_metric_breakdown,
+                                true,
                             ),
                             engagement_score: persona_computation.engagement_score,
                             viral_potential: persona_computation.viral_potential,
@@ -562,15 +823,23 @@ pub fn simulate_marketing_v2(
                 &request.scenario.scenario_type,
                 None,
                 approach,
-                request.output.include_metric_breakdown,
+                true,
             );
             if !persona_results.is_empty() {
-                primary_scorecard = blend_persona_scores(
-                    primary_scorecard,
-                    &persona_results,
-                    request.output.include_metric_breakdown,
-                );
+                primary_scorecard = blend_persona_scores(primary_scorecard, &persona_results, true);
             }
+            let win_reasons = build_win_reasons(&primary_scorecard, &aggregate.top_reactions);
+            let loss_risks = build_loss_risks(&primary_scorecard, &aggregate.concerns);
+            let confidence_notes =
+                build_confidence_notes(&aggregate.run_summary, &primary_scorecard);
+            let calibration_notes = build_calibration_notes(
+                approach,
+                &persona_results,
+                aggregate.engagement_score,
+                aggregate.viral_potential,
+                &primary_scorecard,
+                &request.observed_outcomes,
+            );
 
             Ok(ApproachSimulationResultV2 {
                 approach_id: approach.id.clone(),
@@ -582,6 +851,11 @@ pub fn simulate_marketing_v2(
                 emergent_behaviors: aggregate.emergent_behaviors,
                 top_reactions: aggregate.top_reactions,
                 concerns: aggregate.concerns,
+                win_reasons,
+                loss_risks,
+                confidence_notes,
+                calibration_notes,
+                llm_analysis: None,
                 composure_archetype: aggregate.composure_archetype,
                 run_summary: aggregate.run_summary,
                 mean_trajectory: if request.output.include_mean_trajectory {
@@ -595,25 +869,48 @@ pub fn simulate_marketing_v2(
 
     let cross_approach_insights =
         build_cross_approach_insights_v2(&request.approaches, &approach_results);
+    let recommended_next_experiments =
+        build_recommended_next_experiments(&request.scenario, &approach_results);
+    let calibration_summary =
+        build_calibration_summary(&request.observed_outcomes, &approach_results);
 
-    Ok(MarketingSimulationResultV2 {
+    let mut result = MarketingSimulationResultV2 {
         simulation_id,
         scenario: request.scenario.clone(),
-        primary_scorecard: summarize_v2_scorecard(
-            &approach_results,
-            request.output.include_metric_breakdown,
-        ),
+        primary_scorecard: summarize_v2_scorecard(&approach_results, true),
         approach_results,
         cross_approach_insights,
+        recommended_next_experiments,
+        calibration_summary,
+        llm_analysis: None,
+        llm_trace: None,
         engine: EngineMetadata {
             name: "composure-marketing".into(),
             version: env!("CARGO_PKG_VERSION").into(),
-            model: "deterministic_marketing_adapter_v2_scaffold".into(),
+            model: request
+                .evaluator
+                .as_ref()
+                .and_then(|evaluator| evaluator.model.clone())
+                .unwrap_or_else(|| "deterministic_marketing_adapter_v2_scaffold".into()),
+            provider: request
+                .evaluator
+                .as_ref()
+                .and_then(|evaluator| evaluator.provider.clone()),
+            reasoning_effort: request
+                .evaluator
+                .as_ref()
+                .and_then(|evaluator| evaluator.reasoning_effort.clone()),
             seed_base,
             time_steps,
             num_paths: request.simulation_size,
         },
-    })
+    };
+
+    if !request.output.include_metric_breakdown {
+        strip_metric_breakdowns(&mut result);
+    }
+
+    Ok(result)
 }
 
 fn validate_request(request: &MarketingSimulationRequest) -> Result<(), MarketingSimulationError> {
@@ -682,7 +979,14 @@ fn simulate_approach(
 ) -> Result<ApproachComputation, MarketingSimulationError> {
     let profile = build_audience_profile(seed_data, approach, platforms);
     let dynamics = scenario_dynamics(scenario_type);
-    let scenario = build_scenario(index, approach, &profile, time_steps, scenario_type, &dynamics);
+    let scenario = build_scenario(
+        index,
+        approach,
+        &profile,
+        time_steps,
+        scenario_type,
+        &dynamics,
+    );
     let simulator = MarketingSimulator {
         profile: profile.clone(),
         dynamics,
@@ -783,6 +1087,10 @@ fn approach_definition_to_input(approach: ApproachDefinition) -> ApproachInput {
         channels: approach.channels,
         tone: approach.tone,
         target: approach.target,
+        proof_points: approach.proof_points,
+        objection_handlers: approach.objection_handlers,
+        cta: approach.cta,
+        sequence: approach.sequence,
     }
 }
 
@@ -852,6 +1160,42 @@ fn default_objectives_for(scenario_type: &ScenarioType) -> Vec<ObjectiveDefiniti
             (MetricKind::AudienceReceptivity, 0.16),
             (MetricKind::MessageClarity, 0.14),
         ],
+        ScenarioType::LandingPage => vec![
+            (MetricKind::MessageClarity, 0.24),
+            (MetricKind::TrustSignal, 0.18),
+            (MetricKind::Credibility, 0.16),
+            (MetricKind::ConversionIntent, 0.22),
+            (MetricKind::ObjectionPressure, 0.20),
+        ],
+        ScenarioType::ShortFormVideo => vec![
+            (MetricKind::Shareability, 0.24),
+            (MetricKind::AudienceReceptivity, 0.22),
+            (MetricKind::Belonging, 0.14),
+            (MetricKind::ConversionIntent, 0.18),
+            (MetricKind::Credibility, 0.10),
+            (MetricKind::ChannelFit, 0.12),
+        ],
+        ScenarioType::CommunityEvent => vec![
+            (MetricKind::Belonging, 0.24),
+            (MetricKind::RecommendationConfidence, 0.22),
+            (MetricKind::TrustSignal, 0.18),
+            (MetricKind::AudienceReceptivity, 0.18),
+            (MetricKind::ConversionIntent, 0.18),
+        ],
+        ScenarioType::InStoreEnablement => vec![
+            (MetricKind::RecommendationConfidence, 0.24),
+            (MetricKind::Credibility, 0.20),
+            (MetricKind::MessageClarity, 0.16),
+            (MetricKind::ConversionIntent, 0.18),
+            (MetricKind::ObjectionPressure, 0.22),
+        ],
+        ScenarioType::PrivateRelationship => vec![
+            (MetricKind::TrustSignal, 0.24),
+            (MetricKind::Credibility, 0.18),
+            (MetricKind::RetentionFit, 0.18),
+            (MetricKind::RecommendationConfidence, 0.20),
+            (MetricKind::ConversionIntent, 0.20),
+        ],
         ScenarioType::Custom => vec![
             (MetricKind::AudienceReceptivity, 0.25),
             (MetricKind::PersonaFit, 0.15),
@@ -909,6 +1253,15 @@ fn build_metric_scores(
     persona: Option<&PersonaDefinition>,
     approach: &ApproachDefinition,
 ) -> Vec<MetricScore> {
+    let sequence_strength = sequence_strength(&approach.sequence);
+    let proof_density = signal_density(&approach.proof_points, 4.0);
+    let objection_handling = signal_density(&approach.objection_handlers, 3.0);
+    let cta_strength = approach
+        .cta
+        .as_deref()
+        .map(|value| clamp01(0.45 + (tokenize(value).len().min(8) as f64 * 0.04)))
+        .unwrap_or(0.0);
+
     let mut metrics = vec![
         MetricScore {
             metric: MetricKind::AudienceReceptivity,
@@ -978,7 +1331,105 @@ fn build_metric_scores(
             explanation: "Rewards specificity, lower objection risk, and stronger resonance."
                 .into(),
         },
+        MetricScore {
+            metric: MetricKind::Credibility,
+            label: metric_label(&MetricKind::Credibility),
+            score: as_percent(
+                ((1.0 - profile.objection_risk) * 0.28)
+                    + (profile.specificity * 0.16)
+                    + (proof_density * 0.22)
+                    + (objection_handling * 0.16)
+                    + (final_means.get(1).copied().unwrap_or_default() * 0.18),
+            ),
+            explanation: "Rewards proof density, objection handling, and sustained resonance."
+                .into(),
+        },
+        MetricScore {
+            metric: MetricKind::ObjectionPressure,
+            label: metric_label(&MetricKind::ObjectionPressure),
+            score: as_percent(
+                1.0 - ((profile.objection_risk * 0.48)
+                    + ((1.0 - objection_handling) * 0.26)
+                    + ((1.0 - profile.specificity) * 0.14)
+                    + ((1.0 - final_means.get(1).copied().unwrap_or_default()) * 0.12)),
+            ),
+            explanation:
+                "Higher scores mean lower unresolved objection pressure after the message.".into(),
+        },
+        MetricScore {
+            metric: MetricKind::RecommendationConfidence,
+            label: metric_label(&MetricKind::RecommendationConfidence),
+            score: as_percent(
+                (proof_density * 0.22)
+                    + (objection_handling * 0.22)
+                    + (profile.platform_alignment * 0.16)
+                    + (final_means.get(1).copied().unwrap_or_default() * 0.18)
+                    + (final_means.get(2).copied().unwrap_or_default() * 0.12)
+                    + (profile.relationship_pull * 0.10),
+            ),
+            explanation:
+                "Measures whether someone would feel confident recommending this approach.".into(),
+        },
+        MetricScore {
+            metric: MetricKind::RetentionFit,
+            label: metric_label(&MetricKind::RetentionFit),
+            score: as_percent(
+                (sequence_strength * 0.22)
+                    + (objection_handling * 0.18)
+                    + (profile.relationship_pull * 0.16)
+                    + (final_means.get(1).copied().unwrap_or_default() * 0.26)
+                    + ((1.0 - profile.objection_risk) * 0.18),
+            ),
+            explanation: "Estimates whether the message can sustain repeat engagement over time."
+                .into(),
+        },
+        MetricScore {
+            metric: MetricKind::Belonging,
+            label: metric_label(&MetricKind::Belonging),
+            score: as_percent(
+                (profile.relationship_pull * 0.20)
+                    + (profile.platform_alignment * 0.16)
+                    + (profile.persona_focus * 0.16)
+                    + (sequence_strength * 0.12)
+                    + (final_means.get(2).copied().unwrap_or_default() * 0.20)
+                    + (subject_contains_any(
+                        &tokenize(&format!(
+                            "{} {} {} {}",
+                            approach.angle,
+                            approach.target,
+                            approach.channels.join(" "),
+                            approach
+                                .sequence
+                                .iter()
+                                .map(|step| step.label.clone())
+                                .collect::<Vec<_>>()
+                                .join(" ")
+                        )),
+                        &[
+                            "community",
+                            "together",
+                            "join",
+                            "club",
+                            "members",
+                            "operator",
+                            "peer",
+                        ],
+                    ) * 0.16),
+            ),
+            explanation:
+                "Measures whether the approach creates a felt sense of participation and affinity."
+                    .into(),
+        },
     ];
+
+    if cta_strength > 0.0 {
+        if let Some(metric) = metrics
+            .iter_mut()
+            .find(|metric| metric.metric == MetricKind::ConversionIntent)
+        {
+            metric.score = as_percent((metric.score as f64 / 100.0 * 0.86) + (cta_strength * 0.14));
+        }
+    }
 
     apply_scenario_metric_shaping(&mut metrics, scenario_type, approach);
     if let Some(persona) = persona {
@@ -1092,6 +1543,11 @@ fn summarize_v2_scorecard(
             MetricKind::ConversionIntent,
             MetricKind::Shareability,
             MetricKind::TrustSignal,
+            MetricKind::Credibility,
+            MetricKind::ObjectionPressure,
+            MetricKind::RecommendationConfidence,
+            MetricKind::RetentionFit,
+            MetricKind::Belonging,
         ];
         metric_kinds
             .into_iter()
@@ -1140,6 +1596,11 @@ fn metric_label(metric: &MetricKind) -> String {
         MetricKind::ConversionIntent => "Conversion Intent",
         MetricKind::Shareability => "Shareability",
         MetricKind::TrustSignal => "Trust Signal",
+        MetricKind::Credibility => "Credibility",
+        MetricKind::ObjectionPressure => "Objection Pressure",
+        MetricKind::RecommendationConfidence => "Recommendation Confidence",
+        MetricKind::RetentionFit => "Retention Fit",
+        MetricKind::Belonging => "Belonging",
     }
     .into()
 }
@@ -1175,13 +1636,32 @@ fn apply_scenario_metric_shaping(
             (MetricKind::TrustSignal, ScenarioType::Retention) => 1.18,
             (MetricKind::ConversionIntent, ScenarioType::Retention) => 1.08,
             (MetricKind::Shareability, ScenarioType::Retention) => 0.92,
+            (MetricKind::MessageClarity, ScenarioType::LandingPage) => 1.18,
+            (MetricKind::ConversionIntent, ScenarioType::LandingPage) => 1.12,
+            (MetricKind::Credibility, ScenarioType::LandingPage) => 1.10,
+            (MetricKind::ObjectionPressure, ScenarioType::LandingPage) => 1.16,
+            (MetricKind::Shareability, ScenarioType::ShortFormVideo) => 1.20,
+            (MetricKind::AudienceReceptivity, ScenarioType::ShortFormVideo) => 1.08,
+            (MetricKind::Belonging, ScenarioType::ShortFormVideo) => 1.06,
+            (MetricKind::Belonging, ScenarioType::CommunityEvent) => 1.22,
+            (MetricKind::RecommendationConfidence, ScenarioType::CommunityEvent) => 1.16,
+            (MetricKind::TrustSignal, ScenarioType::CommunityEvent) => 1.10,
+            (MetricKind::RecommendationConfidence, ScenarioType::InStoreEnablement) => 1.20,
+            (MetricKind::Credibility, ScenarioType::InStoreEnablement) => 1.14,
+            (MetricKind::ObjectionPressure, ScenarioType::InStoreEnablement) => 1.10,
+            (MetricKind::TrustSignal, ScenarioType::PrivateRelationship) => 1.18,
+            (MetricKind::RetentionFit, ScenarioType::PrivateRelationship) => 1.12,
+            (MetricKind::RecommendationConfidence, ScenarioType::PrivateRelationship) => 1.08,
             _ => 1.0,
         };
 
         let contextual_bonus = match metric.metric {
             MetricKind::TrustSignal
                 if channels.iter().any(|token| {
-                    matches!(token.as_str(), "private" | "event" | "dinners" | "community")
+                    matches!(
+                        token.as_str(),
+                        "private" | "event" | "dinners" | "community"
+                    )
                 }) =>
             {
                 4.0
@@ -1207,6 +1687,20 @@ fn apply_scenario_metric_shaping(
             {
                 2.0
             }
+            MetricKind::RecommendationConfidence
+                if channels.iter().any(|token| {
+                    matches!(token.as_str(), "store" | "retail" | "private" | "event")
+                }) =>
+            {
+                3.0
+            }
+            MetricKind::Belonging
+                if channels.iter().any(|token| {
+                    matches!(token.as_str(), "community" | "event" | "club" | "group")
+                }) =>
+            {
+                4.0
+            }
             _ => 0.0,
         };
 
@@ -1222,12 +1716,21 @@ fn apply_persona_metric_shaping(
     approach: &ApproachDefinition,
 ) {
     let subject_tokens = tokenize(&format!(
-        "{} {} {} {} {}",
+        "{} {} {} {} {} {} {} {} {}",
         approach.angle,
         approach.format,
         approach.tone,
         approach.target,
-        approach.channels.join(" ")
+        approach.channels.join(" "),
+        approach.proof_points.join(" "),
+        approach.objection_handlers.join(" "),
+        approach.cta.clone().unwrap_or_default(),
+        approach
+            .sequence
+            .iter()
+            .map(|step| step.label.clone())
+            .collect::<Vec<_>>()
+            .join(" ")
     ));
     let channel_tokens = tokenize(&approach.channels.join(" "));
     let jobs_overlap = overlap_score(
@@ -1275,8 +1778,10 @@ fn apply_persona_metric_shaping(
             "metrics",
         ],
     );
-    let privacy_score =
-        subject_contains_any(&subject_tokens, &["privacy", "private", "export", "anonymous"]);
+    let privacy_score = subject_contains_any(
+        &subject_tokens,
+        &["privacy", "private", "export", "anonymous"],
+    );
     let proof_threshold = persona.proof_threshold.unwrap_or(0.45).clamp(0.0, 1.0);
     let privacy_sensitivity = persona.privacy_sensitivity.unwrap_or(0.20).clamp(0.0, 1.0);
     let price_sensitivity = persona.price_sensitivity.unwrap_or(0.25).clamp(0.0, 1.0);
@@ -1298,7 +1803,9 @@ fn apply_persona_metric_shaping(
                     + (proof_score * proof_threshold * 8.0)
                     + (privacy_score * privacy_sensitivity * 6.0)
                     - (barrier_overlap * 10.0)
-                    - (price_sensitivity * subject_contains_any(&subject_tokens, &["premium", "expensive"]) * 8.0)
+                    - (price_sensitivity
+                        * subject_contains_any(&subject_tokens, &["premium", "expensive"])
+                        * 8.0)
             }
             MetricKind::MessageClarity => {
                 (jobs_overlap * 6.0) + (trust_overlap * 4.0) - (barrier_overlap * 4.0)
@@ -1310,19 +1817,55 @@ fn apply_persona_metric_shaping(
                     + (proof_score * proof_threshold * 6.0)
                     - (barrier_overlap * 6.0)
             }
+            MetricKind::Credibility => {
+                (trust_overlap * 10.0)
+                    + (proof_score * proof_threshold * 10.0)
+                    + (privacy_score * privacy_sensitivity * 4.0)
+                    - (barrier_overlap * 6.0)
+            }
+            MetricKind::ObjectionPressure => {
+                -((barrier_overlap * 14.0) + ((1.0 - trust_overlap) * 6.0))
+            }
+            MetricKind::RecommendationConfidence => {
+                (trust_overlap * 10.0)
+                    + (channel_overlap * 6.0)
+                    + (proof_score * proof_threshold * 8.0)
+                    - (barrier_overlap * 6.0)
+            }
+            MetricKind::RetentionFit => {
+                (jobs_overlap * 7.0) + (trust_overlap * 8.0) - (barrier_overlap * 6.0)
+            }
+            MetricKind::Belonging => (channel_overlap * 8.0) + (jobs_overlap * 7.0),
         };
 
-        metric.score = ((metric.score as f64) + delta)
-            .round()
-            .clamp(0.0, 100.0) as u32;
+        metric.score = ((metric.score as f64) + delta).round().clamp(0.0, 100.0) as u32;
     }
 }
 
 fn subject_contains_any(tokens: &[String], keywords: &[&str]) -> f64 {
-    if keywords.iter().any(|keyword| tokens.iter().any(|token| token == keyword)) {
+    if keywords
+        .iter()
+        .any(|keyword| tokens.iter().any(|token| token == keyword))
+    {
         1.0
     } else {
         0.0
+    }
+}
+
+fn signal_density(items: &[String], expected: f64) -> f64 {
+    clamp01(items.len() as f64 / expected.max(1.0))
+}
+
+fn sequence_strength(steps: &[SequenceStep]) -> f64 {
+    if steps.is_empty() {
+        0.0
+    } else {
+        let total = steps
+            .iter()
+            .map(|step| step.intensity.clamp(0.0, 2.0))
+            .sum::<f64>();
+        clamp01(total / (steps.len() as f64 * 1.25))
     }
 }
 
@@ -1346,8 +1889,9 @@ fn build_scenario(
         "dimension_labels": ["attention", "resonance", "share_propensity"],
         "approach_id": approach.id,
         "scenario_type": scenario_type,
+        "sequence_length": approach.sequence.len(),
     }));
-    scenario.actions = build_actions(profile, time_steps, scenario_type);
+    scenario.actions = build_actions(profile, approach, time_steps, scenario_type);
     scenario
 }
 
@@ -1403,155 +1947,386 @@ fn build_initial_state(profile: &AudienceProfile, dynamics: &ScenarioDynamics) -
 
 fn build_actions(
     profile: &AudienceProfile,
+    approach: &ApproachInput,
     time_steps: usize,
     scenario_type: &ScenarioType,
 ) -> Vec<Action> {
-    let skepticism = -(0.08
-        + (profile.objection_risk * 0.16)
-        + ((1.0 - profile.channel_focus) * 0.10));
+    let skepticism =
+        -(0.08 + (profile.objection_risk * 0.16) + ((1.0 - profile.channel_focus) * 0.10));
     let base_attention = 0.16 + (profile.novelty * 0.16);
     let base_resonance = 0.14 + (profile.preference_fit * 0.14) + (profile.specificity * 0.10);
-    let base_share =
-        0.12 + (profile.platform_alignment * 0.10) + (profile.tone_conviction * 0.10);
+    let base_share = 0.12 + (profile.platform_alignment * 0.10) + (profile.tone_conviction * 0.10);
     let recovery = 0.08 + (profile.relationship_pull * 0.10) + (profile.platform_alignment * 0.06);
 
-    let mut actions = match scenario_type {
-        ScenarioType::AudienceDiscovery | ScenarioType::Custom => vec![
-            action(Some(0), base_attention, ActionType::Intervention, "hook launch"),
-            action(
-                Some(1),
-                base_resonance,
-                ActionType::Intervention,
-                "message resonance",
-            ),
-            action(Some(2), base_share, ActionType::Intervention, "sharing catalyst"),
-            Action::default(),
-            action(Some(1), skepticism, ActionType::StressorOnset, "skepticism"),
-            action(
-                Some(2),
-                recovery,
-                ActionType::StressorRemoval,
-                "social proof recovery",
-            ),
-        ],
-        ScenarioType::Positioning => vec![
-            action(
-                Some(1),
-                base_resonance * 1.18,
-                ActionType::Intervention,
-                "headline framing",
-            ),
-            action(
-                Some(0),
-                base_attention * 0.88,
-                ActionType::Intervention,
-                "clarity hook",
-            ),
-            action(
-                Some(1),
-                0.10 + (profile.specificity * 0.12),
-                ActionType::StressorRemoval,
-                "proof clarification",
-            ),
-            Action::default(),
-            action(Some(1), skepticism * 0.82, ActionType::StressorOnset, "skepticism"),
-            action(
-                Some(1),
-                recovery * 0.85,
-                ActionType::StressorRemoval,
-                "trust recovery",
-            ),
-        ],
-        ScenarioType::CampaignSequence => vec![
-            action(Some(0), base_attention * 1.05, ActionType::Intervention, "hook launch"),
-            action(
-                Some(1),
-                base_resonance * 1.08,
-                ActionType::Intervention,
-                "proof follow-up",
-            ),
-            action(
-                Some(1),
-                0.11 + (profile.preference_fit * 0.10),
-                ActionType::StressorRemoval,
-                "objection handling",
-            ),
-            action(
-                Some(0),
-                0.09 + (profile.channel_focus * 0.08),
-                ActionType::Intervention,
-                "conversion CTA",
-            ),
-            action(Some(1), skepticism * 0.76, ActionType::StressorOnset, "friction"),
-            action(
-                Some(2),
-                recovery * 0.95,
-                ActionType::StressorRemoval,
-                "social proof reinforcement",
-            ),
-        ],
-        ScenarioType::CommunityActivation => vec![
-            action(
-                Some(0),
-                base_attention * 0.96,
-                ActionType::Intervention,
-                "community invitation",
-            ),
-            action(
-                Some(2),
-                base_share * 1.25,
-                ActionType::Intervention,
-                "participation spark",
-            ),
-            action(
-                Some(1),
-                base_resonance * 0.94,
-                ActionType::Intervention,
-                "belonging story",
-            ),
-            action(
-                Some(2),
-                0.10 + (profile.relationship_pull * 0.10),
-                ActionType::StressorRemoval,
-                "peer amplification",
-            ),
-            action(Some(1), skepticism * 0.90, ActionType::StressorOnset, "skepticism"),
-            action(
-                Some(2),
-                recovery * 1.08,
-                ActionType::StressorRemoval,
-                "community proof recovery",
-            ),
-        ],
-        ScenarioType::Retention => vec![
-            action(
-                Some(1),
-                base_resonance * 1.12,
-                ActionType::Intervention,
-                "value reminder",
-            ),
-            action(
-                Some(0),
-                base_attention * 0.72,
-                ActionType::Intervention,
-                "gentle reminder",
-            ),
-            action(
-                Some(1),
-                0.10 + (profile.relationship_pull * 0.12),
-                ActionType::StressorRemoval,
-                "habit reinforcement",
-            ),
-            Action::default(),
-            action(Some(1), skepticism * 0.68, ActionType::StressorOnset, "friction"),
-            action(
-                Some(1),
-                recovery * 0.92,
-                ActionType::StressorRemoval,
-                "trust restoration",
-            ),
-        ],
+    let mut actions = if !approach.sequence.is_empty() {
+        build_sequence_actions(profile, approach, time_steps)
+    } else {
+        match scenario_type {
+            ScenarioType::AudienceDiscovery | ScenarioType::Custom => vec![
+                action(
+                    Some(0),
+                    base_attention,
+                    ActionType::Intervention,
+                    "hook launch",
+                ),
+                action(
+                    Some(1),
+                    base_resonance,
+                    ActionType::Intervention,
+                    "message resonance",
+                ),
+                action(
+                    Some(2),
+                    base_share,
+                    ActionType::Intervention,
+                    "sharing catalyst",
+                ),
+                Action::default(),
+                action(Some(1), skepticism, ActionType::StressorOnset, "skepticism"),
+                action(
+                    Some(2),
+                    recovery,
+                    ActionType::StressorRemoval,
+                    "social proof recovery",
+                ),
+            ],
+            ScenarioType::Positioning => vec![
+                action(
+                    Some(1),
+                    base_resonance * 1.18,
+                    ActionType::Intervention,
+                    "headline framing",
+                ),
+                action(
+                    Some(0),
+                    base_attention * 0.88,
+                    ActionType::Intervention,
+                    "clarity hook",
+                ),
+                action(
+                    Some(1),
+                    0.10 + (profile.specificity * 0.12),
+                    ActionType::StressorRemoval,
+                    "proof clarification",
+                ),
+                Action::default(),
+                action(
+                    Some(1),
+                    skepticism * 0.82,
+                    ActionType::StressorOnset,
+                    "skepticism",
+                ),
+                action(
+                    Some(1),
+                    recovery * 0.85,
+                    ActionType::StressorRemoval,
+                    "trust recovery",
+                ),
+            ],
+            ScenarioType::CampaignSequence => vec![
+                action(
+                    Some(0),
+                    base_attention * 1.05,
+                    ActionType::Intervention,
+                    "hook launch",
+                ),
+                action(
+                    Some(1),
+                    base_resonance * 1.08,
+                    ActionType::Intervention,
+                    "proof follow-up",
+                ),
+                action(
+                    Some(1),
+                    0.11 + (profile.preference_fit * 0.10),
+                    ActionType::StressorRemoval,
+                    "objection handling",
+                ),
+                action(
+                    Some(0),
+                    0.09 + (profile.channel_focus * 0.08),
+                    ActionType::Intervention,
+                    "conversion CTA",
+                ),
+                action(
+                    Some(1),
+                    skepticism * 0.76,
+                    ActionType::StressorOnset,
+                    "friction",
+                ),
+                action(
+                    Some(2),
+                    recovery * 0.95,
+                    ActionType::StressorRemoval,
+                    "social proof reinforcement",
+                ),
+            ],
+            ScenarioType::CommunityActivation => vec![
+                action(
+                    Some(0),
+                    base_attention * 0.96,
+                    ActionType::Intervention,
+                    "community invitation",
+                ),
+                action(
+                    Some(2),
+                    base_share * 1.25,
+                    ActionType::Intervention,
+                    "participation spark",
+                ),
+                action(
+                    Some(1),
+                    base_resonance * 0.94,
+                    ActionType::Intervention,
+                    "belonging story",
+                ),
+                action(
+                    Some(2),
+                    0.10 + (profile.relationship_pull * 0.10),
+                    ActionType::StressorRemoval,
+                    "peer amplification",
+                ),
+                action(
+                    Some(1),
+                    skepticism * 0.90,
+                    ActionType::StressorOnset,
+                    "skepticism",
+                ),
+                action(
+                    Some(2),
+                    recovery * 1.08,
+                    ActionType::StressorRemoval,
+                    "community proof recovery",
+                ),
+            ],
+            ScenarioType::Retention => vec![
+                action(
+                    Some(1),
+                    base_resonance * 1.12,
+                    ActionType::Intervention,
+                    "value reminder",
+                ),
+                action(
+                    Some(0),
+                    base_attention * 0.72,
+                    ActionType::Intervention,
+                    "gentle reminder",
+                ),
+                action(
+                    Some(1),
+                    0.10 + (profile.relationship_pull * 0.12),
+                    ActionType::StressorRemoval,
+                    "habit reinforcement",
+                ),
+                Action::default(),
+                action(
+                    Some(1),
+                    skepticism * 0.68,
+                    ActionType::StressorOnset,
+                    "friction",
+                ),
+                action(
+                    Some(1),
+                    recovery * 0.92,
+                    ActionType::StressorRemoval,
+                    "trust restoration",
+                ),
+            ],
+            ScenarioType::LandingPage => vec![
+                action(
+                    Some(1),
+                    base_resonance * 1.20,
+                    ActionType::Intervention,
+                    "headline",
+                ),
+                action(
+                    Some(1),
+                    0.12 + (profile.specificity * 0.10),
+                    ActionType::StressorRemoval,
+                    "proof block",
+                ),
+                action(
+                    Some(0),
+                    base_attention * 0.80,
+                    ActionType::Intervention,
+                    "cta section",
+                ),
+                action(
+                    Some(1),
+                    skepticism * 0.74,
+                    ActionType::StressorOnset,
+                    "objection friction",
+                ),
+            ],
+            ScenarioType::ShortFormVideo => vec![
+                action(
+                    Some(0),
+                    base_attention * 1.24,
+                    ActionType::Intervention,
+                    "hook",
+                ),
+                action(
+                    Some(2),
+                    base_share * 1.24,
+                    ActionType::Intervention,
+                    "save-share beat",
+                ),
+                action(
+                    Some(1),
+                    base_resonance * 0.90,
+                    ActionType::Intervention,
+                    "proof beat",
+                ),
+                action(
+                    Some(2),
+                    recovery * 1.02,
+                    ActionType::StressorRemoval,
+                    "comment spillover",
+                ),
+            ],
+            ScenarioType::CommunityEvent => vec![
+                action(
+                    Some(0),
+                    base_attention * 0.92,
+                    ActionType::Intervention,
+                    "invite",
+                ),
+                action(
+                    Some(1),
+                    base_resonance * 1.06,
+                    ActionType::Intervention,
+                    "story circle",
+                ),
+                action(
+                    Some(2),
+                    base_share * 1.12,
+                    ActionType::Intervention,
+                    "referral nudge",
+                ),
+                action(
+                    Some(2),
+                    recovery * 1.10,
+                    ActionType::StressorRemoval,
+                    "peer reinforcement",
+                ),
+            ],
+            ScenarioType::InStoreEnablement => vec![
+                action(
+                    Some(1),
+                    base_resonance * 1.14,
+                    ActionType::Intervention,
+                    "training proof",
+                ),
+                action(
+                    Some(1),
+                    0.11 + (profile.specificity * 0.10),
+                    ActionType::StressorRemoval,
+                    "objection card",
+                ),
+                action(
+                    Some(0),
+                    base_attention * 0.78,
+                    ActionType::Intervention,
+                    "shelf CTA",
+                ),
+                action(
+                    Some(1),
+                    skepticism * 0.72,
+                    ActionType::StressorOnset,
+                    "buyer skepticism",
+                ),
+            ],
+            ScenarioType::PrivateRelationship => vec![
+                action(
+                    Some(1),
+                    base_resonance * 1.18,
+                    ActionType::Intervention,
+                    "trust opener",
+                ),
+                action(
+                    Some(1),
+                    0.10 + (profile.relationship_pull * 0.12),
+                    ActionType::StressorRemoval,
+                    "follow-up proof",
+                ),
+                action(
+                    Some(2),
+                    base_share * 0.80,
+                    ActionType::Intervention,
+                    "private referral",
+                ),
+                action(
+                    Some(1),
+                    recovery * 0.98,
+                    ActionType::StressorRemoval,
+                    "relationship reinforcement",
+                ),
+            ],
+        }
     };
+
+    actions.resize_with(time_steps, Action::default);
+    actions.truncate(time_steps);
+    actions
+}
+
+fn build_sequence_actions(
+    profile: &AudienceProfile,
+    approach: &ApproachInput,
+    time_steps: usize,
+) -> Vec<Action> {
+    let base_attention = 0.16 + (profile.novelty * 0.16);
+    let base_resonance = 0.14 + (profile.preference_fit * 0.14) + (profile.specificity * 0.10);
+    let base_share = 0.12 + (profile.platform_alignment * 0.10) + (profile.tone_conviction * 0.10);
+    let recovery = 0.08 + (profile.relationship_pull * 0.10) + (profile.platform_alignment * 0.06);
+    let skepticism =
+        -(0.08 + (profile.objection_risk * 0.16) + ((1.0 - profile.channel_focus) * 0.10));
+
+    let mut actions = approach
+        .sequence
+        .iter()
+        .map(|step| {
+            let intensity = step.intensity.clamp(0.2, 2.0);
+            match step.focus {
+                SequenceFocus::Attention => action(
+                    Some(0),
+                    base_attention * intensity,
+                    ActionType::Intervention,
+                    &step.label,
+                ),
+                SequenceFocus::Resonance => action(
+                    Some(1),
+                    base_resonance * intensity,
+                    ActionType::Intervention,
+                    &step.label,
+                ),
+                SequenceFocus::Share => action(
+                    Some(2),
+                    base_share * intensity,
+                    ActionType::Intervention,
+                    &step.label,
+                ),
+                SequenceFocus::TrustRecovery => action(
+                    Some(1),
+                    recovery * intensity,
+                    ActionType::StressorRemoval,
+                    &step.label,
+                ),
+                SequenceFocus::Skepticism => action(
+                    Some(1),
+                    skepticism * intensity,
+                    ActionType::StressorOnset,
+                    &step.label,
+                ),
+                SequenceFocus::Conversion => action(
+                    Some(0),
+                    (0.10 + (profile.channel_focus * 0.08)) * intensity,
+                    ActionType::Intervention,
+                    &step.label,
+                ),
+            }
+        })
+        .collect::<Vec<_>>();
 
     actions.resize_with(time_steps, Action::default);
     actions.truncate(time_steps);
@@ -1664,6 +2439,96 @@ fn scenario_dynamics(scenario_type: &ScenarioType) -> ScenarioDynamics {
             resonance_to_share: 0.040,
             health_weights: [0.22, 0.56, 0.22],
         },
+        ScenarioType::LandingPage => ScenarioDynamics {
+            initial_state_bias: [-0.02, 0.08, -0.06],
+            initial_memory_shift: [-0.01, -0.02, 0.0],
+            initial_uncertainty_shift: [-0.02, -0.03, 0.0],
+            action_effect_multipliers: [0.82, 1.24, 0.64],
+            action_decay: [0.012, 0.004, 0.010],
+            memory_penalty_multipliers: [0.94, 0.76, 1.08],
+            uncertainty_penalty_multipliers: [0.90, 0.68, 1.02],
+            memory_decay: [0.83, 0.78, 0.82],
+            uncertainty_decay: [0.82, 0.76, 0.84],
+            resonance_to_attention: 0.040,
+            share_to_attention: 0.010,
+            attention_to_resonance: 0.032,
+            relationship_to_resonance: 0.018,
+            attention_to_share: 0.016,
+            resonance_to_share: 0.028,
+            health_weights: [0.22, 0.58, 0.20],
+        },
+        ScenarioType::ShortFormVideo => ScenarioDynamics {
+            initial_state_bias: [0.08, 0.0, 0.10],
+            initial_memory_shift: [0.0, 0.0, -0.02],
+            initial_uncertainty_shift: [0.0, -0.01, -0.02],
+            action_effect_multipliers: [1.22, 0.92, 1.34],
+            action_decay: [0.006, 0.010, 0.002],
+            memory_penalty_multipliers: [0.96, 1.00, 0.70],
+            uncertainty_penalty_multipliers: [0.98, 0.94, 0.74],
+            memory_decay: [0.88, 0.84, 0.76],
+            uncertainty_decay: [0.86, 0.84, 0.78],
+            resonance_to_attention: 0.026,
+            share_to_attention: 0.038,
+            attention_to_resonance: 0.018,
+            relationship_to_resonance: 0.010,
+            attention_to_share: 0.040,
+            resonance_to_share: 0.058,
+            health_weights: [0.34, 0.24, 0.42],
+        },
+        ScenarioType::CommunityEvent => ScenarioDynamics {
+            initial_state_bias: [0.00, 0.04, 0.08],
+            initial_memory_shift: [0.0, -0.01, -0.02],
+            initial_uncertainty_shift: [-0.01, -0.02, -0.02],
+            action_effect_multipliers: [0.90, 1.08, 1.16],
+            action_decay: [0.010, 0.006, 0.004],
+            memory_penalty_multipliers: [0.96, 0.82, 0.76],
+            uncertainty_penalty_multipliers: [0.92, 0.82, 0.78],
+            memory_decay: [0.85, 0.80, 0.78],
+            uncertainty_decay: [0.83, 0.80, 0.79],
+            resonance_to_attention: 0.030,
+            share_to_attention: 0.030,
+            attention_to_resonance: 0.022,
+            relationship_to_resonance: 0.018,
+            attention_to_share: 0.034,
+            resonance_to_share: 0.056,
+            health_weights: [0.24, 0.34, 0.42],
+        },
+        ScenarioType::InStoreEnablement => ScenarioDynamics {
+            initial_state_bias: [-0.01, 0.06, -0.02],
+            initial_memory_shift: [-0.01, -0.02, 0.0],
+            initial_uncertainty_shift: [-0.01, -0.03, 0.0],
+            action_effect_multipliers: [0.76, 1.18, 0.72],
+            action_decay: [0.012, 0.005, 0.008],
+            memory_penalty_multipliers: [0.92, 0.76, 0.96],
+            uncertainty_penalty_multipliers: [0.88, 0.70, 0.94],
+            memory_decay: [0.82, 0.78, 0.81],
+            uncertainty_decay: [0.81, 0.76, 0.82],
+            resonance_to_attention: 0.034,
+            share_to_attention: 0.014,
+            attention_to_resonance: 0.028,
+            relationship_to_resonance: 0.014,
+            attention_to_share: 0.020,
+            resonance_to_share: 0.032,
+            health_weights: [0.20, 0.58, 0.22],
+        },
+        ScenarioType::PrivateRelationship => ScenarioDynamics {
+            initial_state_bias: [-0.03, 0.08, -0.02],
+            initial_memory_shift: [-0.02, -0.03, -0.01],
+            initial_uncertainty_shift: [-0.02, -0.03, -0.01],
+            action_effect_multipliers: [0.74, 1.20, 0.84],
+            action_decay: [0.013, 0.004, 0.006],
+            memory_penalty_multipliers: [0.84, 0.70, 0.82],
+            uncertainty_penalty_multipliers: [0.82, 0.66, 0.84],
+            memory_decay: [0.80, 0.74, 0.78],
+            uncertainty_decay: [0.80, 0.74, 0.79],
+            resonance_to_attention: 0.036,
+            share_to_attention: 0.014,
+            attention_to_resonance: 0.024,
+            relationship_to_resonance: 0.024,
+            attention_to_share: 0.024,
+            resonance_to_share: 0.038,
+            health_weights: [0.20, 0.60, 0.20],
+        },
     }
 }
 
@@ -1710,8 +2575,7 @@ impl Simulator for MarketingSimulator {
         };
 
         next.z[0] = clamp01(
-            state.z[0]
-                - self.dynamics.action_decay[0]
+            state.z[0] - self.dynamics.action_decay[0]
                 + attention_effect
                 + (state.z[1] * self.dynamics.resonance_to_attention)
                 + (state.z[2] * self.dynamics.share_to_attention)
@@ -1722,8 +2586,7 @@ impl Simulator for MarketingSimulator {
                 + noise[0],
         );
         next.z[1] = clamp01(
-            state.z[1]
-                - self.dynamics.action_decay[1]
+            state.z[1] - self.dynamics.action_decay[1]
                 + resonance_effect
                 + (state.z[0] * self.dynamics.attention_to_resonance)
                 + (self.profile.relationship_pull * self.dynamics.relationship_to_resonance)
@@ -1734,8 +2597,7 @@ impl Simulator for MarketingSimulator {
                 + noise[1],
         );
         next.z[2] = clamp01(
-            state.z[2]
-                - self.dynamics.action_decay[2]
+            state.z[2] - self.dynamics.action_decay[2]
                 + share_effect
                 + (next.z[0] * self.dynamics.attention_to_share)
                 + (next.z[1] * self.dynamics.resonance_to_share)
@@ -1792,12 +2654,21 @@ fn build_audience_profile(
     platforms: &[String],
 ) -> AudienceProfile {
     let subject_tokens = tokenize(&format!(
-        "{} {} {} {} {}",
+        "{} {} {} {} {} {} {} {} {}",
         approach.angle,
         approach.format,
         approach.tone,
         approach.target,
-        approach.channels.join(" ")
+        approach.channels.join(" "),
+        approach.proof_points.join(" "),
+        approach.objection_handlers.join(" "),
+        approach.cta.clone().unwrap_or_default(),
+        approach
+            .sequence
+            .iter()
+            .map(|step| step.label.clone())
+            .collect::<Vec<_>>()
+            .join(" ")
     ));
     let platform_tokens = tokenize(&platforms.join(" "));
     let project_tokens = tokenize(&format!(
@@ -1892,6 +2763,11 @@ fn build_audience_profile(
             ("carousel", 0.74),
             ("video", 0.80),
             ("short", 0.72),
+            ("landing", 0.70),
+            ("headline", 0.68),
+            ("event", 0.70),
+            ("store", 0.66),
+            ("private", 0.62),
             ("case", 0.66),
             ("story", 0.70),
             ("guide", 0.64),
@@ -2259,6 +3135,350 @@ fn build_cross_approach_insights_v2(
     insights
 }
 
+fn build_win_reasons(scorecard: &PrimaryScorecard, top_reactions: &[String]) -> Vec<String> {
+    let mut reasons = top_reactions.iter().take(2).cloned().collect::<Vec<_>>();
+    if !scorecard.metrics.is_empty() {
+        let mut sorted = scorecard.metrics.iter().collect::<Vec<_>>();
+        sorted.sort_by(|left, right| right.score.cmp(&left.score));
+        for metric in sorted.into_iter().take(2) {
+            reasons.push(format!(
+                "Strong {} at {}",
+                metric.label.to_lowercase(),
+                metric.score
+            ));
+        }
+    }
+    reasons.truncate(4);
+    reasons
+}
+
+fn build_loss_risks(scorecard: &PrimaryScorecard, concerns: &[String]) -> Vec<String> {
+    let mut risks = concerns.iter().take(2).cloned().collect::<Vec<_>>();
+    if !scorecard.metrics.is_empty() {
+        let mut sorted = scorecard.metrics.iter().collect::<Vec<_>>();
+        sorted.sort_by(|left, right| left.score.cmp(&right.score));
+        for metric in sorted.into_iter().take(2) {
+            if metric.score <= 50 {
+                risks.push(format!(
+                    "Weak {} at {}",
+                    metric.label.to_lowercase(),
+                    metric.score
+                ));
+            }
+        }
+    }
+    risks.truncate(4);
+    risks
+}
+
+fn build_confidence_notes(summary: &RunSummary, scorecard: &PrimaryScorecard) -> Vec<String> {
+    let mut notes = Vec::new();
+    if let Some(monte) = &summary.monte_carlo {
+        if let Some(width) = monte.final_band_width {
+            if width <= 0.10 {
+                notes.push(
+                    "Tight final band suggests relatively stable simulation outcomes.".into(),
+                );
+            } else if width >= 0.22 {
+                notes
+                    .push("Wide final band suggests results are more assumption-sensitive.".into());
+            }
+        }
+    }
+    if let Some(composure) = &summary.composure {
+        if composure.residual_damage <= 0.08 {
+            notes.push(
+                "Low residual damage suggests the approach recovers well from skepticism.".into(),
+            );
+        } else if composure.residual_damage >= 0.18 {
+            notes.push(
+                "Higher residual damage suggests objections remain sticky after exposure.".into(),
+            );
+        }
+    }
+    if let Some(metric) = scorecard
+        .metrics
+        .iter()
+        .find(|metric| metric.metric == MetricKind::ObjectionPressure)
+    {
+        if metric.score <= 45 {
+            notes.push("Confidence is reduced by unresolved objection pressure.".into());
+        }
+    }
+    if notes.is_empty() {
+        notes.push(
+            "Confidence is moderate: no single stability or failure signal dominates.".into(),
+        );
+    }
+    notes
+}
+
+fn build_recommended_next_experiments(
+    scenario: &ScenarioDefinition,
+    results: &[ApproachSimulationResultV2],
+) -> Vec<String> {
+    if results.is_empty() {
+        return Vec::new();
+    }
+
+    let mut sorted = results.iter().collect::<Vec<_>>();
+    sorted.sort_by(|left, right| {
+        right
+            .primary_scorecard
+            .overall_score
+            .cmp(&left.primary_scorecard.overall_score)
+    });
+    let winner = sorted[0];
+    let runner_up = sorted.get(1).copied();
+    let mut recs = Vec::new();
+
+    if let Some(runner_up) = runner_up {
+        let gap = winner
+            .primary_scorecard
+            .overall_score
+            .saturating_sub(runner_up.primary_scorecard.overall_score);
+        if gap <= 5 {
+            recs.push("Top approaches are close. Keep the audience fixed and test a narrower hook or proof variant next.".into());
+        } else {
+            recs.push(format!(
+                "Use {} as the control and test one focused challenger against it next.",
+                winner.approach_id
+            ));
+        }
+    }
+
+    if let Some(metric) = winner
+        .primary_scorecard
+        .metrics
+        .iter()
+        .min_by_key(|metric| metric.score)
+    {
+        recs.push(match metric.metric {
+            MetricKind::MessageClarity => "Tighten headline and proof blocks before changing channels.".into(),
+            MetricKind::ConversionIntent => "Keep the story but strengthen the CTA and conversion step in the sequence.".into(),
+            MetricKind::ObjectionPressure => "Test a version that handles the top objection explicitly earlier in the sequence.".into(),
+            MetricKind::Belonging => "Layer in more community proof or peer language before expanding distribution.".into(),
+            MetricKind::RecommendationConfidence => "Add clearer proof artifacts so a partner or operator would feel safer recommending it.".into(),
+            _ => format!("Improve the weakest dimension next: {}.", metric.label),
+        });
+    }
+
+    match scenario.scenario_type {
+        ScenarioType::LandingPage => {
+            recs.push("Run a landing-page-only comparison where headline and proof are held constant while CTA structure changes.".into());
+        }
+        ScenarioType::ShortFormVideo => {
+            recs.push("Keep the channel fixed and test only the first-three-second hook against the current winner.".into());
+        }
+        ScenarioType::CampaignSequence => {
+            recs.push("Compare the current touch order against a proof-first sequence to see whether conversion lifts without increasing fatigue.".into());
+        }
+        ScenarioType::CommunityEvent | ScenarioType::CommunityActivation => {
+            recs.push("Test whether peer proof or operator-specific belonging language drives more follow-through after the first interaction.".into());
+        }
+        ScenarioType::InStoreEnablement => {
+            recs.push("Test a version with stronger objection handling for staff conversations before changing the merchandising story.".into());
+        }
+        ScenarioType::PrivateRelationship | ScenarioType::Retention => {
+            recs.push("Test a follow-up message that reinforces trust before adding more asks or broader distribution.".into());
+        }
+        _ => {}
+    }
+
+    recs.truncate(4);
+    recs
+}
+
+fn build_calibration_notes(
+    approach: &ApproachDefinition,
+    persona_results: &[PersonaApproachResult],
+    engagement_score: u32,
+    viral_potential: u32,
+    primary_scorecard: &PrimaryScorecard,
+    observed_outcomes: &[ObservedOutcome],
+) -> Vec<String> {
+    let observed = observed_outcomes
+        .iter()
+        .filter(|outcome| outcome.approach_id == approach.id)
+        .collect::<Vec<_>>();
+    if observed.is_empty() {
+        return Vec::new();
+    }
+
+    let mut notes = Vec::new();
+    if let Some(signups) = weighted_average_observed(observed.iter().filter_map(|outcome| {
+        outcome
+            .waitlist_signup_rate
+            .map(|value| (value, outcome.sample_size.unwrap_or(1) as f64))
+    })) {
+        let predicted = primary_scorecard
+            .metrics
+            .iter()
+            .find(|metric| metric.metric == MetricKind::ConversionIntent)
+            .map(|metric| metric.score as f64 / 100.0)
+            .unwrap_or(engagement_score as f64 / 100.0);
+        notes.push(alignment_note("signup intent", predicted, signups));
+    }
+    if let Some(retention) = weighted_average_observed(observed.iter().filter_map(|outcome| {
+        outcome
+            .retention_d7
+            .map(|value| (value, outcome.sample_size.unwrap_or(1) as f64))
+    })) {
+        let predicted = primary_scorecard
+            .metrics
+            .iter()
+            .find(|metric| metric.metric == MetricKind::RetentionFit)
+            .map(|metric| metric.score as f64 / 100.0)
+            .unwrap_or(engagement_score as f64 / 100.0);
+        notes.push(alignment_note("retention", predicted, retention));
+    }
+    if let Some(shares) = weighted_average_observed(observed.iter().filter_map(|outcome| {
+        outcome
+            .share_rate
+            .map(|value| (value, outcome.sample_size.unwrap_or(1) as f64))
+    })) {
+        let predicted = viral_potential as f64 / 100.0;
+        notes.push(alignment_note("share rate", predicted, shares));
+    }
+    if let Some(activation) = weighted_average_observed(observed.iter().filter_map(|outcome| {
+        outcome
+            .activation_rate
+            .map(|value| (value, outcome.sample_size.unwrap_or(1) as f64))
+    })) {
+        let predicted = primary_scorecard
+            .metrics
+            .iter()
+            .find(|metric| metric.metric == MetricKind::AudienceReceptivity)
+            .map(|metric| metric.score as f64 / 100.0)
+            .unwrap_or(engagement_score as f64 / 100.0);
+        notes.push(alignment_note("activation", predicted, activation));
+    }
+    if let Some(paid_conversion) =
+        weighted_average_observed(observed.iter().filter_map(|outcome| {
+            outcome
+                .paid_conversion_rate
+                .map(|value| (value, outcome.sample_size.unwrap_or(1) as f64))
+        }))
+    {
+        notes.push(format!(
+            "Observed paid conversion {:.0}% is attached, but the deterministic layer does not yet model a dedicated paid-conversion proxy.",
+            paid_conversion.clamp(0.0, 1.0) * 100.0
+        ));
+    }
+
+    if !persona_results.is_empty() {
+        let observed_personas = observed
+            .iter()
+            .filter_map(|outcome| outcome.persona_id.as_deref())
+            .collect::<Vec<_>>();
+        if !observed_personas.is_empty() {
+            notes.push(format!(
+                "Observed data covers persona-specific outcomes for {}.",
+                observed_personas.join(", ")
+            ));
+        }
+    }
+
+    let sample_total = observed
+        .iter()
+        .filter_map(|outcome| outcome.sample_size)
+        .sum::<u32>();
+    if sample_total > 0 {
+        notes.push(format!(
+            "Calibration sample size across linked observations: {}.",
+            sample_total
+        ));
+    }
+
+    notes.truncate(5);
+    notes
+}
+
+fn build_calibration_summary(
+    observed_outcomes: &[ObservedOutcome],
+    approach_results: &[ApproachSimulationResultV2],
+) -> Vec<String> {
+    if observed_outcomes.is_empty() {
+        return Vec::new();
+    }
+
+    let covered = approach_results
+        .iter()
+        .filter(|result| {
+            observed_outcomes
+                .iter()
+                .any(|outcome| outcome.approach_id == result.approach_id)
+        })
+        .count();
+    let total_samples = observed_outcomes
+        .iter()
+        .filter_map(|outcome| outcome.sample_size)
+        .sum::<u32>();
+
+    let mut summary = vec![format!(
+        "Observed outcomes attached for {}/{} approaches.",
+        covered,
+        approach_results.len()
+    )];
+    if total_samples > 0 {
+        summary.push(format!(
+            "Total linked observed sample size: {}.",
+            total_samples
+        ));
+    }
+    if covered < approach_results.len() {
+        summary.push(
+            "Calibration coverage is partial, so uncovered approaches still rely mostly on heuristics."
+                .into(),
+        );
+    }
+    summary
+}
+
+fn weighted_average_observed(values: impl Iterator<Item = (f64, f64)>) -> Option<f64> {
+    let mut weighted_sum = 0.0;
+    let mut total_weight = 0.0;
+    for (value, weight) in values {
+        weighted_sum += value * weight.max(0.0);
+        total_weight += weight.max(0.0);
+    }
+    if total_weight > 0.0 {
+        Some(weighted_sum / total_weight)
+    } else {
+        None
+    }
+}
+
+fn alignment_note(label: &str, predicted: f64, observed: f64) -> String {
+    let predicted = predicted.clamp(0.0, 1.0);
+    let observed = observed.clamp(0.0, 1.0);
+    let delta = predicted - observed;
+    let phrasing = if delta.abs() <= 0.06 {
+        "tracks closely with"
+    } else if delta > 0.0 {
+        "is more optimistic than"
+    } else {
+        "is more conservative than"
+    };
+    format!(
+        "Predicted {} {:.0}% {} observed {:.0}%.",
+        label,
+        predicted * 100.0,
+        phrasing,
+        observed * 100.0
+    )
+}
+
+fn strip_metric_breakdowns(result: &mut MarketingSimulationResultV2) {
+    result.primary_scorecard.metrics.clear();
+    for approach in &mut result.approach_results {
+        approach.primary_scorecard.metrics.clear();
+        for persona in &mut approach.persona_results {
+            persona.primary_scorecard.metrics.clear();
+        }
+    }
+}
+
 fn approach_label(approaches: &[ApproachInput], approach_id: &str) -> String {
     approaches
         .iter()
@@ -2433,6 +3653,10 @@ fn default_relative_weight() -> f64 {
     1.0
 }
 
+fn default_sequence_intensity() -> f64 {
+    1.0
+}
+
 fn clamp01(value: f64) -> f64 {
     value.clamp(0.0, 1.0)
 }
@@ -2481,6 +3705,10 @@ mod tests {
                     channels: vec!["twitter".into()],
                     tone: "direct and contrarian".into(),
                     target: "technical founders".into(),
+                    proof_points: vec![],
+                    objection_handlers: vec![],
+                    cta: None,
+                    sequence: vec![],
                 },
                 ApproachInput {
                     id: "broad".into(),
@@ -2489,6 +3717,10 @@ mod tests {
                     channels: vec!["twitter".into(), "linkedin".into(), "reddit".into()],
                     tone: "friendly".into(),
                     target: "everyone".into(),
+                    proof_points: vec![],
+                    objection_handlers: vec![],
+                    cta: None,
+                    sequence: vec![],
                 },
             ],
             simulation_size: 24,
@@ -2555,6 +3787,10 @@ mod tests {
                     channels: vec!["twitter".into()],
                     tone: "direct and contrarian".into(),
                     target: "technical founders".into(),
+                    proof_points: vec!["examples".into(), "proof".into()],
+                    objection_handlers: vec!["no hype".into()],
+                    cta: Some("Join waitlist".into()),
+                    sequence: vec![],
                     objectives: vec![],
                 },
                 ApproachDefinition {
@@ -2564,6 +3800,10 @@ mod tests {
                     channels: vec!["twitter".into(), "linkedin".into(), "reddit".into()],
                     tone: "friendly".into(),
                     target: "everyone".into(),
+                    proof_points: vec![],
+                    objection_handlers: vec![],
+                    cta: None,
+                    sequence: vec![],
                     objectives: vec![],
                 },
             ],
@@ -2598,6 +3838,13 @@ mod tests {
                 time_steps: 6,
                 objectives: vec![],
             },
+            evaluator: Some(EvaluatorConfig {
+                provider: Some("cliproxyapi".into()),
+                model: Some("gpt-5.4".into()),
+                reasoning_effort: Some("high".into()),
+            }),
+            llm_assist: None,
+            observed_outcomes: vec![],
             output: OutputOptions::default(),
             simulation_size: 24,
         }
@@ -2663,6 +3910,9 @@ mod tests {
             .metrics
             .iter()
             .any(|metric| metric.metric == MetricKind::AudienceReceptivity));
+        assert_eq!(result.engine.provider.as_deref(), Some("cliproxyapi"));
+        assert_eq!(result.engine.model, "gpt-5.4");
+        assert_eq!(result.engine.reasoning_effort.as_deref(), Some("high"));
     }
 
     #[test]
@@ -2730,11 +3980,17 @@ mod tests {
             ],
             approaches: vec![ApproachDefinition {
                 id: "privacy-proof".into(),
-                angle: "A private way to track protocols with proof confidence and exportable reports".into(),
+                angle:
+                    "A private way to track protocols with proof confidence and exportable reports"
+                        .into(),
                 format: "landing page headline".into(),
                 channels: vec!["landing page".into(), "reddit".into()],
                 tone: "calm and credible".into(),
                 target: "people who want proof and privacy".into(),
+                proof_points: vec!["confidence".into(), "exportable reports".into()],
+                objection_handlers: vec!["private".into()],
+                cta: Some("Join waitlist".into()),
+                sequence: vec![],
                 objectives: vec![],
             }],
             channels: vec![],
@@ -2746,6 +4002,9 @@ mod tests {
                 time_steps: 6,
                 objectives: vec![],
             },
+            evaluator: None,
+            llm_assist: None,
+            observed_outcomes: vec![],
             output: OutputOptions::default(),
             simulation_size: 24,
         };
@@ -2766,8 +4025,94 @@ mod tests {
         assert!(first
             .persona_results
             .windows(2)
-            .any(|window| window[0].engagement_score != window[1].engagement_score
-                || window[0].viral_potential != window[1].viral_potential));
+            .any(
+                |window| window[0].engagement_score != window[1].engagement_score
+                    || window[0].viral_potential != window[1].viral_potential
+            ));
+    }
+
+    #[test]
+    fn marketing_simulation_v2_keeps_calibration_notes_when_metric_breakdowns_are_hidden() {
+        let mut request = sample_request_v2();
+        request.output.include_metric_breakdown = false;
+        request.observed_outcomes = vec![ObservedOutcome {
+            approach_id: "specific".into(),
+            persona_id: Some("developer-founder".into()),
+            source: Some("instagram".into()),
+            creative_id: None,
+            hook_id: None,
+            landing_variant: None,
+            waitlist_signup_rate: Some(0.18),
+            activation_rate: Some(0.24),
+            retention_d7: Some(0.21),
+            paid_conversion_rate: Some(0.07),
+            share_rate: Some(0.09),
+            sample_size: Some(120),
+        }];
+
+        let result = simulate_marketing_v2(&request).unwrap();
+        let specific = result
+            .approach_results
+            .iter()
+            .find(|approach| approach.approach_id == "specific")
+            .unwrap();
+
+        assert!(specific.primary_scorecard.metrics.is_empty());
+        assert!(specific
+            .calibration_notes
+            .iter()
+            .any(|note| note.contains("signup intent")));
+        assert!(specific
+            .calibration_notes
+            .iter()
+            .any(|note| note.contains("paid conversion")));
+    }
+
+    #[test]
+    fn marketing_simulation_v2_uses_weighted_observed_outcomes_in_calibration_notes() {
+        let mut request = sample_request_v2();
+        request.observed_outcomes = vec![
+            ObservedOutcome {
+                approach_id: "specific".into(),
+                persona_id: None,
+                source: Some("instagram".into()),
+                creative_id: None,
+                hook_id: None,
+                landing_variant: None,
+                waitlist_signup_rate: Some(0.10),
+                activation_rate: None,
+                retention_d7: None,
+                paid_conversion_rate: None,
+                share_rate: None,
+                sample_size: Some(100),
+            },
+            ObservedOutcome {
+                approach_id: "specific".into(),
+                persona_id: None,
+                source: Some("reddit".into()),
+                creative_id: None,
+                hook_id: None,
+                landing_variant: None,
+                waitlist_signup_rate: Some(0.90),
+                activation_rate: None,
+                retention_d7: None,
+                paid_conversion_rate: None,
+                share_rate: None,
+                sample_size: Some(1),
+            },
+        ];
+
+        let result = simulate_marketing_v2(&request).unwrap();
+        let specific = result
+            .approach_results
+            .iter()
+            .find(|approach| approach.approach_id == "specific")
+            .unwrap();
+
+        assert!(specific
+            .calibration_notes
+            .iter()
+            .any(|note| note.contains("observed 11%")));
     }
 
     #[test]
@@ -2820,11 +4165,17 @@ mod tests {
             ],
             approaches: vec![ApproachDefinition {
                 id: "privacy-proof".into(),
-                angle: "A private way to track protocols with proof confidence and exportable reports".into(),
+                angle:
+                    "A private way to track protocols with proof confidence and exportable reports"
+                        .into(),
                 format: "landing page headline".into(),
                 channels: vec!["landing page".into(), "reddit".into()],
                 tone: "calm and credible".into(),
                 target: "people who want proof and privacy".into(),
+                proof_points: vec!["confidence".into(), "exportable reports".into()],
+                objection_handlers: vec!["private".into()],
+                cta: Some("Join waitlist".into()),
+                sequence: vec![],
                 objectives: vec![],
             }],
             channels: vec![],
@@ -2836,6 +4187,9 @@ mod tests {
                 time_steps: 6,
                 objectives: vec![],
             },
+            evaluator: None,
+            llm_assist: None,
+            observed_outcomes: vec![],
             output: OutputOptions::default(),
             simulation_size: 24,
         };
@@ -2857,14 +4211,12 @@ mod tests {
             .find(|value| value.persona_id == "proof")
             .unwrap();
 
-        assert!(
-            privacy
-                .primary_scorecard
-                .metrics
-                .iter()
-                .zip(proof.primary_scorecard.metrics.iter())
-                .any(|(left, right)| left.score != right.score)
-        );
+        assert!(privacy
+            .primary_scorecard
+            .metrics
+            .iter()
+            .zip(proof.primary_scorecard.metrics.iter())
+            .any(|(left, right)| left.score != right.score));
         assert_ne!(
             privacy
                 .primary_scorecard
@@ -2977,6 +4329,10 @@ mod tests {
             channels: vec!["twitter".into(), "community".into()],
             tone: "credible and energizing".into(),
             target: "operators who want proof and peers".into(),
+            proof_points: vec!["weekly wins".into()],
+            objection_handlers: vec!["proof".into()],
+            cta: Some("Join event".into()),
+            sequence: vec![],
             objectives: vec![],
         }];
         positioning_request.scenario.scenario_type = ScenarioType::Positioning;
@@ -2997,7 +4353,111 @@ mod tests {
 
         assert!(community_result.viral_potential > positioning_result.viral_potential);
         assert!(retention_result.engagement_score != community_result.engagement_score);
-        assert_ne!(positioning_result.mean_trajectory, community_result.mean_trajectory);
-        assert_ne!(community_result.mean_trajectory, retention_result.mean_trajectory);
+        assert_ne!(
+            positioning_result.mean_trajectory,
+            community_result.mean_trajectory
+        );
+        assert_ne!(
+            community_result.mean_trajectory,
+            retention_result.mean_trajectory
+        );
+    }
+
+    #[test]
+    fn marketing_simulation_v2_landing_page_family_emphasizes_clarity_and_conversion() {
+        let mut request = sample_request_v2();
+        request.scenario.scenario_type = ScenarioType::LandingPage;
+        request.approaches = vec![ApproachDefinition {
+            id: "landing-proof".into(),
+            angle: "See exactly which proof and outcomes changed in your funnel".into(),
+            format: "landing page headline".into(),
+            channels: vec!["landing page".into()],
+            tone: "clear and credible".into(),
+            target: "founders".into(),
+            proof_points: vec!["case study".into(), "examples".into()],
+            objection_handlers: vec!["no hype".into()],
+            cta: Some("Join waitlist".into()),
+            sequence: vec![],
+            objectives: vec![],
+        }];
+
+        let result = simulate_marketing_v2(&request).unwrap();
+        let first = result.approach_results.first().unwrap();
+        let clarity = first
+            .primary_scorecard
+            .metrics
+            .iter()
+            .find(|metric| metric.metric == MetricKind::MessageClarity)
+            .unwrap()
+            .score;
+        let conversion = first
+            .primary_scorecard
+            .metrics
+            .iter()
+            .find(|metric| metric.metric == MetricKind::ConversionIntent)
+            .unwrap()
+            .score;
+        let share = first
+            .primary_scorecard
+            .metrics
+            .iter()
+            .find(|metric| metric.metric == MetricKind::Shareability)
+            .unwrap()
+            .score;
+
+        assert!(clarity >= share);
+        assert!(conversion >= 40);
+    }
+
+    #[test]
+    fn marketing_simulation_v2_sequence_steps_change_campaign_behavior() {
+        let request = sample_request();
+        let seed = 4242;
+        let index = 0;
+        let time_steps = 6;
+        let mut sequenced = request.approaches[0].clone();
+        sequenced.sequence = vec![
+            SequenceStep {
+                label: "hook".into(),
+                focus: SequenceFocus::Attention,
+                intensity: 1.2,
+            },
+            SequenceStep {
+                label: "proof".into(),
+                focus: SequenceFocus::Resonance,
+                intensity: 1.0,
+            },
+            SequenceStep {
+                label: "cta".into(),
+                focus: SequenceFocus::Conversion,
+                intensity: 1.0,
+            },
+        ];
+
+        let base = simulate_approach(
+            &request.seed_data,
+            &request.approaches[0],
+            &request.platforms,
+            request.simulation_size,
+            seed,
+            index,
+            time_steps,
+            &ScenarioType::CampaignSequence,
+        )
+        .unwrap();
+        let sequenced_result = simulate_approach(
+            &request.seed_data,
+            &sequenced,
+            &request.platforms,
+            request.simulation_size,
+            seed,
+            index,
+            time_steps,
+            &ScenarioType::CampaignSequence,
+        )
+        .unwrap();
+
+        assert_ne!(base.mean_trajectory, sequenced_result.mean_trajectory);
+        assert_ne!(base.final_means, sequenced_result.final_means);
     }
 }

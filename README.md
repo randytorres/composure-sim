@@ -34,9 +34,59 @@ It includes:
 - `composure-marketing` request/response types and deterministic scoring logic
 - `composure simulate-marketing <request.json>` for one-shot execution
 - `composure simulate-marketing-v2 <request.json>` for persona-aware scorecards and scenario families
+- `composure simulate-marketing-v2-assisted <request.json>` for frontier-model enrichment layered on top of the deterministic artifact
+- `composure compare-marketing-v2-assisted <request-a.json> <request-b.json> [more...]` for cross-scenario comparison with deterministic ranking plus optional assisted summaries
+- `composure export-marketing-v2-report-markdown <result.json>` for decision-friendly markdown reports
+- `composure export-marketing-v2-compare-markdown <comparison.json>` for markdown portfolio summaries across compared scenarios
+- optional evaluator metadata for provider/model/reasoning selection in V2 artifacts
+- optional `llm_assist` config so a V2 run can call an OpenAI-compatible Responses API without moving HTTP into the pure simulation crate
+- optional calibration-ready observed outcome contracts inside V2 requests
 - a reusable JSON artifact workflow for projects replacing Mirofish-style scoring flows
 
 Example payloads live in [`examples/marketing`](/Users/randytorres/Projects/composure-sim/examples/marketing/README.md).
+
+For assisted marketing runs, `evaluator.provider`, `evaluator.model`, and
+`evaluator.reasoning_effort` can live in the request JSON or be overridden at
+run time with `--provider`, `--model`, and `--reasoning-effort`. `openai`
+requires `OPENAI_API_KEY`; `cliproxyapi` uses `CLIPROXYAPI_API_KEY` and falls
+back to `OPENAI_API_KEY`. Some local proxy setups also accept a placeholder
+bearer token, so the exact auth requirement can depend on proxy policy.
+
+Proxy note: the CLI does not live-stream tokens to the terminal. It first tries
+the normal Responses API shape, then falls back to a buffered streaming parse
+only when the provider returns an empty final `output_text`.
+
+For cross-scenario comparisons, run at least two V2 request paths through
+`compare-marketing-v2-assisted` and optionally persist the JSON artifact:
+
+```bash
+cargo run -p composure-cli -- compare-marketing-v2-assisted \
+  path/to/request-v2-a.json \
+  path/to/request-v2-b.json \
+  --output /tmp/marketing-v2-compare.json
+```
+
+Each scenario entry in `MarketingV2ComparisonReport` includes cross-scenario
+metric deltas for the scenario aggregate scorecard:
+
+- `metric_deltas[]` with `label`, `score`, and `delta_vs_compare_average`
+- `delta_vs_compare_average` is `scenario_metric_score - round(cross-scenario average for that metric label)`
+- `strongest_positive_delta_metric` / `strongest_positive_delta_value`
+- `weakest_delta_metric` / `weakest_delta_value`
+
+To export the comparison artifact as markdown:
+
+```bash
+cargo run -p composure-cli -- export-marketing-v2-compare-markdown \
+  /tmp/marketing-v2-compare.json \
+  --output /tmp/marketing-v2-compare.md
+```
+
+The markdown export includes portfolio recommendations, a scenario leaderboard,
+and per-scenario notes with strongest/weakest cross-scenario deltas plus a
+"Metric deltas vs compare average" table. Today the comparison ranking remains
+deterministic; LLM output is preserved as supporting narrative, not as a
+replacement for the underlying scores.
 
 ## Core Concepts
 

@@ -53,7 +53,10 @@
       "format": "Twitter thread",
       "channels": ["twitter"],
       "tone": "direct and contrarian",
-      "target": "technical founders"
+      "target": "technical founders",
+      "proof_points": ["examples", "ranked hooks"],
+      "objection_handlers": ["no hype"],
+      "cta": "Join waitlist"
     },
     {
       "id": "community-proof",
@@ -61,7 +64,27 @@
       "format": "community event",
       "channels": ["twitter", "community"],
       "tone": "credible and energizing",
-      "target": "operators who want proof and peers"
+      "target": "operators who want proof and peers",
+      "proof_points": ["live teardown", "peer examples"],
+      "objection_handlers": ["real examples"],
+      "cta": "Join the next teardown",
+      "sequence": [
+        {
+          "label": "hook",
+          "focus": "attention",
+          "intensity": 1.2
+        },
+        {
+          "label": "proof follow-up",
+          "focus": "resonance",
+          "intensity": 1.0
+        },
+        {
+          "label": "join CTA",
+          "focus": "conversion",
+          "intensity": 1.0
+        }
+      ]
     }
   ],
   "channels": [
@@ -95,12 +118,46 @@
     }
   ],
   "scenario": {
-    "name": "Community activation",
-    "description": "Example V2 request with persona weighting and scenario-family dynamics",
-    "scenario_type": "community_activation",
+    "name": "Short-form hook test",
+    "description": "Example V2 request with persona weighting, richer metrics, and sequence simulation",
+    "scenario_type": "short_form_video",
     "time_steps": 6,
     "objectives": []
   },
+  "evaluator": {
+    "provider": "cliproxyapi",
+    "model": "gpt-5.4",
+    "reasoning_effort": "high"
+  },
+  "llm_assist": {
+    "enabled": true,
+    "analysis_goal": "Use the deterministic simulation as an anchor, then add frontier-model judgment about which approaches are most believable, commercially useful, and worth testing next.",
+    "max_output_tokens": 1400
+  },
+  "observed_outcomes": [
+    {
+      "approach_id": "specific",
+      "source": "tiktok",
+      "creative_id": "creative-001",
+      "hook_id": "hook-proof-thread",
+      "waitlist_signup_rate": 0.19,
+      "activation_rate": 0.34,
+      "retention_d7": 0.22,
+      "share_rate": 0.11,
+      "sample_size": 180
+    },
+    {
+      "approach_id": "community-proof",
+      "source": "tiktok",
+      "creative_id": "creative-002",
+      "hook_id": "hook-community-teardown",
+      "waitlist_signup_rate": 0.24,
+      "activation_rate": 0.41,
+      "retention_d7": 0.29,
+      "share_rate": 0.16,
+      "sample_size": 210
+    }
+  ],
   "output": {
     "include_persona_breakdown": true,
     "include_metric_breakdown": true,

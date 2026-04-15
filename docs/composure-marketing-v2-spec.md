@@ -7,6 +7,18 @@ Define the next version of the reusable marketing adapter in `composure-sim`.
 This spec is designed to bridge from the current implementation to a much more
 useful system without throwing away what already works.
 
+Document status:
+
+- The sections through `Current implementation status` describe behavior that is
+  already present in the repo.
+- The Rust type snippets near the top are meant to reflect the implemented V2
+  request and assisted-run surfaces.
+- Later sections still include forward-looking design material from the original
+  V2 proposal and should be read as roadmap context, not as the exact current
+  wire schema.
+- The source of truth for the implemented schema is
+  `crates/composure-marketing/src/lib.rs`.
+
 The immediate goal is to move from:
 
 - one blended audience
@@ -55,8 +67,10 @@ This is a good starting point, but it is too compressed for serious planning.
 The first V2 slice is now scaffolded in code:
 
 - `simulate-marketing-v2` exists in the CLI
+- `simulate-marketing-v2-assisted` now exists in the CLI as an optional OpenAI-compatible enrichment layer
 - persona-level scorecards and weighting exist
 - scenario families now affect both metric emphasis and raw simulation dynamics
+- requests can now include `evaluator`, `llm_assist`, and `observed_outcomes`
 
 Implemented scenario families currently include:
 
@@ -65,9 +79,17 @@ Implemented scenario families currently include:
 - `campaign_sequence`
 - `community_activation`
 - `retention`
+- `landing_page`
+- `short_form_video`
+- `community_event`
+- `in_store_enablement`
+- `private_relationship`
 
 This is still an intermediate step. The simulator is richer than V1, but it is
-not yet a calibrated funnel model.
+not yet a calibrated funnel model, though V2 now includes optional observed
+outcome contracts so downstream repos can attach real conversion and retention
+data, and an optional LLM-assisted pass can add richer judgment without moving
+network access into the deterministic core crate.
 
 ### 1. Keep the adapter reusable
 
@@ -103,7 +125,7 @@ The V2 schema should be designed so V3 can add:
 
 without breaking the conceptual model.
 
-## Proposed V2 request model
+## Implemented V2 request model
 
 ## Top-level request
 
@@ -115,17 +137,95 @@ pub struct MarketingSimulationRequestV2 {
     #[serde(default)]
     pub channels: Vec<ChannelContext>,
     #[serde(default)]
-    pub objectives: Vec<ObjectiveDefinition>,
-    #[serde(default)]
-    pub weighting: Option<AudienceWeighting>,
+    pub audience_weighting: Vec<AudienceWeighting>,
     #[serde(default)]
     pub scenario: ScenarioDefinition,
+    #[serde(default)]
+    pub evaluator: Option<EvaluatorConfig>,
+    #[serde(default)]
+    pub llm_assist: Option<LlmAssistConfig>,
+    #[serde(default)]
+    pub observed_outcomes: Vec<ObservedOutcome>,
     #[serde(default)]
     pub output: OutputOptions,
     #[serde(default = "default_simulation_size")]
     pub simulation_size: usize,
 }
 ```
+
+## Assisted-run configuration
+
+These fields exist so downstream repos can keep the deterministic V2 request as
+the source of truth while still attaching provider/model metadata and optional
+frontier-model analysis to one run artifact.
+
+```rust
+pub struct EvaluatorConfig {
+    #[serde(default)]
+    pub provider: Option<String>,
+    #[serde(default)]
+    pub model: Option<String>,
+    #[serde(default)]
+    pub reasoning_effort: Option<String>,
+}
+
+pub struct LlmAssistConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default)]
+    pub evaluator_count: Option<usize>,
+    #[serde(default)]
+    pub analysis_goal: Option<String>,
+    #[serde(default)]
+    pub max_output_tokens: Option<u32>,
+    #[serde(default)]
+    pub system_prompt: Option<String>,
+}
+
+pub struct ObservedOutcome {
+    pub approach_id: String,
+    #[serde(default)]
+    pub persona_id: Option<String>,
+    #[serde(default)]
+    pub source: Option<String>,
+    #[serde(default)]
+    pub creative_id: Option<String>,
+    #[serde(default)]
+    pub hook_id: Option<String>,
+    #[serde(default)]
+    pub landing_variant: Option<String>,
+    #[serde(default)]
+    pub waitlist_signup_rate: Option<f64>,
+    #[serde(default)]
+    pub activation_rate: Option<f64>,
+    #[serde(default)]
+    pub retention_d7: Option<f64>,
+    #[serde(default)]
+    pub paid_conversion_rate: Option<f64>,
+    #[serde(default)]
+    pub share_rate: Option<f64>,
+    #[serde(default)]
+    pub sample_size: Option<u32>,
+}
+```
+
+Operational notes:
+
+- `evaluator.provider` selects the OpenAI-compatible endpoint. Today the CLI
+  treats `openai` as the hosted default and `cliproxyapi` as the local proxy
+  default.
+- `evaluator.model` is required whenever the assisted pass is enabled. The
+  assisted CLI command can now override it with `--model`.
+- `evaluator.reasoning_effort` is optional metadata plus a direct pass-through
+  to the Responses API `reasoning.effort` field. The assisted CLI command can
+  override it with `--reasoning-effort`.
+- `llm_assist.enabled = false` keeps the request on a deterministic, no-network
+  path, which is useful for local artifact generation and tests.
+- `observed_outcomes` gives the deterministic scorecard and assisted analysis a
+  stable place to look for real signup, activation, retention, and share data.
+- `simulate-marketing-v2-assisted` also accepts `--provider`, `--model`, and
+  `--reasoning-effort` so a team can swap evaluator settings without editing the
+  checked-in request JSON.
 
 ## Project context
 
@@ -136,9 +236,13 @@ pub struct ProjectContext {
     #[serde(default)]
     pub category: Option<String>,
     #[serde(default)]
-    pub market_context: Vec<String>,
-    #[serde(default)]
     pub competitors: Vec<String>,
+    #[serde(default)]
+    pub platform_context: Vec<String>,
+    #[serde(default)]
+    pub constraints: Vec<String>,
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 ```
 
@@ -153,13 +257,14 @@ Purpose:
 pub struct PersonaDefinition {
     pub id: String,
     pub name: String,
+    #[serde(rename = "type")]
     pub persona_type: String,
-    #[serde(default)]
-    pub estimated_weight: Option<f64>,
     #[serde(default)]
     pub demographics: Option<Value>,
     #[serde(default)]
     pub psychographics: Option<Value>,
+    #[serde(default)]
+    pub relationship: Option<String>,
     #[serde(default)]
     pub jobs: Vec<String>,
     #[serde(default)]
@@ -184,9 +289,25 @@ pub struct PersonaDefinition {
 Key changes:
 
 - add stable `id`
-- add optional segment weight
+- keep request-level weighting separate via `audience_weighting`
 - add conversion-relevant traits
 - keep enough structure for deterministic heuristics
+
+## Compare and assisted-result notes
+
+Current behavior worth knowing before reading the older forward-looking sections:
+
+- `simulate-marketing-v2` is still the deterministic source of truth
+- `simulate-marketing-v2-assisted` enriches that artifact with LLM narrative, consensus, disagreement, and evidence traces
+- `compare-marketing-v2-assisted` still ranks scenarios deterministically today
+- compare-mode `metric_deltas` are currently based on each scenario's aggregate `primary_scorecard`, not the winning approach alone
+- when `output.include_metric_breakdown = false`, user-facing metric arrays are hidden, but the assisted path can still rebuild the internal metric view needed for calibration evidence
+
+## Forward-looking design material
+
+The remaining sections below preserve earlier V2 planning ideas. They are still
+useful as roadmap context, but some field names and example snippets no longer
+match the exact implemented structs above.
 
 ## Approach definition
 

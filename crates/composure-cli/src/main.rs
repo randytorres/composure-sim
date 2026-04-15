@@ -1,3 +1,4 @@
+mod marketing_llm;
 mod render;
 
 use std::{env, fs};
@@ -9,19 +10,22 @@ use composure_core::{
     MonteCarloResult, RunSummary, SweepExecutionResult, TrajectoryComparison,
 };
 use composure_marketing::{
-    simulate_marketing, simulate_marketing_v2, MarketingSimulationRequest,
-    MarketingSimulationRequestV2,
+    simulate_marketing, simulate_marketing_v2, EvaluatorConfig, MarketingSimulationRequest,
+    MarketingSimulationRequestV2, MarketingSimulationResultV2, MetricKind,
 };
 use composure_runtime::{
     default_run_id, load_counterfactual, load_pack, load_pack_for_run,
     run_counterfactual_definition, run_pack, run_pack_counterfactual,
 };
+use marketing_llm::simulate_marketing_v2_assisted;
 use render::{
     format_bundle, format_calibration, format_comparison, format_counterfactual_result,
     format_report, format_summary, format_sweep, render_bundle_markdown, render_calibration_csv,
-    render_calibration_markdown, render_report_markdown, render_sweep_csv, render_sweep_markdown,
-    render_sweep_summary_markdown,
+    render_calibration_markdown, render_marketing_v2_compare_markdown,
+    render_marketing_v2_report_markdown, render_report_markdown, render_sweep_csv,
+    render_sweep_markdown, render_sweep_summary_markdown,
 };
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 fn main() {
@@ -229,6 +233,31 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
             write_output(output, parse_output_flag(tail)?)
         }
+        [_bin, command, path, tail @ ..] if command == "simulate-marketing-v2-assisted" => {
+            let mut request = read_json::<MarketingSimulationRequestV2>(path)?;
+            let options = parse_marketing_v2_assisted_options(tail)?;
+            apply_marketing_v2_assisted_overrides(&mut request, &options);
+            let result =
+                simulate_marketing_v2_assisted(&request).map_err(CliError::MarketingLlm)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
+            write_output(output, options.output_path.as_deref())
+        }
+        [_bin, command, tail @ ..] if command == "compare-marketing-v2-assisted" => {
+            let (request_paths, options) = parse_marketing_v2_compare_inputs(tail)?;
+            let report = build_marketing_v2_compare_report(&request_paths, &options)?;
+            let output = serde_json::to_string_pretty(&report).map_err(CliError::SerializeJson)?;
+            write_output(output, options.output_path.as_deref())
+        }
+        [_bin, command, path, tail @ ..] if command == "export-marketing-v2-report-markdown" => {
+            let result = read_json::<MarketingSimulationResultV2>(path)?;
+            let output = render_marketing_v2_report_markdown(&result);
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "export-marketing-v2-compare-markdown" => {
+            let report = read_json::<MarketingV2ComparisonReport>(path)?;
+            let output = render_marketing_v2_compare_markdown(&report);
+            write_output(output, parse_output_flag(tail)?)
+        }
         [_bin, ..] => Err(CliError::UnknownCommand { usage: usage() }),
         [] => Err(CliError::Usage(usage())),
     }
@@ -265,6 +294,10 @@ fn usage() -> String {
         "  composure build-report <baseline-summary-path> <candidate-summary-path> [--comparison <path>] [--output <path>]",
         "  composure simulate-marketing <request-path> [--output <path>]",
         "  composure simulate-marketing-v2 <request-path> [--output <path>]",
+        "  composure simulate-marketing-v2-assisted <request-path> [--provider <name>] [--model <name>] [--reasoning-effort <level>] [--output <path>]",
+        "  composure compare-marketing-v2-assisted <request-path> <request-path> [more-paths...] [--provider <name>] [--model <name>] [--reasoning-effort <level>] [--output <path>]",
+        "  composure export-marketing-v2-report-markdown <path> [--output <path>]",
+        "  composure export-marketing-v2-compare-markdown <path> [--output <path>]",
         "",
         "Commands:",
         "  inspect-pack   Read a pack directory or manifest and print a compiled summary",
@@ -295,6 +328,10 @@ fn usage() -> String {
         "  build-report   Build a DeterministicReport JSON artifact from two RunSummary artifacts",
         "  simulate-marketing   Execute the marketing adapter against a request JSON payload",
         "  simulate-marketing-v2   Execute the marketing V2 adapter against a request JSON payload",
+        "  simulate-marketing-v2-assisted   Execute the marketing V2 adapter and enrich the result with an LLM analysis",
+        "  compare-marketing-v2-assisted   Execute multiple assisted marketing V2 scenarios and rank them side by side",
+        "  export-marketing-v2-report-markdown   Convert a MarketingSimulationResultV2 JSON artifact into markdown",
+        "  export-marketing-v2-compare-markdown   Convert a MarketingV2ComparisonReport JSON artifact into markdown",
         "Compare/build flags:",
         "  --divergence-threshold <float>",
         "  --sustained-steps <usize>",
@@ -302,6 +339,10 @@ fn usage() -> String {
         "  --failure-threshold <float>",
         "  --comparison <path>",
         "  --output <path>",
+        "Assisted marketing flags:",
+        "  --provider <name>",
+        "  --model <name>",
+        "  --reasoning-effort <level>",
     ]
     .join("\n")
 }
@@ -330,6 +371,72 @@ struct CompareOptions {
 struct BuildReportOptions {
     comparison_path: Option<String>,
     output_path: Option<String>,
+}
+
+#[derive(Debug, Default)]
+struct MarketingV2AssistedOptions {
+    provider: Option<String>,
+    model: Option<String>,
+    reasoning_effort: Option<String>,
+    output_path: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct MarketingV2ComparisonReport {
+    comparison_id: String,
+    compared_requests: Vec<String>,
+    provider: Option<String>,
+    model: Option<String>,
+    reasoning_effort: Option<String>,
+    portfolio_recommendation: Vec<String>,
+    repeated_winner_patterns: Vec<String>,
+    scenarios: Vec<MarketingV2ComparisonScenario>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct MarketingV2ComparisonScenario {
+    request_path: String,
+    scenario_name: String,
+    scenario_type: String,
+    simulation_id: String,
+    overall_score: u32,
+    winner_approach_id: String,
+    winner_overall_score: u32,
+    runner_up_approach_id: Option<String>,
+    runner_up_overall_score: Option<u32>,
+    score_gap_vs_runner_up: Option<i32>,
+    strongest_metric_label: Option<String>,
+    strongest_metric_score: Option<u32>,
+    #[serde(default)]
+    metric_deltas: Vec<MarketingV2MetricDelta>,
+    #[serde(default)]
+    strongest_positive_delta_metric: Option<String>,
+    #[serde(default)]
+    strongest_positive_delta_value: Option<i32>,
+    #[serde(default)]
+    weakest_delta_metric: Option<String>,
+    #[serde(default)]
+    weakest_delta_value: Option<i32>,
+    recommended_next_experiments: Vec<String>,
+    llm_executive_summary: Vec<String>,
+    llm_consensus_summary: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct MarketingV2MetricDelta {
+    #[serde(default)]
+    metric: Option<MetricKind>,
+    label: String,
+    score: u32,
+    delta_vs_compare_average: i32,
+    #[serde(default)]
+    delta_vs_compare_leader: i32,
+    #[serde(default)]
+    compare_set_rank: usize,
+    #[serde(default)]
+    compare_set_size: usize,
+    #[serde(default)]
+    leading_scenarios: Vec<String>,
 }
 
 fn parse_compare_options(args: &[String]) -> Result<CompareOptions, CliError> {
@@ -402,6 +509,68 @@ fn parse_build_report_options(args: &[String]) -> Result<BuildReportOptions, Cli
     })
 }
 
+fn parse_marketing_v2_assisted_options(
+    args: &[String],
+) -> Result<MarketingV2AssistedOptions, CliError> {
+    let mut options = MarketingV2AssistedOptions::default();
+    let mut index = 0;
+
+    while index < args.len() {
+        let flag = &args[index];
+        let value = args
+            .get(index + 1)
+            .ok_or_else(|| CliError::MissingFlagValue(flag.clone()))?;
+
+        match flag.as_str() {
+            "--provider" => {
+                options.provider = Some(value.clone());
+            }
+            "--model" => {
+                options.model = Some(value.clone());
+            }
+            "--reasoning-effort" => {
+                options.reasoning_effort = Some(value.clone());
+            }
+            "--output" => {
+                options.output_path = Some(value.clone());
+            }
+            _ => return Err(CliError::UnknownFlag(flag.clone())),
+        }
+
+        index += 2;
+    }
+
+    Ok(options)
+}
+
+fn parse_marketing_v2_compare_inputs(
+    args: &[String],
+) -> Result<(Vec<String>, MarketingV2AssistedOptions), CliError> {
+    let mut request_paths = Vec::new();
+    let mut option_args = Vec::new();
+    let mut in_flags = false;
+
+    for arg in args {
+        if arg.starts_with("--") {
+            in_flags = true;
+        }
+        if in_flags {
+            option_args.push(arg.clone());
+        } else {
+            request_paths.push(arg.clone());
+        }
+    }
+
+    if request_paths.len() < 2 {
+        return Err(CliError::Usage(
+            "compare-marketing-v2-assisted requires at least two request paths".into(),
+        ));
+    }
+
+    let options = parse_marketing_v2_assisted_options(&option_args)?;
+    Ok((request_paths, options))
+}
+
 fn parse_output_flag(args: &[String]) -> Result<Option<&str>, CliError> {
     match args {
         [] => Ok(None),
@@ -419,6 +588,307 @@ where
         flag: flag.into(),
         value: value.into(),
     })
+}
+
+fn apply_marketing_v2_assisted_overrides(
+    request: &mut MarketingSimulationRequestV2,
+    options: &MarketingV2AssistedOptions,
+) {
+    if options.provider.is_none() && options.model.is_none() && options.reasoning_effort.is_none() {
+        return;
+    }
+
+    let evaluator = request.evaluator.get_or_insert(EvaluatorConfig {
+        provider: None,
+        model: None,
+        reasoning_effort: None,
+    });
+    if let Some(provider) = &options.provider {
+        evaluator.provider = Some(provider.clone());
+    }
+    if let Some(model) = &options.model {
+        evaluator.model = Some(model.clone());
+    }
+    if let Some(reasoning_effort) = &options.reasoning_effort {
+        evaluator.reasoning_effort = Some(reasoning_effort.clone());
+    }
+}
+
+fn build_marketing_v2_compare_report(
+    request_paths: &[String],
+    options: &MarketingV2AssistedOptions,
+) -> Result<MarketingV2ComparisonReport, CliError> {
+    let mut scenarios = Vec::with_capacity(request_paths.len());
+    let mut common_llm_provider: Option<Option<String>> = None;
+    let mut common_llm_model: Option<Option<String>> = None;
+    let mut common_reasoning_effort: Option<Option<String>> = None;
+
+    for request_path in request_paths {
+        let mut request = read_json::<MarketingSimulationRequestV2>(request_path)?;
+        apply_marketing_v2_assisted_overrides(&mut request, options);
+        let result = simulate_marketing_v2_assisted(&request).map_err(CliError::MarketingLlm)?;
+        let analysis_provider = result
+            .llm_analysis
+            .as_ref()
+            .and_then(|analysis| analysis.provider.clone());
+        let analysis_model = result
+            .llm_analysis
+            .as_ref()
+            .map(|analysis| analysis.model.clone());
+        let analysis_reasoning_effort = result
+            .llm_analysis
+            .as_ref()
+            .and_then(|analysis| analysis.reasoning_effort.clone());
+        merge_common_option(&mut common_llm_provider, analysis_provider);
+        merge_common_option(&mut common_llm_model, analysis_model);
+        merge_common_option(&mut common_reasoning_effort, analysis_reasoning_effort);
+        let mut ranked = result.approach_results.iter().collect::<Vec<_>>();
+        ranked.sort_by(|left, right| {
+            right
+                .primary_scorecard
+                .overall_score
+                .cmp(&left.primary_scorecard.overall_score)
+        });
+        let winner = ranked
+            .first()
+            .copied()
+            .ok_or_else(|| CliError::Usage("marketing compare result had no approaches".into()))?;
+        let runner_up = ranked.get(1).copied();
+        let top_metric = result
+            .primary_scorecard
+            .metrics
+            .iter()
+            .max_by_key(|metric| metric.score);
+
+        scenarios.push(MarketingV2ComparisonScenario {
+            request_path: request_path.clone(),
+            scenario_name: result.scenario.name.clone(),
+            scenario_type: serialize_scenario_type(&result.scenario.scenario_type),
+            simulation_id: result.simulation_id.clone(),
+            overall_score: result.primary_scorecard.overall_score,
+            winner_approach_id: winner.approach_id.clone(),
+            winner_overall_score: winner.primary_scorecard.overall_score,
+            runner_up_approach_id: runner_up.map(|approach| approach.approach_id.clone()),
+            runner_up_overall_score: runner_up
+                .map(|approach| approach.primary_scorecard.overall_score),
+            score_gap_vs_runner_up: runner_up.map(|approach| {
+                winner.primary_scorecard.overall_score as i32
+                    - approach.primary_scorecard.overall_score as i32
+            }),
+            strongest_metric_label: top_metric.map(|metric| metric.label.clone()),
+            strongest_metric_score: top_metric.map(|metric| metric.score),
+            metric_deltas: result
+                .primary_scorecard
+                .metrics
+                .iter()
+                .map(|metric| MarketingV2MetricDelta {
+                    metric: Some(metric.metric.clone()),
+                    label: metric.label.clone(),
+                    score: metric.score,
+                    delta_vs_compare_average: 0,
+                    delta_vs_compare_leader: 0,
+                    compare_set_rank: 0,
+                    compare_set_size: 0,
+                    leading_scenarios: Vec::new(),
+                })
+                .collect(),
+            strongest_positive_delta_metric: None,
+            strongest_positive_delta_value: None,
+            weakest_delta_metric: None,
+            weakest_delta_value: None,
+            recommended_next_experiments: result
+                .recommended_next_experiments
+                .iter()
+                .take(5)
+                .cloned()
+                .collect(),
+            llm_executive_summary: result
+                .llm_analysis
+                .as_ref()
+                .map(|analysis| analysis.executive_summary.iter().take(3).cloned().collect())
+                .unwrap_or_default(),
+            llm_consensus_summary: result
+                .llm_analysis
+                .as_ref()
+                .map(|analysis| analysis.consensus_summary.iter().take(3).cloned().collect())
+                .unwrap_or_default(),
+        });
+    }
+
+    let mut metric_values = std::collections::BTreeMap::<String, Vec<(String, u32)>>::new();
+    for scenario in &scenarios {
+        for metric in &scenario.metric_deltas {
+            metric_values
+                .entry(metric.label.clone())
+                .or_default()
+                .push((scenario.scenario_name.clone(), metric.score));
+        }
+    }
+
+    for scenario in &mut scenarios {
+        for metric in &mut scenario.metric_deltas {
+            if let Some(values) = metric_values.get(&metric.label) {
+                let avg = values.iter().map(|(_, score)| *score as f64).sum::<f64>()
+                    / values.len() as f64;
+                let leader_score = values
+                    .iter()
+                    .map(|(_, score)| *score)
+                    .max()
+                    .unwrap_or(metric.score);
+                metric.delta_vs_compare_average = metric.score as i32 - avg.round() as i32;
+                metric.delta_vs_compare_leader = metric.score as i32 - leader_score as i32;
+                metric.compare_set_rank = values
+                    .iter()
+                    .filter(|(_, score)| *score > metric.score)
+                    .count()
+                    + 1;
+                metric.compare_set_size = values.len();
+                metric.leading_scenarios = values
+                    .iter()
+                    .filter(|(_, score)| *score == leader_score)
+                    .map(|(scenario_name, _)| scenario_name.clone())
+                    .collect();
+            }
+        }
+        scenario.metric_deltas.sort_by(|left, right| {
+            right
+                .delta_vs_compare_average
+                .cmp(&left.delta_vs_compare_average)
+                .then_with(|| {
+                    right
+                        .delta_vs_compare_leader
+                        .cmp(&left.delta_vs_compare_leader)
+                })
+                .then_with(|| left.compare_set_rank.cmp(&right.compare_set_rank))
+                .then_with(|| left.label.cmp(&right.label))
+        });
+        if let Some(best) = scenario
+            .metric_deltas
+            .iter()
+            .find(|metric| metric.compare_set_size >= 2 && metric.delta_vs_compare_average > 0)
+        {
+            scenario.strongest_positive_delta_metric = Some(best.label.clone());
+            scenario.strongest_positive_delta_value = Some(best.delta_vs_compare_average);
+        }
+        if let Some(worst) = scenario.metric_deltas.iter().min_by(|left, right| {
+            left.delta_vs_compare_average
+                .cmp(&right.delta_vs_compare_average)
+                .then_with(|| {
+                    left.delta_vs_compare_leader
+                        .cmp(&right.delta_vs_compare_leader)
+                })
+                .then_with(|| left.label.cmp(&right.label))
+        }) {
+            if worst.compare_set_size >= 2 && worst.delta_vs_compare_average < 0 {
+                scenario.weakest_delta_metric = Some(worst.label.clone());
+                scenario.weakest_delta_value = Some(worst.delta_vs_compare_average);
+            }
+        }
+    }
+
+    scenarios.sort_by(|left, right| {
+        right
+            .overall_score
+            .cmp(&left.overall_score)
+            .then_with(|| left.scenario_name.cmp(&right.scenario_name))
+    });
+
+    let portfolio_recommendation = build_marketing_portfolio_recommendation(&scenarios);
+    let repeated_winner_patterns = build_repeated_winner_patterns(&scenarios);
+
+    Ok(MarketingV2ComparisonReport {
+        comparison_id: format!("marketing-compare-{}", scenarios.len()),
+        compared_requests: request_paths.to_vec(),
+        provider: common_llm_provider.unwrap_or_else(|| options.provider.clone()),
+        model: common_llm_model.unwrap_or_else(|| options.model.clone()),
+        reasoning_effort: common_reasoning_effort
+            .unwrap_or_else(|| options.reasoning_effort.clone()),
+        portfolio_recommendation,
+        repeated_winner_patterns,
+        scenarios,
+    })
+}
+
+fn merge_common_option<T>(slot: &mut Option<Option<T>>, candidate: Option<T>)
+where
+    T: PartialEq,
+{
+    match slot {
+        None => *slot = Some(candidate),
+        Some(current) if *current == candidate => {}
+        Some(_) => *slot = Some(None),
+    }
+}
+
+fn serialize_scenario_type(scenario_type: &composure_marketing::ScenarioType) -> String {
+    serde_json::to_value(scenario_type)
+        .ok()
+        .and_then(|value| value.as_str().map(|value| value.to_string()))
+        .unwrap_or_else(|| "custom".into())
+}
+
+fn build_marketing_portfolio_recommendation(
+    scenarios: &[MarketingV2ComparisonScenario],
+) -> Vec<String> {
+    let mut lines = Vec::new();
+    if let Some(control) = scenarios.first() {
+        lines.push(format!(
+            "Use `{}` as the control scenario because it has the highest overall score at `{}`.",
+            control.scenario_name, control.overall_score
+        ));
+    }
+    if let Some(challenger) = scenarios.get(1) {
+        lines.push(format!(
+            "Use `{}` as the challenger scenario because it is the next-strongest option and creates a meaningful comparison against the control.",
+            challenger.scenario_name
+        ));
+    }
+    if let Some(best_gap) = scenarios
+        .iter()
+        .filter_map(|scenario| scenario.score_gap_vs_runner_up.map(|gap| (scenario, gap)))
+        .max_by_key(|(_, gap)| *gap)
+    {
+        lines.push(format!(
+            "`{}` had the clearest internal win with a `{}` point gap over its runner-up, so its positioning is currently the most decisive.",
+            best_gap.0.scenario_name, best_gap.1
+        ));
+    }
+    if let Some(control) = scenarios.first() {
+        if let (Some(metric), Some(delta)) = (
+            &control.strongest_positive_delta_metric,
+            control.strongest_positive_delta_value,
+        ) {
+            lines.push(format!(
+                "The control scenario's clearest cross-scenario edge was `{metric}`, where it ran `{delta}` points above the compare-set average."
+            ));
+        }
+        if let (Some(metric), Some(delta)) =
+            (&control.weakest_delta_metric, control.weakest_delta_value)
+        {
+            lines.push(format!(
+                "The control scenario's main relative weakness was `{metric}`, where it sat `{delta}` points versus the compare-set average."
+            ));
+        }
+    }
+    lines
+}
+
+fn build_repeated_winner_patterns(scenarios: &[MarketingV2ComparisonScenario]) -> Vec<String> {
+    let mut counts = std::collections::BTreeMap::<String, usize>::new();
+    for scenario in scenarios {
+        *counts
+            .entry(scenario.winner_approach_id.clone())
+            .or_default() += 1;
+    }
+    counts
+        .into_iter()
+        .filter(|(_, count)| *count > 1)
+        .map(|(winner, count)| {
+            format!(
+                "`{winner}` won in {count} scenarios, which suggests a repeated pattern worth keeping in the control set."
+            )
+        })
+        .collect()
 }
 
 fn write_output(output: String, output_path: Option<&str>) -> Result<String, CliError> {
@@ -484,6 +954,8 @@ enum CliError {
     CounterfactualRun(composure_runtime::CounterfactualRunError),
     #[error("marketing simulation error: {0}")]
     MarketingSimulation(composure_marketing::MarketingSimulationError),
+    #[error("marketing LLM error: {0}")]
+    MarketingLlm(marketing_llm::MarketingLlmError),
     #[error("failed to serialize JSON output: {0}")]
     SerializeJson(serde_json::Error),
 }
@@ -979,6 +1451,13 @@ mod tests {
         assert!(output.contains("build-report"));
         assert!(output.contains("simulate-marketing"));
         assert!(output.contains("simulate-marketing-v2"));
+        assert!(output.contains("simulate-marketing-v2-assisted"));
+        assert!(output.contains("compare-marketing-v2-assisted"));
+        assert!(output.contains("export-marketing-v2-report-markdown"));
+        assert!(output.contains("export-marketing-v2-compare-markdown"));
+        assert!(output.contains("--provider <name>"));
+        assert!(output.contains("--model <name>"));
+        assert!(output.contains("--reasoning-effort <level>"));
         assert!(output.contains("--output <path>"));
     }
 
@@ -1030,6 +1509,543 @@ mod tests {
         assert!(output.contains("\"approach_results\""));
 
         let _ = fs::remove_file(request_path);
+    }
+
+    #[test]
+    fn test_run_simulate_marketing_v2_assisted_can_skip_llm() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-marketing-v2-assisted.json");
+        fs::write(
+            &request_path,
+            serde_json::json!({
+                "project": {
+                    "name": "Composure",
+                    "description": "Deterministic simulation for campaigns",
+                    "platform_context": ["twitter", "linkedin"]
+                },
+                "personas": [
+                    {
+                        "id": "dev",
+                        "name": "Pragmatic Dev",
+                        "type": "developer",
+                        "relationship": "existing customer",
+                        "preferences": ["practical examples", "clear frameworks"],
+                        "objections": ["vague marketing", "tool sprawl"]
+                    }
+                ],
+                "approaches": [
+                    {
+                        "id": "specific",
+                        "angle": "Show founders how to rank hooks before publishing",
+                        "format": "Twitter thread",
+                        "channels": ["twitter"],
+                        "tone": "direct and contrarian",
+                        "target": "technical founders"
+                    }
+                ],
+                "llm_assist": {
+                    "enabled": false
+                },
+                "simulation_size": 8
+            })
+            .to_string(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "simulate-marketing-v2-assisted".into(),
+            request_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("\"approach_results\""));
+
+        let _ = fs::remove_file(request_path);
+    }
+
+    #[test]
+    fn test_run_simulate_marketing_v2_assisted_applies_cli_evaluator_overrides() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-marketing-v2-assisted-with-overrides.json");
+        fs::write(
+            &request_path,
+            serde_json::json!({
+                "project": {
+                    "name": "Composure",
+                    "description": "Deterministic simulation for campaigns",
+                    "platform_context": ["twitter", "linkedin"]
+                },
+                "personas": [
+                    {
+                        "id": "dev",
+                        "name": "Pragmatic Dev",
+                        "type": "developer",
+                        "relationship": "existing customer",
+                        "preferences": ["practical examples", "clear frameworks"],
+                        "objections": ["vague marketing", "tool sprawl"]
+                    }
+                ],
+                "approaches": [
+                    {
+                        "id": "specific",
+                        "angle": "Show founders how to rank hooks before publishing",
+                        "format": "Twitter thread",
+                        "channels": ["twitter"],
+                        "tone": "direct and contrarian",
+                        "target": "technical founders"
+                    }
+                ],
+                "llm_assist": {
+                    "enabled": false
+                },
+                "simulation_size": 8
+            })
+            .to_string(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "simulate-marketing-v2-assisted".into(),
+            request_path.display().to_string(),
+            "--provider".into(),
+            "cliproxyapi".into(),
+            "--model".into(),
+            "gpt-5.4".into(),
+            "--reasoning-effort".into(),
+            "high".into(),
+        ])
+        .unwrap();
+
+        let parsed: MarketingSimulationResultV2 = serde_json::from_str(&output).unwrap();
+        assert_eq!(parsed.engine.provider.as_deref(), Some("cliproxyapi"));
+        assert_eq!(parsed.engine.model, "gpt-5.4");
+        assert_eq!(parsed.engine.reasoning_effort.as_deref(), Some("high"));
+
+        let _ = fs::remove_file(request_path);
+    }
+
+    #[test]
+    fn test_render_marketing_v2_report_markdown() {
+        let request = serde_json::json!({
+            "project": {
+                "name": "Composure",
+                "description": "Deterministic simulation for campaigns",
+                "platform_context": ["landing page", "tiktok"]
+            },
+            "personas": [
+                {
+                    "id": "builder",
+                    "name": "Builder",
+                    "type": "founder",
+                    "jobs": ["ship faster"],
+                    "preferences": ["proof"],
+                    "trust_signals": ["proof"],
+                    "channels": ["landing page"]
+                },
+                {
+                    "id": "operator",
+                    "name": "Operator",
+                    "type": "operator",
+                    "jobs": ["share what works"],
+                    "preferences": ["community"],
+                    "channels": ["tiktok"]
+                }
+            ],
+            "approaches": [
+                {
+                    "id": "lp-proof",
+                    "angle": "Proof on the landing page",
+                    "format": "landing page headline",
+                    "channels": ["landing page"],
+                    "tone": "clear",
+                    "target": "founders",
+                    "proof_points": ["case study"],
+                    "objection_handlers": ["no hype"],
+                    "cta": "Join waitlist"
+                },
+                {
+                    "id": "tt-community",
+                    "angle": "Show the operator community sharing wins",
+                    "format": "short-form video",
+                    "channels": ["tiktok", "community"],
+                    "tone": "energetic",
+                    "target": "operators",
+                    "sequence": [
+                        { "label": "hook", "focus": "attention", "intensity": 1.2 },
+                        { "label": "proof", "focus": "resonance", "intensity": 1.0 },
+                        { "label": "cta", "focus": "conversion", "intensity": 1.0 }
+                    ]
+                }
+            ],
+            "scenario": {
+                "name": "short form",
+                "scenario_type": "short_form_video",
+                "time_steps": 6
+            },
+            "simulation_size": 8
+        });
+
+        let mut result = simulate_marketing_v2(&serde_json::from_value(request).unwrap()).unwrap();
+        result.llm_analysis = Some(composure_marketing::MarketingLlmAnalysis {
+            provider: Some("openai".into()),
+            model: "gpt-test".into(),
+            reasoning_effort: Some("medium".into()),
+            evaluator_count: 1,
+            executive_summary: vec!["One clear winner emerged.".into()],
+            consensus_summary: vec![],
+            strategic_takeaways: vec!["Keep the proof-forward angle.".into()],
+            recommended_next_experiments: vec!["Test a sharper CTA.".into()],
+            confidence_notes: vec!["Audit metadata was captured.".into()],
+            disagreement_notes: vec![],
+            evidence: None,
+        });
+        result.llm_trace = Some(composure_marketing::MarketingLlmTrace {
+            analysis_goal: Some("stress test realism".into()),
+            system_prompt: "System prompt".into(),
+            user_prompt: "User prompt".into(),
+            prompt_char_count: 22,
+            evaluators: vec![composure_marketing::LlmEvaluatorTrace {
+                evaluator_index: 1,
+                provider: Some("openai".into()),
+                model: "gpt-test".into(),
+                reasoning_effort: Some("medium".into()),
+                base_url: "https://api.openai.com/v1".into(),
+                requested_max_output_tokens: Some(512),
+                stream_fallback_used: true,
+                duration_ms: 321,
+                response_id: Some("resp_123".into()),
+                usage: Some(composure_marketing::LlmUsage {
+                    input_tokens: Some(120),
+                    output_tokens: Some(60),
+                    reasoning_tokens: Some(10),
+                    total_tokens: Some(180),
+                }),
+                raw_response: serde_json::json!({
+                    "raw_stream_text": "data: example"
+                }),
+                raw_output_text: "{\"executive_summary\":[]}".into(),
+                parsed_output: Some(serde_json::json!({
+                    "executive_summary": [],
+                    "strategic_takeaways": [],
+                    "recommended_next_experiments": [],
+                    "confidence_notes": [],
+                    "approach_analyses": []
+                })),
+            }],
+        });
+        let output = render_marketing_v2_report_markdown(&result);
+
+        assert!(output.contains("Persona Leaderboard"));
+        assert!(output.contains("Repeated Concerns"));
+        assert!(output.contains("Confidence Notes"));
+        assert!(output.contains("Recommended Next Experiments"));
+        assert!(output.contains("LLM Evidence"));
+        assert!(output.contains("Stream fallback used"));
+    }
+
+    #[test]
+    fn test_run_export_marketing_v2_report_markdown() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-marketing-v2-report-request.json");
+        let artifact_path = temp_dir.join("composure-cli-marketing-v2-report.json");
+
+        fs::write(
+            &request_path,
+            serde_json::json!({
+                "project": {
+                    "name": "Composure",
+                    "description": "Deterministic simulation for campaigns",
+                    "platform_context": ["landing page"]
+                },
+                "personas": [
+                    {
+                        "id": "builder",
+                        "name": "Builder",
+                        "type": "founder",
+                        "jobs": ["ship faster"],
+                        "preferences": ["proof"]
+                    }
+                ],
+                "approaches": [
+                    {
+                        "id": "lp-proof",
+                        "angle": "Proof on the landing page",
+                        "format": "landing page headline",
+                        "channels": ["landing page"],
+                        "tone": "clear",
+                        "target": "founders",
+                        "cta": "Join waitlist"
+                    }
+                ],
+                "scenario": {
+                    "name": "landing",
+                    "scenario_type": "landing_page",
+                    "time_steps": 6
+                },
+                "simulation_size": 8
+            })
+            .to_string(),
+        )
+        .unwrap();
+
+        let raw = run(&[
+            "composure".into(),
+            "simulate-marketing-v2".into(),
+            request_path.display().to_string(),
+            "--output".into(),
+            artifact_path.display().to_string(),
+        ])
+        .unwrap();
+        assert!(raw.contains("Wrote artifact"));
+
+        let markdown = run(&[
+            "composure".into(),
+            "export-marketing-v2-report-markdown".into(),
+            artifact_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(markdown.contains("Marketing Simulation Report"));
+        assert!(markdown.contains("Recommended Next Experiments"));
+
+        let _ = fs::remove_file(request_path);
+        let _ = fs::remove_file(artifact_path);
+    }
+
+    #[test]
+    fn test_compare_marketing_v2_assisted_requires_two_paths() {
+        let err = run(&[
+            "composure".into(),
+            "compare-marketing-v2-assisted".into(),
+            "only-one.json".into(),
+        ])
+        .unwrap_err();
+
+        assert!(err.to_string().contains("at least two request paths"));
+    }
+
+    #[test]
+    fn test_run_compare_marketing_v2_assisted_and_export_markdown() {
+        let temp_dir = std::env::temp_dir();
+        let request_a = temp_dir.join("compare-marketing-a.json");
+        let request_b = temp_dir.join("compare-marketing-b.json");
+        let artifact = temp_dir.join("compare-marketing-artifact.json");
+        fs::write(
+            &request_a,
+            serde_json::json!({
+                "project": {
+                    "name": "Composure",
+                    "description": "Deterministic simulation for campaigns",
+                    "platform_context": ["landing page"]
+                },
+                "personas": [{
+                    "id": "builder",
+                    "name": "Builder",
+                    "type": "founder",
+                    "jobs": ["ship faster"],
+                    "preferences": ["proof"],
+                    "trust_signals": ["proof"],
+                    "channels": ["landing page"]
+                }],
+                "approaches": [{
+                    "id": "lp-proof",
+                    "angle": "Proof on the landing page",
+                    "format": "landing page headline",
+                    "channels": ["landing page"],
+                    "tone": "clear",
+                    "target": "founders",
+                    "proof_points": ["case study"],
+                    "objection_handlers": ["no hype"],
+                    "cta": "Join waitlist"
+                }],
+                "scenario": {
+                    "name": "Landing",
+                    "scenario_type": "landing_page",
+                    "time_steps": 6
+                },
+                "llm_assist": {
+                    "enabled": false
+                },
+                "simulation_size": 8
+            })
+            .to_string(),
+        )
+        .unwrap();
+        fs::write(
+            &request_b,
+            serde_json::json!({
+                "project": {
+                    "name": "Composure",
+                    "description": "Deterministic simulation for campaigns",
+                    "platform_context": ["tiktok"]
+                },
+                "personas": [{
+                    "id": "operator",
+                    "name": "Operator",
+                    "type": "operator",
+                    "jobs": ["share what works"],
+                    "preferences": ["community"],
+                    "channels": ["tiktok"]
+                }],
+                "approaches": [{
+                    "id": "tt-community",
+                    "angle": "Show the operator community sharing wins",
+                    "format": "short-form video",
+                    "channels": ["tiktok", "community"],
+                    "tone": "energetic",
+                    "target": "operators",
+                    "sequence": [
+                        { "label": "hook", "focus": "attention", "intensity": 1.2 },
+                        { "label": "proof", "focus": "resonance", "intensity": 1.0 },
+                        { "label": "cta", "focus": "conversion", "intensity": 1.0 }
+                    ]
+                }],
+                "scenario": {
+                    "name": "Short form",
+                    "scenario_type": "short_form_video",
+                    "time_steps": 6
+                },
+                "llm_assist": {
+                    "enabled": false
+                },
+                "simulation_size": 8
+            })
+            .to_string(),
+        )
+        .unwrap();
+
+        let raw = run(&[
+            "composure".into(),
+            "compare-marketing-v2-assisted".into(),
+            request_a.display().to_string(),
+            request_b.display().to_string(),
+            "--output".into(),
+            artifact.display().to_string(),
+        ])
+        .unwrap();
+        assert!(raw.contains("Wrote artifact"));
+
+        let report =
+            read_json::<MarketingV2ComparisonReport>(&artifact.display().to_string()).unwrap();
+        assert_eq!(report.scenarios.len(), 2);
+
+        let short_form = report
+            .scenarios
+            .iter()
+            .find(|scenario| scenario.scenario_name == "Short form")
+            .unwrap();
+        let landing = report
+            .scenarios
+            .iter()
+            .find(|scenario| scenario.scenario_name == "Landing")
+            .unwrap();
+        assert_eq!(short_form.scenario_type, "short_form_video");
+        assert_eq!(landing.scenario_type, "landing_page");
+
+        assert_eq!(
+            short_form.strongest_positive_delta_metric.as_deref(),
+            Some("Belonging")
+        );
+        assert_eq!(short_form.strongest_positive_delta_value, Some(22));
+        assert_eq!(
+            short_form.weakest_delta_metric.as_deref(),
+            Some("Objection Pressure")
+        );
+        assert_eq!(short_form.weakest_delta_value, Some(-11));
+        assert_eq!(
+            landing.strongest_positive_delta_metric.as_deref(),
+            Some("Objection Pressure")
+        );
+        assert_eq!(landing.strongest_positive_delta_value, Some(11));
+        assert_eq!(landing.weakest_delta_metric.as_deref(), Some("Belonging"));
+        assert_eq!(landing.weakest_delta_value, Some(-22));
+
+        let short_form_belonging = short_form
+            .metric_deltas
+            .iter()
+            .find(|metric| metric.label == "Belonging")
+            .unwrap();
+        assert_eq!(short_form_belonging.score, 84);
+        assert_eq!(short_form_belonging.delta_vs_compare_average, 22);
+        assert_eq!(short_form_belonging.delta_vs_compare_leader, 0);
+        assert_eq!(short_form_belonging.compare_set_rank, 1);
+        assert_eq!(short_form_belonging.compare_set_size, 2);
+        assert_eq!(short_form_belonging.leading_scenarios, vec!["Short form"]);
+
+        let landing_objection_pressure = landing
+            .metric_deltas
+            .iter()
+            .find(|metric| metric.label == "Objection Pressure")
+            .unwrap();
+        assert_eq!(landing_objection_pressure.score, 85);
+        assert_eq!(landing_objection_pressure.delta_vs_compare_average, 11);
+        assert_eq!(landing_objection_pressure.delta_vs_compare_leader, 0);
+        assert_eq!(landing_objection_pressure.compare_set_rank, 1);
+        assert_eq!(landing_objection_pressure.compare_set_size, 2);
+        assert_eq!(
+            landing_objection_pressure.leading_scenarios,
+            vec!["Landing"]
+        );
+
+        let landing_belonging = landing
+            .metric_deltas
+            .iter()
+            .find(|metric| metric.label == "Belonging")
+            .unwrap();
+        assert_eq!(landing_belonging.score, 40);
+        assert_eq!(landing_belonging.delta_vs_compare_average, -22);
+        assert_eq!(landing_belonging.delta_vs_compare_leader, -44);
+        assert_eq!(landing_belonging.compare_set_rank, 2);
+        assert_eq!(landing_belonging.compare_set_size, 2);
+        assert_eq!(landing_belonging.leading_scenarios, vec!["Short form"]);
+
+        let markdown = run(&[
+            "composure".into(),
+            "export-marketing-v2-compare-markdown".into(),
+            artifact.display().to_string(),
+        ])
+        .unwrap();
+        assert!(markdown.contains("Marketing V2 Comparison"));
+        assert!(markdown.contains("Leaderboard"));
+        assert!(markdown.contains("Cross-Scenario Metric Delta Matrix"));
+        assert!(markdown.contains("aggregate primary scorecard"));
+        assert!(markdown.contains("Metric Delta Leaders"));
+        assert!(markdown.contains("Scenario Notes"));
+        assert!(markdown.contains("Portfolio Recommendation"));
+        assert!(markdown.contains("Strongest Metric"));
+        assert!(markdown.contains("Metric deltas vs compare set"));
+        assert!(markdown.contains("Vs Leader"));
+        assert!(markdown.contains("Leader(s)"));
+        assert!(markdown.contains("| Belonging | 44 | +22 | -22 |"));
+        assert!(markdown.contains("| Belonging | Short form (+22) | Landing (-22) |"));
+        assert!(markdown
+            .contains("- Strongest cross-scenario delta: `Belonging` at `+22` vs compare average"));
+        assert!(markdown
+            .contains("- Weakest cross-scenario delta: `Belonging` at `-22` vs compare average"));
+        assert!(markdown.contains("| Belonging | 84 | +22 | +0 | 1/2 | Short form |"));
+        assert!(markdown.contains("| Objection Pressure | 85 | +11 | +0 | 1/2 | Landing |"));
+
+        let _ = fs::remove_file(request_a);
+        let _ = fs::remove_file(request_b);
+        let _ = fs::remove_file(artifact);
+    }
+
+    #[test]
+    fn test_merge_common_option_tracks_consensus_and_conflicts() {
+        let mut slot = None;
+        merge_common_option(&mut slot, Some("gpt-5.4".to_string()));
+        assert_eq!(slot, Some(Some("gpt-5.4".to_string())));
+
+        merge_common_option(&mut slot, Some("gpt-5.4".to_string()));
+        assert_eq!(slot, Some(Some("gpt-5.4".to_string())));
+
+        merge_common_option(&mut slot, Some("gpt-5.3-codex".to_string()));
+        assert_eq!(slot, Some(None));
+
+        merge_common_option(&mut slot, Some("gpt-5.4".to_string()));
+        assert_eq!(slot, Some(None));
     }
 
     #[test]
