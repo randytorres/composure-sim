@@ -108,8 +108,12 @@ impl InfluencePropagator {
         influence_type: InfluenceType,
         num_steps: usize,
         rng: &mut impl Rng,
-    ) -> (HashMap<usize, Vec<InfluenceEvent>>, HashMap<String, BuyerInfluenceState>) {
-        let mut per_step_events: HashMap<usize, Vec<InfluenceEvent>> = (0..=num_steps).map(|t| (t, vec![])).collect();
+    ) -> (
+        HashMap<usize, Vec<InfluenceEvent>>,
+        HashMap<String, BuyerInfluenceState>,
+    ) {
+        let mut per_step_events: HashMap<usize, Vec<InfluenceEvent>> =
+            (0..=num_steps).map(|t| (t, vec![])).collect();
         let mut buyer_states: HashMap<String, BuyerInfluenceState> = graph
             .adjacency
             .keys()
@@ -153,7 +157,8 @@ impl InfluencePropagator {
                             .unwrap_or(0.5);
 
                         // Apply hop_decay: influence decays per hop
-                        let effective_mag = current_mag * weight * self.config.edge_weight_boost * hop_decay_factor;
+                        let effective_mag =
+                            current_mag * weight * self.config.edge_weight_boost * hop_decay_factor;
                         if effective_mag < 0.05 {
                             continue; // too weak to propagate
                         }
@@ -172,15 +177,22 @@ impl InfluencePropagator {
                             // Update state
                             if let Some(state) = buyer_states.get_mut(neighbor_id) {
                                 match influence_type {
-                                    InfluenceType::Exposure => state.exposure_score += effective_mag,
-                                    InfluenceType::SocialProof => state.proof_score += effective_mag,
-                                    InfluenceType::Skepticism => state.skepticism_score += effective_mag,
+                                    InfluenceType::Exposure => {
+                                        state.exposure_score += effective_mag
+                                    }
+                                    InfluenceType::SocialProof => {
+                                        state.proof_score += effective_mag
+                                    }
+                                    InfluenceType::Skepticism => {
+                                        state.skepticism_score += effective_mag
+                                    }
                                     InfluenceType::Referral => state.referral_count += 1,
                                 }
                             }
 
                             visited.insert(neighbor_id.clone());
-                            *next_frontier.entry(neighbor_id.clone()).or_insert(0.0) += effective_mag;
+                            *next_frontier.entry(neighbor_id.clone()).or_insert(0.0) +=
+                                effective_mag;
                         }
                     }
                 }
@@ -202,10 +214,7 @@ impl InfluencePropagator {
 
     /// Compute trust delta for each buyer based on their influence state.
     /// skepticism_decay moderates how much accumulated skepticism penalizes trust.
-    pub fn compute_trust_delta(
-        &self,
-        influence_state: &BuyerInfluenceState,
-    ) -> f64 {
+    pub fn compute_trust_delta(&self, influence_state: &BuyerInfluenceState) -> f64 {
         let proof_gain = influence_state.proof_score * self.config.proof_trust_boost;
         let skeptic_loss = influence_state.skepticism_score * self.config.skeptic_trust_penalty;
         (proof_gain - skeptic_loss).clamp(-1.0, 1.0)
@@ -222,16 +231,43 @@ mod tests {
     #[test]
     fn test_propagate_exposure() {
         let mut graph = SocialGraph::default();
-        graph.adjacency.insert("A".to_string(), vec!["B".to_string()]);
-        graph.adjacency.insert("B".to_string(), vec!["C".to_string()]);
-        graph.reverse_adjacency.insert("B".to_string(), vec!["A".to_string()]);
-        graph.reverse_adjacency.insert("C".to_string(), vec!["B".to_string()]);
-        graph.edges.push(Edge::new("A".to_string(), "B".to_string(), EdgeKind::Friend, 0.9));
-        graph.edges.push(Edge::new("B".to_string(), "C".to_string(), EdgeKind::Friend, 0.9));
+        graph
+            .adjacency
+            .insert("A".to_string(), vec!["B".to_string()]);
+        graph
+            .adjacency
+            .insert("B".to_string(), vec!["C".to_string()]);
+        graph
+            .reverse_adjacency
+            .insert("B".to_string(), vec!["A".to_string()]);
+        graph
+            .reverse_adjacency
+            .insert("C".to_string(), vec!["B".to_string()]);
+        graph.edges.push(Edge::new(
+            "A".to_string(),
+            "B".to_string(),
+            EdgeKind::Friend,
+            0.9,
+        ));
+        graph.edges.push(Edge::new(
+            "B".to_string(),
+            "C".to_string(),
+            EdgeKind::Friend,
+            0.9,
+        ));
 
-        let prop = InfluencePropagator::new(InfluenceConfig { max_hops: 3, ..Default::default() });
+        let prop = InfluencePropagator::new(InfluenceConfig {
+            max_hops: 3,
+            ..Default::default()
+        });
         let mut rng = rand::rngs::StdRng::seed_from_u64(42);
-        let (_events, states) = prop.propagate(&graph, &["A".to_string()], InfluenceType::Exposure, 3, &mut rng);
+        let (_events, states) = prop.propagate(
+            &graph,
+            &["A".to_string()],
+            InfluenceType::Exposure,
+            3,
+            &mut rng,
+        );
 
         let b_state = states.get("B").unwrap();
         assert!(b_state.exposure_score > 0.0);
@@ -240,7 +276,12 @@ mod tests {
     #[test]
     fn test_trust_delta_positive() {
         let prop = InfluencePropagator::new(InfluenceConfig::default());
-        let state = BuyerInfluenceState { exposure_score: 0.0, proof_score: 5.0, skepticism_score: 0.0, referral_count: 0 };
+        let state = BuyerInfluenceState {
+            exposure_score: 0.0,
+            proof_score: 5.0,
+            skepticism_score: 0.0,
+            referral_count: 0,
+        };
         let delta = prop.compute_trust_delta(&state);
         assert!(delta > 0.0);
     }
@@ -248,7 +289,12 @@ mod tests {
     #[test]
     fn test_trust_delta_negative() {
         let prop = InfluencePropagator::new(InfluenceConfig::default());
-        let state = BuyerInfluenceState { exposure_score: 0.0, proof_score: 0.0, skepticism_score: 3.0, referral_count: 0 };
+        let state = BuyerInfluenceState {
+            exposure_score: 0.0,
+            proof_score: 0.0,
+            skepticism_score: 3.0,
+            referral_count: 0,
+        };
         let delta = prop.compute_trust_delta(&state);
         assert!(delta < 0.0);
     }
@@ -259,17 +305,44 @@ mod tests {
         // Since we skip already-visited nodes, C can only be reached from B if B
         // is in the frontier — but with effective_mag threshold = 0.05, B (mag=1.0*1.0=1.0)
         // should propagate to C. The test checks that B receives influence at all.
-        let prop = InfluencePropagator::new(InfluenceConfig { hop_decay: 0.5, ..Default::default() });
+        let prop = InfluencePropagator::new(InfluenceConfig {
+            hop_decay: 0.5,
+            ..Default::default()
+        });
         let mut rng = rand::rngs::StdRng::seed_from_u64(42);
         let mut graph = SocialGraph::default();
-        graph.adjacency.insert("A".to_string(), vec!["B".to_string()]);
-        graph.adjacency.insert("B".to_string(), vec!["C".to_string()]);
-        graph.reverse_adjacency.insert("B".to_string(), vec!["A".to_string()]);
-        graph.reverse_adjacency.insert("C".to_string(), vec!["B".to_string()]);
-        graph.edges.push(Edge::new("A".to_string(), "B".to_string(), EdgeKind::Follow, 1.0));
-        graph.edges.push(Edge::new("B".to_string(), "C".to_string(), EdgeKind::Follow, 1.0));
+        graph
+            .adjacency
+            .insert("A".to_string(), vec!["B".to_string()]);
+        graph
+            .adjacency
+            .insert("B".to_string(), vec!["C".to_string()]);
+        graph
+            .reverse_adjacency
+            .insert("B".to_string(), vec!["A".to_string()]);
+        graph
+            .reverse_adjacency
+            .insert("C".to_string(), vec!["B".to_string()]);
+        graph.edges.push(Edge::new(
+            "A".to_string(),
+            "B".to_string(),
+            EdgeKind::Follow,
+            1.0,
+        ));
+        graph.edges.push(Edge::new(
+            "B".to_string(),
+            "C".to_string(),
+            EdgeKind::Follow,
+            1.0,
+        ));
 
-        let (_, states) = prop.propagate(&graph, &["A".to_string()], InfluenceType::Exposure, 3, &mut rng);
+        let (_, states) = prop.propagate(
+            &graph,
+            &["A".to_string()],
+            InfluenceType::Exposure,
+            3,
+            &mut rng,
+        );
         // B should receive influence from A (weight=1.0, mag=1.0)
         let b_exp = states.get("B").unwrap().exposure_score;
         assert!(b_exp > 0.0, "B should receive influence from A");
@@ -277,18 +350,45 @@ mod tests {
 
     #[test]
     fn test_num_steps_caps_propagation_depth() {
-        let prop = InfluencePropagator::new(InfluenceConfig { max_hops: 3, ..Default::default() });
+        let prop = InfluencePropagator::new(InfluenceConfig {
+            max_hops: 3,
+            ..Default::default()
+        });
         let mut rng = rand::rngs::StdRng::seed_from_u64(42);
         let mut graph = SocialGraph::default();
-        graph.adjacency.insert("A".to_string(), vec!["B".to_string()]);
-        graph.adjacency.insert("B".to_string(), vec!["C".to_string()]);
+        graph
+            .adjacency
+            .insert("A".to_string(), vec!["B".to_string()]);
+        graph
+            .adjacency
+            .insert("B".to_string(), vec!["C".to_string()]);
         graph.adjacency.insert("C".to_string(), vec![]);
-        graph.reverse_adjacency.insert("B".to_string(), vec!["A".to_string()]);
-        graph.reverse_adjacency.insert("C".to_string(), vec!["B".to_string()]);
-        graph.edges.push(Edge::new("A".to_string(), "B".to_string(), EdgeKind::Follow, 1.0));
-        graph.edges.push(Edge::new("B".to_string(), "C".to_string(), EdgeKind::Follow, 1.0));
+        graph
+            .reverse_adjacency
+            .insert("B".to_string(), vec!["A".to_string()]);
+        graph
+            .reverse_adjacency
+            .insert("C".to_string(), vec!["B".to_string()]);
+        graph.edges.push(Edge::new(
+            "A".to_string(),
+            "B".to_string(),
+            EdgeKind::Follow,
+            1.0,
+        ));
+        graph.edges.push(Edge::new(
+            "B".to_string(),
+            "C".to_string(),
+            EdgeKind::Follow,
+            1.0,
+        ));
 
-        let (_, states) = prop.propagate(&graph, &["A".to_string()], InfluenceType::Exposure, 1, &mut rng);
+        let (_, states) = prop.propagate(
+            &graph,
+            &["A".to_string()],
+            InfluenceType::Exposure,
+            1,
+            &mut rng,
+        );
         assert!(states.get("B").unwrap().exposure_score > 0.0);
         assert_eq!(states.get("C").unwrap().exposure_score, 0.0);
     }

@@ -57,14 +57,21 @@ pub enum TraitDistribution {
     /// Range is [0, 1] internally; caller clamps.
     Beta { alpha: f64, beta: f64 },
     /// Truncated normal: samples from Normal(mean, stddev) then clamps to [lo, hi].
-    TruncatedNormal { mean: f64, stddev: f64, lo: f64, hi: f64 },
+    TruncatedNormal {
+        mean: f64,
+        stddev: f64,
+        lo: f64,
+        hi: f64,
+    },
     /// Categorical: pick from weighted options.
     Categorical { options: Vec<(String, f64)> },
 }
 
 impl TraitDistribution {
     /// Build from a `TraitDistributionConfig` (e.g. from a `SegmentBlueprint`).
-    pub fn from_config(config: &crate::blueprint::TraitDistributionConfig) -> Result<Self, TraitError> {
+    pub fn from_config(
+        config: &crate::blueprint::TraitDistributionConfig,
+    ) -> Result<Self, TraitError> {
         let dt = DistributionType::from_str(&config.distribution_type)
             .ok_or_else(|| TraitError::UnknownDistribution(config.distribution_type.clone()))?;
 
@@ -85,7 +92,10 @@ impl TraitDistribution {
                 let mean = config.params.get("mean").copied().unwrap_or(0.5);
                 let stddev = config.params.get("stddev").copied().unwrap_or(0.2);
                 if stddev <= 0.0 {
-                    return Err(TraitError::InvalidStddev { name: "Normal".to_string(), value: stddev });
+                    return Err(TraitError::InvalidStddev {
+                        name: "Normal".to_string(),
+                        value: stddev,
+                    });
                 }
                 Ok(Self::Normal { mean, stddev })
             }
@@ -119,7 +129,12 @@ impl TraitDistribution {
                         max: hi,
                     });
                 }
-                Ok(Self::TruncatedNormal { mean, stddev, lo, hi })
+                Ok(Self::TruncatedNormal {
+                    mean,
+                    stddev,
+                    lo,
+                    hi,
+                })
             }
             DistributionType::Categorical => {
                 let options: Vec<(String, f64)> = config
@@ -148,11 +163,16 @@ impl TraitDistribution {
     /// Used by the population generator to seed the correlated sampler.
     pub fn mean_stddev(&self) -> (f64, f64) {
         match self {
-            Self::Uniform { min, max } => ((min + max) / 2.0, (max - min) / (2.0 * 1.732_f64.sqrt())),
+            Self::Uniform { min, max } => {
+                ((min + max) / 2.0, (max - min) / (2.0 * 1.732_f64.sqrt()))
+            }
             Self::Normal { mean, stddev } => (*mean, *stddev),
             Self::Beta { alpha, beta } => {
                 let denom = alpha + beta;
-                (alpha / denom, (alpha * beta / (denom * denom * (denom + 1.0))).sqrt())
+                (
+                    alpha / denom,
+                    (alpha * beta / (denom * denom * (denom + 1.0))).sqrt(),
+                )
             }
             Self::TruncatedNormal { mean, stddev, .. } => (*mean, *stddev),
             // Categorical: use weighted average of option values as proxy mean
@@ -161,12 +181,15 @@ impl TraitDistribution {
                     return (0.5, 0.2);
                 }
                 let total: f64 = options.iter().map(|(_, w)| w).sum();
-                let mean = options.iter().map(|(name, w)| {
-                    // Map categorical index to a continuous value (0-1 scale)
-                    let idx = options.iter().position(|(n, _)| n == name).unwrap() as f64;
-                    let normalized = idx / (options.len() - 1).max(1) as f64;
-                    normalized * w / total
-                }).sum::<f64>();
+                let mean = options
+                    .iter()
+                    .map(|(name, w)| {
+                        // Map categorical index to a continuous value (0-1 scale)
+                        let idx = options.iter().position(|(n, _)| n == name).unwrap() as f64;
+                        let normalized = idx / (options.len() - 1).max(1) as f64;
+                        normalized * w / total
+                    })
+                    .sum::<f64>();
                 (mean, 0.2)
             }
         }
@@ -189,7 +212,9 @@ impl TraitDistribution {
     /// Sample a single value from this distribution.
     pub fn sample<R: Rng>(&self, rng: &mut R) -> TraitValue {
         match self {
-            Self::Uniform { min, max } => TraitValue::Continuous(min + rng.gen::<f64>() * (max - min)),
+            Self::Uniform { min, max } => {
+                TraitValue::Continuous(min + rng.gen::<f64>() * (max - min))
+            }
             Self::Normal { mean, stddev } => {
                 let n = rand_distr::Normal::new(*mean, *stddev)
                     .expect("Normal distribution created with validated params");
@@ -199,7 +224,12 @@ impl TraitDistribution {
                 let x = sample_beta_internal(rng, *alpha, *beta);
                 TraitValue::Continuous(x)
             }
-            Self::TruncatedNormal { mean, stddev, lo, hi } => {
+            Self::TruncatedNormal {
+                mean,
+                stddev,
+                lo,
+                hi,
+            } => {
                 let sample = rng.sample(rand_distr::Normal::new(*mean, *stddev).unwrap());
                 TraitValue::Continuous(sample.clamp(*lo, *hi))
             }
@@ -265,7 +295,9 @@ pub struct TraitSampler {
 
 impl TraitSampler {
     /// Build a sampler from a map of trait name → `TraitDistributionConfig`.
-    pub fn from_configs(configs: &BTreeMap<String, crate::blueprint::TraitDistributionConfig>) -> Result<Self, TraitError> {
+    pub fn from_configs(
+        configs: &BTreeMap<String, crate::blueprint::TraitDistributionConfig>,
+    ) -> Result<Self, TraitError> {
         let distributions = configs
             .iter()
             .map(|(name, config)| {
@@ -278,7 +310,10 @@ impl TraitSampler {
 
     /// Sample all configured traits.
     pub fn sample_all<R: Rng>(&self, rng: &mut R) -> BTreeMap<String, TraitValue> {
-        self.distributions.iter().map(|(name, dist)| (name.clone(), dist.sample(rng))).collect()
+        self.distributions
+            .iter()
+            .map(|(name, dist)| (name.clone(), dist.sample(rng)))
+            .collect()
     }
 
     /// Sample a specific trait.
@@ -364,7 +399,10 @@ mod tests {
         let mut configs = BTreeMap::new();
         configs.insert(
             "proof_hunger".to_string(),
-            crate::blueprint::TraitDistributionConfig { distribution_type: "uniform".to_string(), params: BTreeMap::new() },
+            crate::blueprint::TraitDistributionConfig {
+                distribution_type: "uniform".to_string(),
+                params: BTreeMap::new(),
+            },
         );
         let sampler = TraitSampler::from_configs(&configs).unwrap();
         let values = sampler.sample_all(&mut rand::thread_rng());

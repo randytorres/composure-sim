@@ -1508,7 +1508,8 @@ mod tests {
                 organic_readiness_score: 31,
                 paid_readiness_score: 9,
                 subscription_readiness_score: 5,
-                current_focus: "Stay focused on organic channels and onboarding proof.".into(),
+                current_focus: "Stay focused on organic channels and repeatable conversion proof."
+                    .into(),
                 gating_factors: vec![
                     "Observed outcomes are placeholders only.".into(),
                     "Activation is still too soft for scale.".into(),
@@ -1586,7 +1587,8 @@ mod tests {
                 converted_paid: false,
             }],
             notes: vec![
-                "Control is strong on receptivity but weak on subscription readiness.".into(),
+                "Control is strong on receptivity but weak on repeat and monetization readiness."
+                    .into(),
             ],
         }
     }
@@ -2393,55 +2395,52 @@ mod tests {
             short_form.strongest_positive_delta_metric.as_deref(),
             Some("Belonging")
         );
-        assert_eq!(short_form.strongest_positive_delta_value, Some(22));
+        assert_eq!(short_form.strongest_positive_delta_value, Some(18));
         assert_eq!(
             short_form.weakest_delta_metric.as_deref(),
-            Some("Objection Pressure")
+            Some("Message Clarity")
         );
-        assert_eq!(short_form.weakest_delta_value, Some(-11));
+        assert_eq!(short_form.weakest_delta_value, Some(-14));
         assert_eq!(
             landing.strongest_positive_delta_metric.as_deref(),
-            Some("Objection Pressure")
+            Some("Message Clarity")
         );
-        assert_eq!(landing.strongest_positive_delta_value, Some(11));
+        assert_eq!(landing.strongest_positive_delta_value, Some(13));
         assert_eq!(landing.weakest_delta_metric.as_deref(), Some("Belonging"));
-        assert_eq!(landing.weakest_delta_value, Some(-22));
+        assert_eq!(landing.weakest_delta_value, Some(-18));
 
         let short_form_belonging = short_form
             .metric_deltas
             .iter()
             .find(|metric| metric.label == "Belonging")
             .unwrap();
-        assert_eq!(short_form_belonging.score, 84);
-        assert_eq!(short_form_belonging.delta_vs_compare_average, 22);
+        assert_eq!(short_form_belonging.score, 85);
+        assert_eq!(short_form_belonging.delta_vs_compare_average, 18);
         assert_eq!(short_form_belonging.delta_vs_compare_leader, 0);
         assert_eq!(short_form_belonging.compare_set_rank, 1);
         assert_eq!(short_form_belonging.compare_set_size, 2);
         assert_eq!(short_form_belonging.leading_scenarios, vec!["Short form"]);
 
-        let landing_objection_pressure = landing
+        let landing_message_clarity = landing
             .metric_deltas
             .iter()
-            .find(|metric| metric.label == "Objection Pressure")
+            .find(|metric| metric.label == "Message Clarity")
             .unwrap();
-        assert_eq!(landing_objection_pressure.score, 85);
-        assert_eq!(landing_objection_pressure.delta_vs_compare_average, 11);
-        assert_eq!(landing_objection_pressure.delta_vs_compare_leader, 0);
-        assert_eq!(landing_objection_pressure.compare_set_rank, 1);
-        assert_eq!(landing_objection_pressure.compare_set_size, 2);
-        assert_eq!(
-            landing_objection_pressure.leading_scenarios,
-            vec!["Landing"]
-        );
+        assert_eq!(landing_message_clarity.score, 96);
+        assert_eq!(landing_message_clarity.delta_vs_compare_average, 13);
+        assert_eq!(landing_message_clarity.delta_vs_compare_leader, 0);
+        assert_eq!(landing_message_clarity.compare_set_rank, 1);
+        assert_eq!(landing_message_clarity.compare_set_size, 2);
+        assert_eq!(landing_message_clarity.leading_scenarios, vec!["Landing"]);
 
         let landing_belonging = landing
             .metric_deltas
             .iter()
             .find(|metric| metric.label == "Belonging")
             .unwrap();
-        assert_eq!(landing_belonging.score, 40);
-        assert_eq!(landing_belonging.delta_vs_compare_average, -22);
-        assert_eq!(landing_belonging.delta_vs_compare_leader, -44);
+        assert_eq!(landing_belonging.score, 49);
+        assert_eq!(landing_belonging.delta_vs_compare_average, -18);
+        assert_eq!(landing_belonging.delta_vs_compare_leader, -36);
         assert_eq!(landing_belonging.compare_set_rank, 2);
         assert_eq!(landing_belonging.compare_set_size, 2);
         assert_eq!(landing_belonging.leading_scenarios, vec!["Short form"]);
@@ -2463,14 +2462,15 @@ mod tests {
         assert!(markdown.contains("Metric deltas vs compare set"));
         assert!(markdown.contains("Vs Leader"));
         assert!(markdown.contains("Leader(s)"));
-        assert!(markdown.contains("| Belonging | 44 | +22 | -22 |"));
-        assert!(markdown.contains("| Belonging | Short form (+22) | Landing (-22) |"));
+        assert!(markdown.contains("| Belonging | 36 | -18 | +18 |"));
+        assert!(markdown.contains("| Belonging | Short form (+18) | Landing (-18) |"));
+        assert!(markdown.contains(
+            "- Strongest cross-scenario delta: `Message Clarity` at `+13` vs compare average"
+        ));
         assert!(markdown
-            .contains("- Strongest cross-scenario delta: `Belonging` at `+22` vs compare average"));
-        assert!(markdown
-            .contains("- Weakest cross-scenario delta: `Belonging` at `-22` vs compare average"));
-        assert!(markdown.contains("| Belonging | 84 | +22 | +0 | 1/2 | Short form |"));
-        assert!(markdown.contains("| Objection Pressure | 85 | +11 | +0 | 1/2 | Landing |"));
+            .contains("- Weakest cross-scenario delta: `Belonging` at `-18` vs compare average"));
+        assert!(markdown.contains("| Belonging | 85 | +18 | +0 | 1/2 | Short form |"));
+        assert!(markdown.contains("| Message Clarity | 96 | +13 | +0 | 1/2 | Landing |"));
 
         let _ = fs::remove_file(request_a);
         let _ = fs::remove_file(request_b);

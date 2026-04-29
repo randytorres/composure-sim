@@ -42,7 +42,12 @@ impl BuyerTranscript {
 
         let trust_delta = last.trust - first.trust;
         let stages: Vec<_> = self.lines.iter().map(|l| l.stage.as_str()).collect();
-        let unique_stages: Vec<_> = stages.iter().collect::<std::collections::HashSet<_>>().iter().copied().collect();
+        let unique_stages: Vec<_> = stages
+            .iter()
+            .collect::<std::collections::HashSet<_>>()
+            .iter()
+            .copied()
+            .collect();
 
         let progression = if unique_stages.len() > 1 {
             "evolving"
@@ -75,12 +80,23 @@ pub struct TranscriptConfig {
 
 impl Default for TranscriptConfig {
     fn default() -> Self {
-        Self { sample_rate: 0.01, seed: 42, max_lines: -1 }
+        Self {
+            sample_rate: 0.01,
+            seed: 42,
+            max_lines: -1,
+        }
     }
 }
 
 /// Template phrases for generating reactions.
-fn sample_reaction(_buyer_id: &str, _step: usize, trust: f64, channel: &str, influence_type: Option<&str>, rng: &mut impl Rng) -> String {
+fn sample_reaction(
+    _buyer_id: &str,
+    _step: usize,
+    trust: f64,
+    channel: &str,
+    influence_type: Option<&str>,
+    rng: &mut impl Rng,
+) -> String {
     let trust_bucket = if trust > 0.7 {
         "high"
     } else if trust > 0.4 {
@@ -155,7 +171,12 @@ pub fn build_transcripts(
         .map(|&idx| {
             let id = &buyer_ids[idx];
             let segment = &segment_ids[idx];
-            let buyer = snapshot.buyers.iter().find(|b| &b.id.0 == id).cloned().unwrap_or_default();
+            let buyer = snapshot
+                .buyers
+                .iter()
+                .find(|b| &b.id.0 == id)
+                .cloned()
+                .unwrap_or_default();
 
             let mut transcript = BuyerTranscript {
                 buyer_id: id.clone(),
@@ -164,7 +185,11 @@ pub fn build_transcripts(
                 arc_summary: String::new(),
             };
 
-            let max_lines = if config.max_lines < 0 { steps } else { config.max_lines as usize };
+            let max_lines = if config.max_lines < 0 {
+                steps
+            } else {
+                config.max_lines as usize
+            };
             for step in 0..steps.min(max_lines) {
                 let default_state = crate::influence::BuyerInfluenceState::default();
                 let inf_state = influence_states.get(id).unwrap_or(&default_state);
@@ -176,7 +201,14 @@ pub fn build_transcripts(
                 } else {
                     None
                 };
-                let reaction = sample_reaction(id, step, trust, &buyer.primary_channel, influence_type, &mut rng);
+                let reaction = sample_reaction(
+                    id,
+                    step,
+                    trust,
+                    &buyer.primary_channel,
+                    influence_type,
+                    &mut rng,
+                );
                 transcript.append(TranscriptLine {
                     buyer_id: id.clone(),
                     step,
@@ -210,7 +242,18 @@ mod tests {
             segment_summaries: std::collections::BTreeMap::new(),
         };
         let influence_states = std::collections::HashMap::new();
-        let transcripts = build_transcripts(&buyer_ids, &segment_ids, &snapshot, &influence_states, 3, &TranscriptConfig { sample_rate: 1.0, seed: 7, ..Default::default() });
+        let transcripts = build_transcripts(
+            &buyer_ids,
+            &segment_ids,
+            &snapshot,
+            &influence_states,
+            3,
+            &TranscriptConfig {
+                sample_rate: 1.0,
+                seed: 7,
+                ..Default::default()
+            },
+        );
         assert!(!transcripts.is_empty());
         assert!(!transcripts[0].arc_summary.is_empty());
     }
@@ -227,7 +270,18 @@ mod tests {
             segment_summaries: std::collections::BTreeMap::new(),
         };
         let influence_states = std::collections::HashMap::new();
-        let transcripts = build_transcripts(&buyer_ids, &segment_ids, &snapshot, &influence_states, 3, &TranscriptConfig { sample_rate: 0.0, seed: 7, ..Default::default() });
+        let transcripts = build_transcripts(
+            &buyer_ids,
+            &segment_ids,
+            &snapshot,
+            &influence_states,
+            3,
+            &TranscriptConfig {
+                sample_rate: 0.0,
+                seed: 7,
+                ..Default::default()
+            },
+        );
         assert!(transcripts.is_empty());
     }
 }

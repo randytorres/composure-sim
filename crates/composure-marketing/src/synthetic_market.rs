@@ -667,10 +667,12 @@ pub fn simulate_synthetic_market(
         .filter_map(|variant_id| variants_by_id.get(variant_id.as_str()).copied())
         .collect::<Vec<_>>();
 
-    let mut buyer_rng = StdRng::seed_from_u64(simulation_seed(&package.market.name, &scenario.scenario_id));
+    let mut buyer_rng =
+        StdRng::seed_from_u64(simulation_seed(&package.market.name, &scenario.scenario_id));
     let mut segment_buyer_counts = BTreeMap::new();
     let mut sampled_buyers = Vec::new();
-    let mut per_variant_segment_scores: BTreeMap<String, Vec<VariantSegmentScore>> = BTreeMap::new();
+    let mut per_variant_segment_scores: BTreeMap<String, Vec<VariantSegmentScore>> =
+        BTreeMap::new();
 
     for (segment_id, normalized_weight) in &normalized_weights {
         let segment = segments_by_id[segment_id];
@@ -703,7 +705,8 @@ pub fn simulate_synthetic_market(
                     accumulator.signups += usize::from(variant_score.funnel.signed_up);
                     accumulator.activations += usize::from(variant_score.funnel.activated);
                     accumulator.retained += usize::from(variant_score.funnel.retained);
-                    accumulator.paid_conversions += usize::from(variant_score.funnel.converted_paid);
+                    accumulator.paid_conversions +=
+                        usize::from(variant_score.funnel.converted_paid);
                     (
                         variant.variant_id.clone(),
                         as_percent(variant_score.score),
@@ -713,12 +716,20 @@ pub fn simulate_synthetic_market(
                 .collect::<Vec<_>>();
             ranked_for_buyer.sort_by(|a, b| b.1.cmp(&a.1));
 
-            if sampled_buyers.len() < 18 && buyer_index % (buyers_for_segment.max(1) / 3).max(1) == 0 {
+            if sampled_buyers.len() < 18
+                && buyer_index % (buyers_for_segment.max(1) / 3).max(1) == 0
+            {
                 sampled_buyers.push(SyntheticBuyerSample {
                     buyer_id: format!("{}-buyer-{}", segment.segment_id, buyer_index + 1),
                     segment_id: segment.segment_id.clone(),
-                    strongest_variant_id: ranked_for_buyer.first().map(|item| item.0.clone()).unwrap_or_default(),
-                    strongest_variant_score: ranked_for_buyer.first().map(|item| item.1).unwrap_or_default(),
+                    strongest_variant_id: ranked_for_buyer
+                        .first()
+                        .map(|item| item.0.clone())
+                        .unwrap_or_default(),
+                    strongest_variant_score: ranked_for_buyer
+                        .first()
+                        .map(|item| item.1)
+                        .unwrap_or_default(),
                     runner_up_variant_id: ranked_for_buyer.get(1).map(|item| item.0.clone()),
                     runner_up_score: ranked_for_buyer.get(1).map(|item| item.1),
                     proof_hunger: as_percent(buyer.proof_hunger),
@@ -726,16 +737,46 @@ pub fn simulate_synthetic_market(
                     privacy_sensitivity: as_percent(buyer.privacy_sensitivity),
                     wearable_ownership: as_percent(buyer.wearable_ownership),
                     subscription_willingness: as_percent(buyer.subscription_willingness),
-                    click_probability: ranked_for_buyer.first().map(|item| as_percent(item.2.click_probability)).unwrap_or_default(),
-                    signup_probability: ranked_for_buyer.first().map(|item| as_percent(item.2.signup_probability)).unwrap_or_default(),
-                    activation_probability: ranked_for_buyer.first().map(|item| as_percent(item.2.activation_probability)).unwrap_or_default(),
-                    retention_probability: ranked_for_buyer.first().map(|item| as_percent(item.2.retention_probability)).unwrap_or_default(),
-                    paid_conversion_probability: ranked_for_buyer.first().map(|item| as_percent(item.2.paid_conversion_probability)).unwrap_or_default(),
-                    clicked: ranked_for_buyer.first().map(|item| item.2.clicked).unwrap_or(false),
-                    signed_up: ranked_for_buyer.first().map(|item| item.2.signed_up).unwrap_or(false),
-                    activated: ranked_for_buyer.first().map(|item| item.2.activated).unwrap_or(false),
-                    retained: ranked_for_buyer.first().map(|item| item.2.retained).unwrap_or(false),
-                    converted_paid: ranked_for_buyer.first().map(|item| item.2.converted_paid).unwrap_or(false),
+                    click_probability: ranked_for_buyer
+                        .first()
+                        .map(|item| as_percent(item.2.click_probability))
+                        .unwrap_or_default(),
+                    signup_probability: ranked_for_buyer
+                        .first()
+                        .map(|item| as_percent(item.2.signup_probability))
+                        .unwrap_or_default(),
+                    activation_probability: ranked_for_buyer
+                        .first()
+                        .map(|item| as_percent(item.2.activation_probability))
+                        .unwrap_or_default(),
+                    retention_probability: ranked_for_buyer
+                        .first()
+                        .map(|item| as_percent(item.2.retention_probability))
+                        .unwrap_or_default(),
+                    paid_conversion_probability: ranked_for_buyer
+                        .first()
+                        .map(|item| as_percent(item.2.paid_conversion_probability))
+                        .unwrap_or_default(),
+                    clicked: ranked_for_buyer
+                        .first()
+                        .map(|item| item.2.clicked)
+                        .unwrap_or(false),
+                    signed_up: ranked_for_buyer
+                        .first()
+                        .map(|item| item.2.signed_up)
+                        .unwrap_or(false),
+                    activated: ranked_for_buyer
+                        .first()
+                        .map(|item| item.2.activated)
+                        .unwrap_or(false),
+                    retained: ranked_for_buyer
+                        .first()
+                        .map(|item| item.2.retained)
+                        .unwrap_or(false),
+                    converted_paid: ranked_for_buyer
+                        .first()
+                        .map(|item| item.2.converted_paid)
+                        .unwrap_or(false),
                 });
             }
         }
@@ -753,15 +794,21 @@ pub fn simulate_synthetic_market(
             let affinity = affinity_score(segment, variant);
             let channel_fit = channel_overlap_score(&scenario.channels, &variant.channel_fit);
             let trust = trust_score(&scenario.channels, &variant.channel_fit, &channels_by_id);
-            let driver = value_driver_score_for_segment(segment, &variant.supports_value_drivers, &value_drivers_by_id);
-            let penalty = friction_penalty_for_segment(segment, &variant.exposed_frictions, &frictions_by_id);
+            let driver = value_driver_score_for_segment(
+                segment,
+                &variant.supports_value_drivers,
+                &value_drivers_by_id,
+            );
+            let penalty =
+                friction_penalty_for_segment(segment, &variant.exposed_frictions, &frictions_by_id);
             per_variant_segment_scores
                 .entry(variant.variant_id.clone())
                 .or_default()
                 .push(VariantSegmentScore {
                     segment_id: segment.segment_id.clone(),
                     segment_name: segment.name.clone(),
-                    effective_weight: normalized_weight * buyers_for_segment as f64 / total_buyers_simulated as f64,
+                    effective_weight: normalized_weight * buyers_for_segment as f64
+                        / total_buyers_simulated as f64,
                     score: as_percent(avg_score),
                     funnel: aggregate_funnel_metrics(&accumulator),
                     affinity_score: as_percent(affinity),
@@ -780,8 +827,17 @@ pub fn simulate_synthetic_market(
                 .remove(&variant.variant_id)
                 .unwrap_or_default();
             segment_scores.sort_by(|a, b| b.score.cmp(&a.score));
-            let strongest_segments = segment_scores.iter().take(2).map(|item| item.segment_id.clone()).collect::<Vec<_>>();
-            let weakest_segments = segment_scores.iter().rev().take(2).map(|item| item.segment_id.clone()).collect::<Vec<_>>();
+            let strongest_segments = segment_scores
+                .iter()
+                .take(2)
+                .map(|item| item.segment_id.clone())
+                .collect::<Vec<_>>();
+            let weakest_segments = segment_scores
+                .iter()
+                .rev()
+                .take(2)
+                .map(|item| item.segment_id.clone())
+                .collect::<Vec<_>>();
             let weighted_total = segment_scores
                 .iter()
                 .map(|item| item.effective_weight * item.score as f64)
@@ -991,14 +1047,29 @@ fn simulation_seed(market_name: &str, scenario_id: &str) -> u64 {
 fn sample_buyer(segment: &SegmentBlueprint, rng: &mut StdRng) -> BuyerProfile {
     BuyerProfile {
         proof_hunger: sample_named_trait(segment, "proof_hunger", 0.62, rng),
-        manual_logging_tolerance: sample_named_trait(segment, "manual_logging_tolerance", 0.45, rng),
+        manual_logging_tolerance: sample_named_trait(
+            segment,
+            "manual_logging_tolerance",
+            0.45,
+            rng,
+        ),
         privacy_sensitivity: sample_named_trait(segment, "privacy_sensitivity", 0.42, rng),
         wearable_ownership: sample_named_trait(segment, "wearable_ownership", 0.5, rng),
         peptide_openness: sample_named_trait(segment, "peptide_openness", 0.4, rng),
-        scientific_rigor_threshold: sample_named_trait(segment, "scientific_rigor_threshold", 0.55, rng),
+        scientific_rigor_threshold: sample_named_trait(
+            segment,
+            "scientific_rigor_threshold",
+            0.55,
+            rng,
+        ),
         creator_trust: sample_named_trait(segment, "creator_trust", 0.5, rng),
         weekly_review_desire: sample_named_trait(segment, "weekly_review_desire", 0.58, rng),
-        subscription_willingness: sample_named_trait(segment, "subscription_willingness", 0.52, rng),
+        subscription_willingness: sample_named_trait(
+            segment,
+            "subscription_willingness",
+            0.52,
+            rng,
+        ),
         passive_data_expectation: sample_named_trait(segment, "passive_data_expectation", 0.5, rng),
         trust_barrier: sample_named_trait(segment, "trust_barrier", 0.5, rng),
         dashboard_tolerance: sample_named_trait(segment, "dashboard_tolerance", 0.45, rng),
@@ -1039,15 +1110,17 @@ fn score_buyer_against_variant(
     let affinity = affinity_score(segment, variant);
     let channel_fit = personalized_channel_fit(segment, buyer, scenario, variant);
     let trust = buyer_trust_score(buyer, segment, scenario, variant, channels_by_id);
-    let driver = buyer_value_driver_score(buyer, segment, &variant.supports_value_drivers, value_drivers_by_id);
-    let penalty = buyer_friction_penalty(buyer, segment, &variant.exposed_frictions, frictions_by_id);
+    let driver = buyer_value_driver_score(
+        buyer,
+        segment,
+        &variant.supports_value_drivers,
+        value_drivers_by_id,
+    );
+    let penalty =
+        buyer_friction_penalty(buyer, segment, &variant.exposed_frictions, frictions_by_id);
     let role_bonus = role_bonus(variant.role.as_deref());
     let score = clamp01(
-        0.14
-            + (affinity * 0.24)
-            + (channel_fit * 0.16)
-            + (trust * 0.15)
-            + (driver * 0.29)
+        0.14 + (affinity * 0.24) + (channel_fit * 0.16) + (trust * 0.15) + (driver * 0.29)
             - (penalty * 0.24)
             + (buyer.subscription_willingness * 0.08)
             + variant_specific_adjustment(buyer, variant)
@@ -1058,7 +1131,11 @@ fn score_buyer_against_variant(
 }
 
 fn affinity_score(segment: &SegmentBlueprint, variant: &CampaignVariantDefinition) -> f64 {
-    if variant.best_for_segments.iter().any(|id| id == &segment.segment_id) {
+    if variant
+        .best_for_segments
+        .iter()
+        .any(|id| id == &segment.segment_id)
+    {
         1.0
     } else if segment
         .adjacent_to
@@ -1223,8 +1300,10 @@ fn buyer_value_driver_score(
 }
 
 fn variant_specific_adjustment(buyer: &BuyerProfile, variant: &CampaignVariantDefinition) -> f64 {
-    let peptide_coded = variant.variant_id.contains("peptide") || variant.variant_id.contains("glp1");
-    let natural_coded = variant.variant_id.contains("natural") || variant.variant_id.contains("whoop");
+    let peptide_coded =
+        variant.variant_id.contains("peptide") || variant.variant_id.contains("glp1");
+    let natural_coded =
+        variant.variant_id.contains("natural") || variant.variant_id.contains("whoop");
     let adjustment = if peptide_coded {
         (buyer.peptide_openness - 0.5) * 0.08
     } else if natural_coded {
@@ -1245,18 +1324,12 @@ fn simulate_buyer_funnel(
     rng: &mut StdRng,
 ) -> BuyerFunnelOutcome {
     let click_probability = clamp01(
-        (score * 0.55)
-            + (channel_fit * 0.20)
-            + (buyer.creator_trust * 0.08)
-            + (trust * 0.10)
+        (score * 0.55) + (channel_fit * 0.20) + (buyer.creator_trust * 0.08) + (trust * 0.10)
             - (penalty * 0.10),
     );
     let signup_probability = clamp01(
         click_probability
-            * ((score * 0.42)
-                + (driver * 0.22)
-                + (trust * 0.20)
-                + (buyer.proof_hunger * 0.10)
+            * ((score * 0.42) + (driver * 0.22) + (trust * 0.20) + (buyer.proof_hunger * 0.10)
                 - (penalty * 0.18)),
     );
     let activation_probability = clamp01(
@@ -1315,7 +1388,11 @@ fn friction_penalty(
         .iter()
         .filter_map(|friction_id| frictions_by_id.get(friction_id.as_str()).copied())
         .map(|friction| {
-            let modifier = friction.segment_modifiers.get(segment_id).copied().unwrap_or(1.0);
+            let modifier = friction
+                .segment_modifiers
+                .get(segment_id)
+                .copied()
+                .unwrap_or(1.0);
             let default_impact = friction
                 .default_impact
                 .as_ref()
@@ -1408,11 +1485,26 @@ fn aggregate_weighted_funnel(segment_scores: &[VariantSegmentScore]) -> Aggregat
         .map(|score| score.effective_weight)
         .sum::<f64>()
         .max(f64::EPSILON);
-    let buyers = segment_scores.iter().map(|score| score.funnel.buyers).sum::<usize>();
-    let clicks = segment_scores.iter().map(|score| score.funnel.clicks).sum::<usize>();
-    let signups = segment_scores.iter().map(|score| score.funnel.signups).sum::<usize>();
-    let activations = segment_scores.iter().map(|score| score.funnel.activations).sum::<usize>();
-    let retained = segment_scores.iter().map(|score| score.funnel.retained).sum::<usize>();
+    let buyers = segment_scores
+        .iter()
+        .map(|score| score.funnel.buyers)
+        .sum::<usize>();
+    let clicks = segment_scores
+        .iter()
+        .map(|score| score.funnel.clicks)
+        .sum::<usize>();
+    let signups = segment_scores
+        .iter()
+        .map(|score| score.funnel.signups)
+        .sum::<usize>();
+    let activations = segment_scores
+        .iter()
+        .map(|score| score.funnel.activations)
+        .sum::<usize>();
+    let retained = segment_scores
+        .iter()
+        .map(|score| score.funnel.retained)
+        .sum::<usize>();
     let paid_conversions = segment_scores
         .iter()
         .map(|score| score.funnel.paid_conversions)
@@ -1489,7 +1581,11 @@ fn build_observed_data_summary(
     let mut organic_sources = BTreeSet::new();
     let mut paid_sources = BTreeSet::new();
     for outcome in &observed_for_scenario {
-        if let Some(source) = outcome.source.as_ref().filter(|value| !value.trim().is_empty()) {
+        if let Some(source) = outcome
+            .source
+            .as_ref()
+            .filter(|value| !value.trim().is_empty())
+        {
             if is_paid_source(source) {
                 paid_sources.insert(source.clone());
             } else {
@@ -1778,18 +1874,18 @@ fn build_business_readiness(
         );
     }
     if control_funnel.activation_rate < 0.16 {
-        gating_factors.push(
-            "Activation is still too soft to support efficient acquisition at scale.".into(),
-        );
+        gating_factors
+            .push("Activation is still too soft to support efficient acquisition at scale.".into());
     }
     if control_funnel.retention_rate < 0.08 {
         gating_factors.push(
-            "Week-2 retention is below subscription-ready territory for a durable health product.".into(),
+            "Early repeat behavior is still too weak to treat this as a compounding growth system."
+                .into(),
         );
     }
     if control_funnel.paid_conversion_rate < 0.03 {
         gating_factors.push(
-            "Monetization intent remains weak or unvalidated, so the business model still needs proof.".into(),
+            "Monetization intent remains weak or unvalidated, so the revenue model still needs proof.".into(),
         );
     }
 
@@ -1798,11 +1894,11 @@ fn build_business_readiness(
             || control_funnel.activation_rate < 0.20
             || control_funnel.retention_rate < 0.10)
     {
-        "Stay focused on organic channels, wedge clarity, and onboarding proof before any paid scale."
+        "Stay focused on organic channels, wedge clarity, and repeatable conversion proof before any paid scale."
     } else if paid_readiness_score < 60 {
-        "Keep running low-cost creator and content loops until the control message is more efficient."
+        "Keep running low-cost content and relationship loops until the control motion is more efficient."
     } else {
-        "The top wedge looks strong enough for tightly capped paid tests."
+        "The top motion looks strong enough for tightly capped paid tests."
     }
     .into();
 
@@ -1873,7 +1969,10 @@ fn role_bonus(role: Option<&str>) -> f64 {
     }
 }
 
-fn build_risk_flags(variant: &CampaignVariantDefinition, scenario_channels: &[String]) -> Vec<String> {
+fn build_risk_flags(
+    variant: &CampaignVariantDefinition,
+    scenario_channels: &[String],
+) -> Vec<String> {
     let mut flags = Vec::new();
     let overlap = channel_overlap_score(scenario_channels, &variant.channel_fit);
     if overlap < 0.34 {
@@ -2002,19 +2101,13 @@ mod tests {
                     activation_penalty: 0.18,
                     retention_penalty: 0.22,
                 }),
-                segment_modifiers: BTreeMap::from([
-                    ("glp1".into(), 1.0),
-                    ("privacy".into(), 1.2),
-                ]),
+                segment_modifiers: BTreeMap::from([("glp1".into(), 1.0), ("privacy".into(), 1.2)]),
             }],
             value_drivers: vec![ValueDriverPrior {
                 driver_id: "proof".into(),
                 label: "Proof".into(),
                 description: None,
-                segment_lift: BTreeMap::from([
-                    ("glp1".into(), 1.3),
-                    ("privacy".into(), 0.8),
-                ]),
+                segment_lift: BTreeMap::from([("glp1".into(), 1.3), ("privacy".into(), 0.8)]),
             }],
             channels: vec![ChannelAssumption {
                 channel_id: "landing_page".into(),
@@ -2116,7 +2209,10 @@ mod tests {
         }];
 
         let result = simulate_synthetic_market(&package, "wedge_test").unwrap();
-        assert_eq!(result.observed_data_summary.acquisition_motion, "organic_only");
+        assert_eq!(
+            result.observed_data_summary.acquisition_motion,
+            "organic_only"
+        );
         assert_eq!(result.observed_data_summary.data_status, "placeholder_only");
         assert_eq!(result.calibration_summary.len(), 1);
         assert_eq!(result.calibration_summary[0].usable_observed_records, 0);

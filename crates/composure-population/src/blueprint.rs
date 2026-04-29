@@ -76,7 +76,11 @@ pub struct ChannelPreference {
 
 impl ChannelPreference {
     pub fn new(channel: Channel, weight: f64) -> Self {
-        Self { channel, weight, reach_per_week: None }
+        Self {
+            channel,
+            weight,
+            reach_per_week: None,
+        }
     }
 }
 
@@ -125,7 +129,12 @@ impl Objection {
         severity: f64,
         resolvable_via_social_proof: bool,
     ) -> Self {
-        Self { objection_type, activation_probability, severity, resolvable_via_social_proof }
+        Self {
+            objection_type,
+            activation_probability,
+            severity,
+            resolvable_via_social_proof,
+        }
     }
 }
 
@@ -171,7 +180,12 @@ pub struct Prior {
 
 impl Prior {
     pub fn new(belief: &str, strength: f64, valence: bool) -> Self {
-        Self { belief: belief.to_string(), strength, valence, source: None }
+        Self {
+            belief: belief.to_string(),
+            strength,
+            valence,
+            source: None,
+        }
     }
 }
 
@@ -232,7 +246,10 @@ pub struct TraitDistributionConfig {
 
 impl Default for TraitDistributionConfig {
     fn default() -> Self {
-        Self { distribution_type: "uniform".to_string(), params: BTreeMap::new() }
+        Self {
+            distribution_type: "uniform".to_string(),
+            params: BTreeMap::new(),
+        }
     }
 }
 
@@ -300,7 +317,10 @@ impl SegmentBlueprint {
         if total == 0.0 {
             return BTreeMap::new();
         }
-        self.channel_preferences.iter().map(|cp| (cp.channel.clone(), cp.weight / total)).collect()
+        self.channel_preferences
+            .iter()
+            .map(|cp| (cp.channel.clone(), cp.weight / total))
+            .collect()
     }
 
     /// Returns all trait names (built-in + extra) with their distribution configs.
@@ -352,7 +372,12 @@ impl Default for SegmentBlueprint {
             priors: vec![],
             channel_preferences: vec![],
             objections: vec![],
-            budget: Budget { monthly_min: 0.0, monthly_max: 1000.0, price_sensitive: true, prefers_annual: false },
+            budget: Budget {
+                monthly_min: 0.0,
+                monthly_max: 1000.0,
+                price_sensitive: true,
+                prefers_annual: false,
+            },
             trust: TrustCalibration::default(),
             friction: ProductFriction::default(),
             target_count: 1000,
@@ -375,8 +400,10 @@ mod tests {
     #[test]
     fn test_normalized_channel_weights() {
         let mut bp = SegmentBlueprint::default();
-        bp.channel_preferences =
-            vec![ChannelPreference::new(Channel::Tiktok, 0.6), ChannelPreference::new(Channel::Instagram, 0.4)];
+        bp.channel_preferences = vec![
+            ChannelPreference::new(Channel::Tiktok, 0.6),
+            ChannelPreference::new(Channel::Instagram, 0.4),
+        ];
         let weights = bp.normalized_channel_weights();
         assert!((weights.get(&Channel::Tiktok).unwrap() - 0.6).abs() < 1e-9);
         assert!((weights.get(&Channel::Instagram).unwrap() - 0.4).abs() < 1e-9);

@@ -26,7 +26,11 @@ pub struct TraitCorrelation {
 
 impl TraitCorrelation {
     pub fn new(trait_a: &str, trait_b: &str, correlation: f64) -> Self {
-        Self { trait_a: trait_a.to_string(), trait_b: trait_b.to_string(), correlation }
+        Self {
+            trait_a: trait_a.to_string(),
+            trait_b: trait_b.to_string(),
+            correlation,
+        }
     }
 }
 
@@ -51,8 +55,12 @@ impl CorrelationSpec {
         }
 
         // Build index map
-        let index: std::collections::HashMap<&str, usize> =
-            self.trait_names.iter().enumerate().map(|(i, t)| (t.as_str(), i)).collect();
+        let index: std::collections::HashMap<&str, usize> = self
+            .trait_names
+            .iter()
+            .enumerate()
+            .map(|(i, t)| (t.as_str(), i))
+            .collect();
 
         for corr in &self.correlations {
             let Some(&i) = index.get(corr.trait_a.as_str()) else {
@@ -118,7 +126,10 @@ impl CorrelatedTraitSampler {
     pub fn from_covariance(trait_names: &[String], cov: &[Vec<f64>]) -> Result<Self, CorrError> {
         let n = trait_names.len();
         if cov.len() != n || cov.iter().any(|row| row.len() != n) {
-            return Err(CorrError::NotSquare { expected: n, got: cov.len() });
+            return Err(CorrError::NotSquare {
+                expected: n,
+                got: cov.len(),
+            });
         }
 
         // Compute Cholesky decomposition L where C = L * L^T
@@ -150,7 +161,10 @@ impl CorrelatedTraitSampler {
             l[i][i] = sum.sqrt();
         }
 
-        Ok(Self { cholesky: l, trait_names: trait_names.to_vec() })
+        Ok(Self {
+            cholesky: l,
+            trait_names: trait_names.to_vec(),
+        })
     }
 
     /// Sample a vector of correlated standard-normal values, then transform them
@@ -160,22 +174,26 @@ impl CorrelatedTraitSampler {
     pub fn sample<R: Rng>(&self, means: &[f64], rng: &mut R) -> Vec<f64> {
         let n = self.trait_names.len();
         // Sample n independent standard normals
-        let z: Vec<f64> = (0..n).map(|_| {
-            // Box-Muller
-            let u1 = rng.gen::<f64>().max(1e-10);
-            let u2 = rng.gen::<f64>();
-            let mag = (-2.0 * u1.ln()).sqrt();
-            mag * (2.0 * std::f64::consts::PI * u2).cos()
-        }).collect();
+        let z: Vec<f64> = (0..n)
+            .map(|_| {
+                // Box-Muller
+                let u1 = rng.gen::<f64>().max(1e-10);
+                let u2 = rng.gen::<f64>();
+                let mag = (-2.0 * u1.ln()).sqrt();
+                mag * (2.0 * std::f64::consts::PI * u2).cos()
+            })
+            .collect();
 
         // Apply L * z to get correlated standard normals (stddevs baked into Cholesky)
-        let correlated: Vec<f64> = (0..n).map(|i| {
-            let mut sum = 0.0;
-            for j in 0..=i {
-                sum += self.cholesky[i][j] * z[j];
-            }
-            means[i] + sum
-        }).collect();
+        let correlated: Vec<f64> = (0..n)
+            .map(|i| {
+                let mut sum = 0.0;
+                for j in 0..=i {
+                    sum += self.cholesky[i][j] * z[j];
+                }
+                means[i] + sum
+            })
+            .collect();
 
         correlated
     }
@@ -237,7 +255,12 @@ mod tests {
         }
         let mean_a = a_vals.iter().sum::<f64>() / n as f64;
         let mean_b = b_vals.iter().sum::<f64>() / n as f64;
-        let cov = a_vals.iter().zip(b_vals.iter()).map(|(a, b)| (a - mean_a) * (b - mean_b)).sum::<f64>() / n as f64;
+        let cov = a_vals
+            .iter()
+            .zip(b_vals.iter())
+            .map(|(a, b)| (a - mean_a) * (b - mean_b))
+            .sum::<f64>()
+            / n as f64;
         let var_a = a_vals.iter().map(|a| (a - mean_a).powi(2)).sum::<f64>() / n as f64;
         let var_b = b_vals.iter().map(|b| (b - mean_b).powi(2)).sum::<f64>() / n as f64;
         let est_corr = cov / (var_a.sqrt() * var_b.sqrt());

@@ -6,8 +6,8 @@
 use rand::{prelude::*, Rng, SeedableRng};
 use rand_chacha::ChaCha12Rng;
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
 use std::collections::{HashMap, HashSet};
+use thiserror::Error;
 
 /// The kind of edge connecting two buyers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -43,11 +43,29 @@ pub struct Edge {
 
 impl Edge {
     pub fn new(from: String, to: String, kind: EdgeKind, weight: f64) -> Self {
-        Self { from, to, kind, weight, channel: None }
+        Self {
+            from,
+            to,
+            kind,
+            weight,
+            channel: None,
+        }
     }
 
-    pub fn with_channel(from: String, to: String, kind: EdgeKind, weight: f64, channel: &str) -> Self {
-        Self { from, to, kind, weight, channel: Some(channel.to_string()) }
+    pub fn with_channel(
+        from: String,
+        to: String,
+        kind: EdgeKind,
+        weight: f64,
+        channel: &str,
+    ) -> Self {
+        Self {
+            from,
+            to,
+            kind,
+            weight,
+            channel: Some(channel.to_string()),
+        }
     }
 
     /// Returns true if this is a bidirectional edge (friend = mutual).
@@ -179,8 +197,19 @@ impl SocialGraphGenerator {
                 continue; // mostly same-community
             }
             let weight = 0.7 + rng.gen::<f64>() * 0.3;
-            let edge = Edge::new(buyer_ids[ai].clone(), buyer_ids[bi].clone(), EdgeKind::Friend, weight);
-            Self::add_edge(&mut edges, &mut adjacency, &mut reverse_adjacency, edge, false);
+            let edge = Edge::new(
+                buyer_ids[ai].clone(),
+                buyer_ids[bi].clone(),
+                EdgeKind::Friend,
+                weight,
+            );
+            Self::add_edge(
+                &mut edges,
+                &mut adjacency,
+                &mut reverse_adjacency,
+                edge,
+                false,
+            );
         }
 
         // Step 4: Creator-follower edges
@@ -206,12 +235,19 @@ impl SocialGraphGenerator {
                 EdgeKind::Follow,
                 weight,
             );
-            Self::add_edge(&mut edges, &mut adjacency, &mut reverse_adjacency, edge, true);
+            Self::add_edge(
+                &mut edges,
+                &mut adjacency,
+                &mut reverse_adjacency,
+                edge,
+                true,
+            );
         }
 
         // Step 5: Cross-channel / peer edges
-        let cross_edge_target =
-            ((self.config.avg_degree / 2.0) * n as f64 * self.config.cross_channel_edge_prob) as usize;
+        let cross_edge_target = ((self.config.avg_degree / 2.0)
+            * n as f64
+            * self.config.cross_channel_edge_prob) as usize;
         for _ in 0..cross_edge_target {
             let ai = rng.gen::<usize>() % n;
             let bi = rng.gen::<usize>() % n;
@@ -225,7 +261,13 @@ impl SocialGraphGenerator {
                 EdgeKind::Peer,
                 weight,
             );
-            Self::add_edge(&mut edges, &mut adjacency, &mut reverse_adjacency, edge, false);
+            Self::add_edge(
+                &mut edges,
+                &mut adjacency,
+                &mut reverse_adjacency,
+                edge,
+                false,
+            );
         }
 
         Ok(SocialGraph {
@@ -285,7 +327,12 @@ impl SocialGraphGenerator {
     }
 
     /// Find all buyers connected to a given buyer within N hops.
-    pub fn k_hop_neighbors(&self, graph: &SocialGraph, buyer_id: &str, k: usize) -> HashSet<String> {
+    pub fn k_hop_neighbors(
+        &self,
+        graph: &SocialGraph,
+        buyer_id: &str,
+        k: usize,
+    ) -> HashSet<String> {
         let mut visited: HashSet<String> = HashSet::new();
         let mut frontier: HashSet<String> = vec![buyer_id.to_string()].into_iter().collect();
         visited.insert(buyer_id.to_string());
@@ -309,11 +356,7 @@ impl SocialGraphGenerator {
     }
 }
 
-fn push_unique_neighbor(
-    map: &mut HashMap<String, Vec<String>>,
-    from: &str,
-    to: String,
-) {
+fn push_unique_neighbor(map: &mut HashMap<String, Vec<String>>, from: &str, to: String) {
     if let Some(values) = map.get_mut(from) {
         if !values.contains(&to) {
             values.push(to);
@@ -354,17 +397,35 @@ mod tests {
         // ordering for the same undirected edge set. We verify determinism via
         // structural properties that are guaranteed stable.
         let ids: Vec<String> = (0..50).map(|i| format!("buyer-{:03}", i)).collect();
-        let gen1 = SocialGraphGenerator::new(SocialGraphConfig { graph_seed: 99, buyer_count: 50, ..Default::default() });
+        let gen1 = SocialGraphGenerator::new(SocialGraphConfig {
+            graph_seed: 99,
+            buyer_count: 50,
+            ..Default::default()
+        });
         let graph1 = gen1.generate(&ids).unwrap();
-        let gen2 = SocialGraphGenerator::new(SocialGraphConfig { graph_seed: 99, buyer_count: 50, ..Default::default() });
+        let gen2 = SocialGraphGenerator::new(SocialGraphConfig {
+            graph_seed: 99,
+            buyer_count: 50,
+            ..Default::default()
+        });
         let graph2 = gen2.generate(&ids).unwrap();
 
         // Creators (HashSet) and communities (BTreeMap) are deterministic
-        assert_eq!(graph1.creators, graph2.creators, "creators must be identical");
-        assert_eq!(graph1.communities, graph2.communities, "communities must be identical");
+        assert_eq!(
+            graph1.creators, graph2.creators,
+            "creators must be identical"
+        );
+        assert_eq!(
+            graph1.communities, graph2.communities,
+            "communities must be identical"
+        );
 
         // Same number of edges (structural consistency)
-        assert_eq!(graph1.edges.len(), graph2.edges.len(), "edge count must be identical");
+        assert_eq!(
+            graph1.edges.len(),
+            graph2.edges.len(),
+            "edge count must be identical"
+        );
 
         // Verify edge count is reasonable (non-zero graph generated)
         assert!(!graph1.edges.is_empty());
@@ -374,14 +435,25 @@ mod tests {
     fn test_determinism_runs() {
         // Verify ChaCha12Rng is deterministic: same seed → same sequence
         let ids: Vec<String> = (0..20).map(|i| format!("b{}", i)).collect();
-        let config = SocialGraphConfig { graph_seed: 7, buyer_count: 20, ..Default::default() };
-        let g1 = SocialGraphGenerator::new(config.clone()).generate(&ids).unwrap();
+        let config = SocialGraphConfig {
+            graph_seed: 7,
+            buyer_count: 20,
+            ..Default::default()
+        };
+        let g1 = SocialGraphGenerator::new(config.clone())
+            .generate(&ids)
+            .unwrap();
         let g2 = SocialGraphGenerator::new(config).generate(&ids).unwrap();
-        assert_eq!(g1.creators, g2.creators, "creators must be identical for same seed");
+        assert_eq!(
+            g1.creators, g2.creators,
+            "creators must be identical for same seed"
+        );
         for (id, n1) in &g1.adjacency {
             let n2 = g2.adjacency.get(id).unwrap();
-            let mut s1 = n1.clone(); s1.sort();
-            let mut s2 = n2.clone(); s2.sort();
+            let mut s1 = n1.clone();
+            s1.sort();
+            let mut s2 = n2.clone();
+            s2.sort();
             assert_eq!(s1, s2, "adjacency for {} must be identical", id);
         }
     }
@@ -396,7 +468,12 @@ mod tests {
     #[test]
     fn test_k_hop_neighbors() {
         let ids: Vec<String> = (0..10).map(|i| format!("b{}", i)).collect();
-        let gen = SocialGraphGenerator::new(SocialGraphConfig { graph_seed: 1, buyer_count: 10, avg_degree: 2.0, ..Default::default() });
+        let gen = SocialGraphGenerator::new(SocialGraphConfig {
+            graph_seed: 1,
+            buyer_count: 10,
+            avg_degree: 2.0,
+            ..Default::default()
+        });
         let graph = gen.generate(&ids).unwrap();
         let neighbors = gen.k_hop_neighbors(&graph, "b0", 2);
         // Should find some neighbors but not itself
@@ -406,10 +483,7 @@ mod tests {
     #[test]
     fn test_undirected_edges_are_stored_bidirectionally() {
         let mut edges = Vec::new();
-        let mut adjacency = HashMap::from([
-            ("A".to_string(), vec![]),
-            ("B".to_string(), vec![]),
-        ]);
+        let mut adjacency = HashMap::from([("A".to_string(), vec![]), ("B".to_string(), vec![])]);
         let mut reverse_adjacency = adjacency.clone();
 
         SocialGraphGenerator::add_edge(

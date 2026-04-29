@@ -1911,7 +1911,7 @@ pub(crate) fn render_synthetic_market_report_markdown(
         result.business_readiness.paid_readiness_score
     ));
     lines.push(format!(
-        "- Subscription readiness: `{}`",
+        "- Repeat / monetization readiness: `{}`",
         result.business_readiness.subscription_readiness_score
     ));
     lines.push(format!(

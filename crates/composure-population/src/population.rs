@@ -9,8 +9,8 @@ use crate::{blueprint::SegmentBlueprint, buyer::Buyer};
 use rand::{Rng, RngCore, SeedableRng};
 use rand_chacha::ChaCha12Rng;
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
 use std::collections::BTreeMap;
+use thiserror::Error;
 
 /// Stable buyer ID derived from population seed + index.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -38,7 +38,12 @@ pub struct PopulationConfig {
 
 impl Default for PopulationConfig {
     fn default() -> Self {
-        Self { population_seed: 42, target_count: 10_000, use_correlation: true, correlation_specs: BTreeMap::new() }
+        Self {
+            population_seed: 42,
+            target_count: 10_000,
+            use_correlation: true,
+            correlation_specs: BTreeMap::new(),
+        }
     }
 }
 
@@ -70,7 +75,10 @@ impl SyntheticPopulationSnapshot {
             });
         let trait_means: BTreeMap<String, f64> =
             trait_sums.into_iter().map(|(k, v)| (k, v / n)).collect();
-        SegmentSummary { buyer_count: buyers.len(), trait_means }
+        SegmentSummary {
+            buyer_count: buyers.len(),
+            trait_means,
+        }
     }
 }
 
@@ -102,13 +110,15 @@ impl SegmentSampler {
     ) -> Result<Self, PopError> {
         let mut distributions = BTreeMap::new();
         for trait_name in blueprint.all_trait_names() {
-            let config = blueprint
-                .trait_distribution(&trait_name)
-                .ok_or_else(|| PopError::InvalidTraitConfig {
+            let config = blueprint.trait_distribution(&trait_name).ok_or_else(|| {
+                PopError::InvalidTraitConfig {
                     trait_name: trait_name.clone(),
-                })?;
-            let dist = TraitDistribution::from_config(config).map_err(|_| PopError::InvalidTraitConfig {
-                trait_name: trait_name.clone(),
+                }
+            })?;
+            let dist = TraitDistribution::from_config(config).map_err(|_| {
+                PopError::InvalidTraitConfig {
+                    trait_name: trait_name.clone(),
+                }
             })?;
             distributions.insert(trait_name, dist);
         }
@@ -191,7 +201,10 @@ impl PopulationGenerator {
     }
 
     /// Generate the full synthetic population.
-    pub fn generate(&self, blueprints: &[SegmentBlueprint]) -> Result<SyntheticPopulationSnapshot, PopError> {
+    pub fn generate(
+        &self,
+        blueprints: &[SegmentBlueprint],
+    ) -> Result<SyntheticPopulationSnapshot, PopError> {
         if blueprints.is_empty() {
             return Err(PopError::NoBlueprints);
         }
@@ -220,8 +233,11 @@ impl PopulationGenerator {
 
         for blueprint in blueprints {
             let count = self.proportional_count(blueprint.target_count, total_target);
-            let sampler = segment_samplers.get(&blueprint.id).expect("sampler built above");
-            let buyers = self.generate_for_blueprint(blueprint, count, sampler, &mut master_rng, global_idx);
+            let sampler = segment_samplers
+                .get(&blueprint.id)
+                .expect("sampler built above");
+            let buyers =
+                self.generate_for_blueprint(blueprint, count, sampler, &mut master_rng, global_idx);
             global_idx += buyers.len();
             segment_distribution.insert(blueprint.id.clone(), buyers.len());
             all_buyers.extend(buyers);
@@ -230,10 +246,13 @@ impl PopulationGenerator {
         // Build segment summaries
         let mut segment_summaries: BTreeMap<String, SegmentSummary> = BTreeMap::new();
         for bp in blueprints {
-            let bp_buyers: Vec<&Buyer> = all_buyers.iter().filter(|b| b.segment_id == bp.id).collect();
+            let bp_buyers: Vec<&Buyer> = all_buyers
+                .iter()
+                .filter(|b| b.segment_id == bp.id)
+                .collect();
             if !bp_buyers.is_empty() {
                 let summary = SyntheticPopulationSnapshot::build_segment_summary(
-                    &bp_buyers.iter().map(|b| (*b).clone()).collect::<Vec<_>>()
+                    &bp_buyers.iter().map(|b| (*b).clone()).collect::<Vec<_>>(),
                 );
                 segment_summaries.insert(bp.id.clone(), summary);
             }
@@ -303,7 +322,11 @@ impl PopulationGenerator {
         buyers
     }
 
-    fn sample_primary_channel(&self, blueprint: &SegmentBlueprint, rng: &mut ChaCha12Rng) -> String {
+    fn sample_primary_channel(
+        &self,
+        blueprint: &SegmentBlueprint,
+        rng: &mut ChaCha12Rng,
+    ) -> String {
         let weights = blueprint.normalized_channel_weights();
         if weights.is_empty() {
             return "organic_search".to_string();
@@ -349,7 +372,11 @@ mod tests {
     #[test]
     fn test_generate_proportional() {
         let bps = vec![make_blueprint("a", 1), make_blueprint("b", 1)];
-        let gen = PopulationGenerator::new(PopulationConfig { population_seed: 0, target_count: 100, ..Default::default() });
+        let gen = PopulationGenerator::new(PopulationConfig {
+            population_seed: 0,
+            target_count: 100,
+            ..Default::default()
+        });
         let snap = gen.generate(&bps).unwrap();
         assert_eq!(snap.buyer_count, 100);
         let a = snap.segment_distribution.get("a").copied().unwrap_or(0);
@@ -360,9 +387,17 @@ mod tests {
     #[test]
     fn test_reproducibility() {
         let bps = vec![make_blueprint("x", 50)];
-        let gen1 = PopulationGenerator::new(PopulationConfig { population_seed: 7, target_count: 50, ..Default::default() });
+        let gen1 = PopulationGenerator::new(PopulationConfig {
+            population_seed: 7,
+            target_count: 50,
+            ..Default::default()
+        });
         let snap1 = gen1.generate(&bps).unwrap();
-        let gen2 = PopulationGenerator::new(PopulationConfig { population_seed: 7, target_count: 50, ..Default::default() });
+        let gen2 = PopulationGenerator::new(PopulationConfig {
+            population_seed: 7,
+            target_count: 50,
+            ..Default::default()
+        });
         let snap2 = gen2.generate(&bps).unwrap();
         assert_eq!(snap1.buyers.len(), snap2.buyers.len());
         for (b1, b2) in snap1.buyers.iter().zip(snap2.buyers.iter()) {
@@ -373,9 +408,14 @@ mod tests {
     #[test]
     fn test_unique_ids() {
         let bps = vec![make_blueprint("seg", 200)];
-        let gen = PopulationGenerator::new(PopulationConfig { population_seed: 99, target_count: 200, ..Default::default() });
+        let gen = PopulationGenerator::new(PopulationConfig {
+            population_seed: 99,
+            target_count: 200,
+            ..Default::default()
+        });
         let snap = gen.generate(&bps).unwrap();
-        let ids: std::collections::HashSet<_> = snap.buyers.iter().map(|b| b.id.0.clone()).collect();
+        let ids: std::collections::HashSet<_> =
+            snap.buyers.iter().map(|b| b.id.0.clone()).collect();
         assert_eq!(ids.len(), snap.buyers.len());
     }
 
@@ -391,7 +431,11 @@ mod tests {
         let bp = make_blueprint("corr", 4_000);
         let spec = CorrelationSpec {
             trait_names: vec!["proof_hunger".to_string(), "glp1_familiarity".to_string()],
-            correlations: vec![TraitCorrelation::new("proof_hunger", "glp1_familiarity", 0.8)],
+            correlations: vec![TraitCorrelation::new(
+                "proof_hunger",
+                "glp1_familiarity",
+                0.8,
+            )],
         };
         let mut cfg = PopulationConfig::default();
         cfg.use_correlation = true;
@@ -401,14 +445,30 @@ mod tests {
         let gen = PopulationGenerator::new(cfg);
         let snap = gen.generate(&[bp]).unwrap();
 
-        let hunger: Vec<_> = snap.buyers.iter().map(|b| b.traits.get("proof_hunger").copied().unwrap_or(0.0)).collect();
-        let fam: Vec<_> = snap.buyers.iter().map(|b| b.traits.get("glp1_familiarity").copied().unwrap_or(0.0)).collect();
+        let hunger: Vec<_> = snap
+            .buyers
+            .iter()
+            .map(|b| b.traits.get("proof_hunger").copied().unwrap_or(0.0))
+            .collect();
+        let fam: Vec<_> = snap
+            .buyers
+            .iter()
+            .map(|b| b.traits.get("glp1_familiarity").copied().unwrap_or(0.0))
+            .collect();
 
         let n = hunger.len() as f64;
         let h_mean = hunger.iter().sum::<f64>() / n;
         let f_mean = fam.iter().sum::<f64>() / n;
-        let cov: f64 = hunger.iter().zip(fam.iter()).map(|(h, f)| (h - h_mean) * (f - f_mean)).sum::<f64>() / n;
-        assert!(cov > 0.01, "correlated traits should have positive covariance");
+        let cov: f64 = hunger
+            .iter()
+            .zip(fam.iter())
+            .map(|(h, f)| (h - h_mean) * (f - f_mean))
+            .sum::<f64>()
+            / n;
+        assert!(
+            cov > 0.01,
+            "correlated traits should have positive covariance"
+        );
     }
 
     #[test]
@@ -418,10 +478,7 @@ mod tests {
             "bad_trait".to_string(),
             crate::blueprint::TraitDistributionConfig {
                 distribution_type: "normal".to_string(),
-                params: BTreeMap::from([
-                    ("mean".to_string(), 0.5),
-                    ("stddev".to_string(), 0.0),
-                ]),
+                params: BTreeMap::from([("mean".to_string(), 0.5), ("stddev".to_string(), 0.0)]),
             },
         );
         let gen = PopulationGenerator::new(PopulationConfig::default());

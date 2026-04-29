@@ -153,14 +153,21 @@ impl StageTransitionEngine {
             TransitionRule {
                 from_stage: SegmentStage::CuriousObserver,
                 to_stage: SegmentStage::ActiveTracker,
-                condition: TransitionCondition { min_exposures: Some(5), ..Default::default() },
+                condition: TransitionCondition {
+                    min_exposures: Some(5),
+                    ..Default::default()
+                },
                 probability: 0.7,
             },
             // ActiveTracker → Evaluator: trust building, proof accumulating
             TransitionRule {
                 from_stage: SegmentStage::ActiveTracker,
                 to_stage: SegmentStage::Evaluator,
-                condition: TransitionCondition { min_trust: Some(0.4), min_proof_score: Some(2.0), ..Default::default() },
+                condition: TransitionCondition {
+                    min_trust: Some(0.4),
+                    min_proof_score: Some(2.0),
+                    ..Default::default()
+                },
                 probability: 0.6,
             },
             // Evaluator → Buyer: trust high enough, skepticism LOW enough (not skeptical-dominant)
@@ -179,42 +186,63 @@ impl StageTransitionEngine {
             TransitionRule {
                 from_stage: SegmentStage::Buyer,
                 to_stage: SegmentStage::Advocate,
-                condition: TransitionCondition { min_purchases: Some(2), min_trust: Some(0.7), ..Default::default() },
+                condition: TransitionCondition {
+                    min_purchases: Some(2),
+                    min_trust: Some(0.7),
+                    ..Default::default()
+                },
                 probability: 0.4,
             },
             // Any stage → ChurnRiskSkeptic: 2+ churn events
             TransitionRule {
                 from_stage: SegmentStage::CuriousObserver,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
-                condition: TransitionCondition { min_churns: Some(2), ..Default::default() },
+                condition: TransitionCondition {
+                    min_churns: Some(2),
+                    ..Default::default()
+                },
                 probability: 1.0,
             },
             // ActiveTracker → ChurnRiskSkeptic: trust collapsed
             TransitionRule {
                 from_stage: SegmentStage::ActiveTracker,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
-                condition: TransitionCondition { max_trust: Some(0.15), ..Default::default() },
+                condition: TransitionCondition {
+                    max_trust: Some(0.15),
+                    ..Default::default()
+                },
                 probability: 1.0,
             },
             // Evaluator → ChurnRiskSkeptic: skepticism too dominant
             TransitionRule {
                 from_stage: SegmentStage::Evaluator,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
-                condition: TransitionCondition { min_skepticism_score: Some(5.0), ..Default::default() },
+                condition: TransitionCondition {
+                    min_skepticism_score: Some(5.0),
+                    ..Default::default()
+                },
                 probability: 0.8,
             },
             // Buyer → ChurnRiskSkeptic: churn or trust collapse
             TransitionRule {
                 from_stage: SegmentStage::Buyer,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
-                condition: TransitionCondition { min_churns: Some(1), max_trust: Some(0.2), ..Default::default() },
+                condition: TransitionCondition {
+                    min_churns: Some(1),
+                    max_trust: Some(0.2),
+                    ..Default::default()
+                },
                 probability: 0.9,
             },
             // Advocate → ChurnRiskSkeptic: multiple churn events or trust collapse
             TransitionRule {
                 from_stage: SegmentStage::Advocate,
                 to_stage: SegmentStage::ChurnRiskSkeptic,
-                condition: TransitionCondition { min_churns: Some(2), max_trust: Some(0.25), ..Default::default() },
+                condition: TransitionCondition {
+                    min_churns: Some(2),
+                    max_trust: Some(0.25),
+                    ..Default::default()
+                },
                 probability: 0.8,
             },
         ])
@@ -256,7 +284,10 @@ mod tests {
             &mut rng,
         );
         // With rng seed 42 and probability 0.7, should transition
-        assert!(matches!(new_stage, SegmentStage::ActiveTracker | SegmentStage::CuriousObserver));
+        assert!(matches!(
+            new_stage,
+            SegmentStage::ActiveTracker | SegmentStage::CuriousObserver
+        ));
     }
 
     #[test]
@@ -302,10 +333,10 @@ mod tests {
             let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
             let new_stage = engine.evaluate(
                 SegmentStage::Evaluator,
-                0.7,  // min_trust = 0.65 ✓
+                0.7, // min_trust = 0.65 ✓
                 20,
-                4.0,  // min_proof_score = 3.0 ✓
-                1.5,  // max_skepticism_score = 2.5 ✓ (low skeptic passes)
+                4.0, // min_proof_score = 3.0 ✓
+                1.5, // max_skepticism_score = 2.5 ✓ (low skeptic passes)
                 0,
                 0,
                 &mut rng,
@@ -329,13 +360,17 @@ mod tests {
                 0.7,
                 20,
                 4.0,
-                3.0,  // exceeds max_skepticism_score = 2.5 → blocked
+                3.0, // exceeds max_skepticism_score = 2.5 → blocked
                 0,
                 0,
                 &mut rng,
             );
             // Cannot convert with high skepticism
-            assert!(!matches!(new_stage, SegmentStage::Buyer), "high skepticism should block conversion (seed={})", seed);
+            assert!(
+                !matches!(new_stage, SegmentStage::Buyer),
+                "high skepticism should block conversion (seed={})",
+                seed
+            );
         }
     }
 
@@ -344,16 +379,8 @@ mod tests {
         let engine = StageTransitionEngine::biohacker_default();
         for seed in [42u64, 7, 13, 99, 123, 456] {
             let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
-            let new_stage = engine.evaluate(
-                SegmentStage::Evaluator,
-                0.6,
-                10,
-                2.0,
-                5.5,
-                0,
-                0,
-                &mut rng,
-            );
+            let new_stage =
+                engine.evaluate(SegmentStage::Evaluator, 0.6, 10, 2.0, 5.5, 0, 0, &mut rng);
             if matches!(new_stage, SegmentStage::ChurnRiskSkeptic) {
                 return;
             }

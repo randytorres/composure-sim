@@ -51,6 +51,10 @@ pub struct PersonaSeed {
     pub preferences: Vec<String>,
     #[serde(default)]
     pub objections: Vec<String>,
+    #[serde(default)]
+    pub channels: Vec<String>,
+    #[serde(default = "default_objective_weight")]
+    pub weight: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -741,8 +745,12 @@ pub fn simulate_marketing_v2(
 
     let simulation_id = build_simulation_id_v2(request);
     let seed_base = derive_seed_base_v2(request, &simulation_id);
-    let seed_data =
-        project_context_to_seed_data(&request.project, &request.personas, &request.channels);
+    let seed_data = project_context_to_seed_data(
+        &request.project,
+        &request.personas,
+        &request.channels,
+        &request.audience_weighting,
+    );
     let platforms = v2_platforms(request);
     let time_steps = request.scenario.time_steps.max(1);
 
@@ -763,60 +771,57 @@ pub fn simulate_marketing_v2(
                 &request.scenario.scenario_type,
             )?;
 
-            let persona_results = if request.output.include_persona_breakdown {
-                request
-                    .personas
-                    .iter()
-                    .enumerate()
-                    .map(|(persona_index, persona)| {
-                        let persona_seed_data = project_context_to_seed_data(
-                            &request.project,
-                            std::slice::from_ref(persona),
-                            &request.channels,
-                        );
-                        let persona_computation = simulate_approach(
-                            &persona_seed_data,
-                            &approach_input,
-                            &platforms,
-                            request.simulation_size,
-                            seed_base
-                                .wrapping_add((index as u64) * 97)
-                                .wrapping_add((persona_index as u64 + 1) * 131),
-                            index,
-                            time_steps,
-                            &request.scenario.scenario_type,
-                        )?;
+            let persona_results = request
+                .personas
+                .iter()
+                .enumerate()
+                .map(|(persona_index, persona)| {
+                    let persona_seed_data = project_context_to_seed_data(
+                        &request.project,
+                        std::slice::from_ref(persona),
+                        &request.channels,
+                        &request.audience_weighting,
+                    );
+                    let persona_computation = simulate_approach(
+                        &persona_seed_data,
+                        &approach_input,
+                        &platforms,
+                        request.simulation_size,
+                        seed_base
+                            .wrapping_add((index as u64) * 97)
+                            .wrapping_add((persona_index as u64 + 1) * 131),
+                        index,
+                        time_steps,
+                        &request.scenario.scenario_type,
+                    )?;
 
-                        Ok(PersonaApproachResult {
-                            persona_id: persona.id.clone(),
-                            persona_name: persona.name.clone(),
-                            audience_weight: audience_weight_for(
-                                &request.audience_weighting,
-                                &persona.id,
-                            ),
-                            primary_scorecard: build_primary_scorecard(
-                                &persona_computation.profile,
-                                &persona_computation.final_means,
-                                persona_computation.engagement_score,
-                                persona_computation.viral_potential,
-                                &resolve_objectives(request, approach),
-                                &request.scenario.scenario_type,
-                                Some(persona),
-                                approach,
-                                true,
-                            ),
-                            engagement_score: persona_computation.engagement_score,
-                            viral_potential: persona_computation.viral_potential,
-                            sentiment_distribution: persona_computation.sentiment_distribution,
-                            top_reactions: persona_computation.top_reactions,
-                            concerns: persona_computation.concerns,
-                            composure_archetype: persona_computation.composure_archetype,
-                        })
+                    Ok(PersonaApproachResult {
+                        persona_id: persona.id.clone(),
+                        persona_name: persona.name.clone(),
+                        audience_weight: audience_weight_for(
+                            &request.audience_weighting,
+                            &persona.id,
+                        ),
+                        primary_scorecard: build_primary_scorecard(
+                            &persona_computation.profile,
+                            &persona_computation.final_means,
+                            persona_computation.engagement_score,
+                            persona_computation.viral_potential,
+                            &resolve_objectives(request, approach),
+                            &request.scenario.scenario_type,
+                            Some(persona),
+                            approach,
+                            true,
+                        ),
+                        engagement_score: persona_computation.engagement_score,
+                        viral_potential: persona_computation.viral_potential,
+                        sentiment_distribution: persona_computation.sentiment_distribution,
+                        top_reactions: persona_computation.top_reactions,
+                        concerns: persona_computation.concerns,
+                        composure_archetype: persona_computation.composure_archetype,
                     })
-                    .collect::<Result<Vec<_>, MarketingSimulationError>>()?
-            } else {
-                Vec::new()
-            };
+                })
+                .collect::<Result<Vec<_>, MarketingSimulationError>>()?;
 
             let mut primary_scorecard = build_primary_scorecard(
                 &aggregate.profile,
@@ -851,7 +856,11 @@ pub fn simulate_marketing_v2(
                 engagement_score: aggregate.engagement_score,
                 viral_potential: aggregate.viral_potential,
                 sentiment_distribution: aggregate.sentiment_distribution,
-                persona_results,
+                persona_results: if request.output.include_persona_breakdown {
+                    persona_results
+                } else {
+                    Vec::new()
+                },
                 emergent_behaviors: aggregate.emergent_behaviors,
                 top_reactions: aggregate.top_reactions,
                 concerns: aggregate.concerns,
@@ -945,6 +954,7 @@ fn validate_v2_request(
             &request.project,
             &request.personas,
             &request.channels,
+            &request.audience_weighting,
         ),
         approaches: request
             .approaches
@@ -1036,12 +1046,15 @@ fn project_context_to_seed_data(
     project: &ProjectContext,
     personas: &[PersonaDefinition],
     channels: &[ChannelContext],
+    audience_weighting: &[AudienceWeighting],
 ) -> SeedData {
     let mut platform_context = project.platform_context.clone();
     for channel in channels {
-        platform_context.push(channel.channel.clone());
-        platform_context.extend(channel.norms.iter().cloned());
-        platform_context.extend(channel.constraints.iter().cloned());
+        for _ in 0..channel_repeat_count(channel.relative_weight) {
+            platform_context.push(channel.channel.clone());
+            platform_context.extend(channel.norms.iter().cloned());
+            platform_context.extend(channel.constraints.iter().cloned());
+        }
     }
     if let Some(category) = &project.category {
         platform_context.push(category.clone());
@@ -1053,7 +1066,10 @@ fn project_context_to_seed_data(
         personas: personas
             .iter()
             .cloned()
-            .map(persona_definition_to_seed)
+            .map(|persona| {
+                let weight = audience_weight_for(audience_weighting, &persona.id);
+                persona_definition_to_seed(persona, weight)
+            })
             .collect(),
         competitors: project.competitors.clone(),
         project_name: project.name.clone(),
@@ -1062,24 +1078,41 @@ fn project_context_to_seed_data(
     }
 }
 
-fn persona_definition_to_seed(persona: PersonaDefinition) -> PersonaSeed {
+fn persona_definition_to_seed(persona: PersonaDefinition, weight: f64) -> PersonaSeed {
+    let PersonaDefinition {
+        id: _,
+        name,
+        persona_type,
+        demographics,
+        psychographics,
+        relationship,
+        jobs,
+        preferences,
+        objections,
+        channels,
+        conversion_barriers,
+        trust_signals,
+        price_sensitivity: _,
+        proof_threshold: _,
+        privacy_sensitivity: _,
+    } = persona;
+    let channel_preferences = channels.clone();
+
     PersonaSeed {
-        name: persona.name,
-        persona_type: persona.persona_type,
-        demographics: persona.demographics,
-        psychographics: persona.psychographics,
-        relationship: persona.relationship,
-        preferences: persona
-            .preferences
+        name,
+        persona_type,
+        demographics,
+        psychographics,
+        relationship,
+        preferences: preferences
             .into_iter()
-            .chain(persona.jobs)
-            .chain(persona.trust_signals)
+            .chain(jobs)
+            .chain(channel_preferences)
+            .chain(trust_signals)
             .collect(),
-        objections: persona
-            .objections
-            .into_iter()
-            .chain(persona.conversion_barriers)
-            .collect(),
+        objections: objections.into_iter().chain(conversion_barriers).collect(),
+        channels,
+        weight: weight.max(0.0),
     }
 }
 
@@ -1099,16 +1132,17 @@ fn approach_definition_to_input(approach: ApproachDefinition) -> ApproachInput {
 }
 
 fn v2_platforms(request: &MarketingSimulationRequestV2) -> Vec<String> {
-    let mut platforms = request
-        .channels
-        .iter()
-        .map(|channel| channel.channel.clone())
-        .collect::<Vec<_>>();
-    for approach in &request.approaches {
-        platforms.extend(approach.channels.iter().cloned());
+    let mut platforms = Vec::new();
+    for channel in &request.channels {
+        for _ in 0..channel_repeat_count(channel.relative_weight) {
+            platforms.push(channel.channel.clone());
+        }
     }
     if platforms.is_empty() {
         platforms.extend(request.project.platform_context.iter().cloned());
+        for approach in &request.approaches {
+            platforms.extend(approach.channels.iter().cloned());
+        }
     }
     platforms
 }
@@ -2695,46 +2729,90 @@ fn build_audience_profile(
             if let Some(value) = &persona.psychographics {
                 tokens.extend(json_tokens(value));
             }
-            tokens
-        })
-        .collect::<Vec<_>>();
-
-    let preference_fit = average_or(
-        seed_data.personas.iter().map(|persona| {
-            overlap_score(
-                &persona
+            tokens.extend(
+                persona
                     .preferences
                     .iter()
                     .flat_map(|value| tokenize(value))
                     .collect::<Vec<_>>(),
-                &subject_tokens,
+            );
+            tokens.extend(
+                persona
+                    .channels
+                    .iter()
+                    .flat_map(|value| tokenize(value))
+                    .collect::<Vec<_>>(),
+            );
+            tokens
+        })
+        .collect::<Vec<_>>();
+
+    let preference_fit = weighted_average_or(
+        seed_data.personas.iter().map(|persona| {
+            (
+                overlap_score(
+                    &persona
+                        .preferences
+                        .iter()
+                        .flat_map(|value| tokenize(value))
+                        .collect::<Vec<_>>(),
+                    &subject_tokens,
+                ),
+                persona.weight,
             )
         }),
         0.45,
     );
-    let objection_risk = average_or(
+    let objection_risk = weighted_average_or(
         seed_data.personas.iter().map(|persona| {
-            overlap_score(
-                &persona
-                    .objections
-                    .iter()
-                    .flat_map(|value| tokenize(value))
-                    .collect::<Vec<_>>(),
-                &subject_tokens,
+            (
+                overlap_score(
+                    &persona
+                        .objections
+                        .iter()
+                        .flat_map(|value| tokenize(value))
+                        .collect::<Vec<_>>(),
+                    &subject_tokens,
+                ),
+                persona.weight,
             )
         }),
         0.10,
     );
     let persona_focus = overlap_score(&audience_tokens, &subject_tokens);
-    let relationship_pull = average_or(
+    let relationship_pull = weighted_average_or(
         seed_data.personas.iter().map(|persona| {
-            persona
-                .relationship
-                .as_deref()
-                .map(|value| overlap_score(&tokenize(value), &subject_tokens))
-                .unwrap_or(0.30)
+            (
+                persona
+                    .relationship
+                    .as_deref()
+                    .map(|value| overlap_score(&tokenize(value), &subject_tokens))
+                    .unwrap_or(0.30),
+                persona.weight,
+            )
         }),
         0.30,
+    );
+    let approach_channel_tokens = tokenize(&approach.channels.join(" "));
+    let audience_channel_alignment = weighted_average_or(
+        seed_data.personas.iter().map(|persona| {
+            (
+                overlap_score(
+                    &persona
+                        .channels
+                        .iter()
+                        .flat_map(|value| tokenize(value))
+                        .collect::<Vec<_>>(),
+                    &approach_channel_tokens,
+                ),
+                persona.weight,
+            )
+        }),
+        if approach.channels.is_empty() {
+            0.30
+        } else {
+            0.35
+        },
     );
     let competitor_pressure = overlap_score(
         &seed_data
@@ -2745,21 +2823,27 @@ fn build_audience_profile(
         &subject_tokens,
     );
     let platform_alignment = {
-        let merged_platforms = [
-            platform_tokens.clone(),
-            tokenize(&seed_data.platform_context.join(" ")),
-        ]
-        .concat();
-        let alignment = overlap_score(&merged_platforms, &tokenize(&approach.channels.join(" ")));
+        let explicit_channel_support =
+            weighted_token_support(&platform_tokens, &approach_channel_tokens);
+        let context_channel_support = weighted_token_support(
+            &tokenize(&seed_data.platform_context.join(" ")),
+            &approach_channel_tokens,
+        );
+        let alignment = explicit_channel_support.max(context_channel_support);
         if alignment > 0.0 {
-            alignment
+            clamp01((alignment * 0.7) + (audience_channel_alignment * 0.3))
         } else if approach.channels.is_empty() {
             0.30
         } else {
-            0.55
+            clamp01(0.35 + (audience_channel_alignment * 0.4))
         }
     };
-    let channel_focus = 1.0 / (approach.channels.len().max(1) as f64).sqrt();
+    let channel_focus = {
+        let base_focus = 1.0 / (approach.channels.len().max(1) as f64).sqrt();
+        clamp01(
+            (base_focus * 0.7) + (platform_alignment * 0.2) + (audience_channel_alignment * 0.1),
+        )
+    };
     let format_strength = score_keywords(
         &subject_tokens,
         &[
@@ -3540,6 +3624,7 @@ fn derive_seed_base(request: &MarketingSimulationRequest, simulation_id: &str) -
 
 fn derive_seed_base_v2(request: &MarketingSimulationRequestV2, simulation_id: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
+    deterministic_seed_fingerprint_v2(request).hash(&mut hasher);
     simulation_id.hash(&mut hasher);
     request.simulation_size.hash(&mut hasher);
     request.scenario.time_steps.hash(&mut hasher);
@@ -3566,10 +3651,26 @@ fn build_simulation_id(request: &MarketingSimulationRequest) -> String {
 
 fn build_simulation_id_v2(request: &MarketingSimulationRequestV2) -> String {
     let mut hasher = DefaultHasher::new();
-    serde_json::to_string(request)
+    serde_json::to_string(&canonicalize_v2_request_for_deterministic_hash(request))
         .unwrap_or_default()
         .hash(&mut hasher);
     format!("sim-{:016x}", hasher.finish())
+}
+
+fn deterministic_seed_fingerprint_v2(request: &MarketingSimulationRequestV2) -> String {
+    serde_json::to_string(&canonicalize_v2_request_for_deterministic_hash(request))
+        .unwrap_or_default()
+}
+
+fn canonicalize_v2_request_for_deterministic_hash(
+    request: &MarketingSimulationRequestV2,
+) -> MarketingSimulationRequestV2 {
+    let mut canonical = request.clone();
+    canonical.evaluator = None;
+    canonical.llm_assist = None;
+    canonical.observed_outcomes.clear();
+    canonical.output = OutputOptions::default();
+    canonical
 }
 
 fn normalized_action_magnitude(action: &Action) -> f64 {
@@ -3603,13 +3704,36 @@ fn overlap_score(left: &[String], right: &[String]) -> f64 {
     clamp01(overlap / left.len().max(right.len()) as f64 * 2.0)
 }
 
-fn average_or(values: impl Iterator<Item = f64>, fallback: f64) -> f64 {
-    let collected = values.collect::<Vec<_>>();
-    if collected.is_empty() {
+fn weighted_average_or(values: impl Iterator<Item = (f64, f64)>, fallback: f64) -> f64 {
+    let mut weighted_total = 0.0;
+    let mut total_weight = 0.0;
+
+    for (value, weight) in values {
+        let normalized_weight = weight.max(0.0);
+        if normalized_weight <= f64::EPSILON {
+            continue;
+        }
+        weighted_total += value * normalized_weight;
+        total_weight += normalized_weight;
+    }
+
+    if total_weight <= f64::EPSILON {
         fallback
     } else {
-        clamp01(collected.iter().sum::<f64>() / collected.len() as f64)
+        clamp01(weighted_total / total_weight)
     }
+}
+
+fn weighted_token_support(context_tokens: &[String], subject_tokens: &[String]) -> f64 {
+    if context_tokens.is_empty() || subject_tokens.is_empty() {
+        return 0.0;
+    }
+
+    let overlap = context_tokens
+        .iter()
+        .filter(|token| subject_tokens.contains(*token))
+        .count() as f64;
+    clamp01((overlap / subject_tokens.len() as f64) / 3.0)
 }
 
 fn tokenize(value: &str) -> Vec<String> {
@@ -3657,6 +3781,14 @@ fn default_relative_weight() -> f64 {
     1.0
 }
 
+fn channel_repeat_count(weight: f64) -> usize {
+    if weight <= 0.0 {
+        0
+    } else {
+        ((weight * 3.0).round() as usize).clamp(1, 6)
+    }
+}
+
 fn default_sequence_intensity() -> f64 {
     1.0
 }
@@ -3683,6 +3815,8 @@ mod tests {
                         relationship: Some("existing customer".into()),
                         preferences: vec!["practical examples".into(), "clear frameworks".into()],
                         objections: vec!["vague marketing".into(), "tool sprawl".into()],
+                        channels: vec!["twitter".into()],
+                        weight: 1.0,
                     },
                     PersonaSeed {
                         name: "Skeptical Founder".into(),
@@ -3694,6 +3828,8 @@ mod tests {
                         relationship: Some("aware but unconvinced".into()),
                         preferences: vec!["proof".into(), "positioning".into()],
                         objections: vec!["hype".into(), "too broad".into()],
+                        channels: vec!["linkedin".into(), "twitter".into()],
+                        weight: 1.0,
                     },
                 ],
                 competitors: vec!["generic ai tools".into()],
@@ -3932,6 +4068,41 @@ mod tests {
         assert!(result.primary_scorecard.metrics.is_empty());
         assert!(first.persona_results.is_empty());
         assert!(first.mean_trajectory.is_empty());
+    }
+
+    #[test]
+    fn marketing_simulation_v2_hiding_persona_breakdowns_does_not_change_scores() {
+        let request = sample_request_v2();
+        let full = simulate_marketing_v2(&request).unwrap();
+
+        let mut hidden = request.clone();
+        hidden.output.include_persona_breakdown = false;
+        let hidden_result = simulate_marketing_v2(&hidden).unwrap();
+
+        assert_eq!(
+            full.primary_scorecard.overall_score,
+            hidden_result.primary_scorecard.overall_score
+        );
+
+        for (full_approach, hidden_approach) in full
+            .approach_results
+            .iter()
+            .zip(hidden_result.approach_results.iter())
+        {
+            assert_eq!(
+                full_approach.primary_scorecard.overall_score,
+                hidden_approach.primary_scorecard.overall_score
+            );
+            assert_eq!(
+                full_approach.engagement_score,
+                hidden_approach.engagement_score
+            );
+            assert_eq!(
+                full_approach.viral_potential,
+                hidden_approach.viral_potential
+            );
+            assert_eq!(hidden_approach.persona_results.len(), 0);
+        }
     }
 
     #[test]
@@ -4237,6 +4408,189 @@ mod tests {
                 .unwrap()
                 .score
         );
+    }
+
+    #[test]
+    fn build_audience_profile_uses_persona_weights_for_aggregate_profile() {
+        let approach = ApproachInput {
+            id: "proof-message".into(),
+            angle: "Proof confidence for founders".into(),
+            format: "landing page headline".into(),
+            channels: vec!["linkedin".into()],
+            tone: "credible".into(),
+            target: "founders".into(),
+            proof_points: vec!["proof".into()],
+            objection_handlers: vec![],
+            cta: None,
+            sequence: vec![],
+        };
+        let platforms = vec!["linkedin".into()];
+        let weighted_proof = SeedData {
+            personas: vec![
+                PersonaSeed {
+                    name: "Proof Buyer".into(),
+                    persona_type: "founder".into(),
+                    demographics: None,
+                    psychographics: None,
+                    relationship: Some("ready for proof".into()),
+                    preferences: vec!["proof".into(), "confidence".into()],
+                    objections: vec!["hype".into()],
+                    channels: vec!["linkedin".into()],
+                    weight: 5.0,
+                },
+                PersonaSeed {
+                    name: "Privacy Buyer".into(),
+                    persona_type: "operator".into(),
+                    demographics: None,
+                    psychographics: None,
+                    relationship: Some("wants privacy".into()),
+                    preferences: vec!["privacy".into()],
+                    objections: vec!["too public".into()],
+                    channels: vec!["reddit".into()],
+                    weight: 1.0,
+                },
+            ],
+            competitors: vec![],
+            project_name: "Composure".into(),
+            project_description: "Deterministic simulation for campaigns".into(),
+            platform_context: vec!["linkedin".into()],
+        };
+        let weighted_privacy = SeedData {
+            personas: vec![
+                PersonaSeed {
+                    weight: 1.0,
+                    ..weighted_proof.personas[0].clone()
+                },
+                PersonaSeed {
+                    weight: 5.0,
+                    ..weighted_proof.personas[1].clone()
+                },
+            ],
+            competitors: vec![],
+            project_name: "Composure".into(),
+            project_description: "Deterministic simulation for campaigns".into(),
+            platform_context: vec!["linkedin".into()],
+        };
+
+        let proof_profile = build_audience_profile(&weighted_proof, &approach, &platforms);
+        let privacy_profile = build_audience_profile(&weighted_privacy, &approach, &platforms);
+
+        assert!(proof_profile.preference_fit > privacy_profile.preference_fit);
+        assert!(proof_profile.relationship_pull > privacy_profile.relationship_pull);
+    }
+
+    #[test]
+    fn build_audience_profile_uses_persona_channel_preferences() {
+        let approach = ApproachInput {
+            id: "reddit-message".into(),
+            angle: "Raw operator breakdowns and behind the scenes interviews".into(),
+            format: "community thread".into(),
+            channels: vec!["reddit".into()],
+            tone: "raw".into(),
+            target: "curious consumers".into(),
+            proof_points: vec![],
+            objection_handlers: vec![],
+            cta: None,
+            sequence: vec![],
+        };
+        let channels_match = SeedData {
+            personas: vec![PersonaSeed {
+                name: "Reddit Native".into(),
+                persona_type: "consumer".into(),
+                demographics: None,
+                psychographics: None,
+                relationship: None,
+                preferences: vec!["raw interviews".into()],
+                objections: vec![],
+                channels: vec!["reddit".into()],
+                weight: 1.0,
+            }],
+            competitors: vec![],
+            project_name: "Composure".into(),
+            project_description: "Deterministic simulation for campaigns".into(),
+            platform_context: vec!["youtube".into()],
+        };
+        let channels_miss = SeedData {
+            personas: vec![PersonaSeed {
+                channels: vec!["youtube".into()],
+                ..channels_match.personas[0].clone()
+            }],
+            competitors: vec![],
+            project_name: "Composure".into(),
+            project_description: "Deterministic simulation for campaigns".into(),
+            platform_context: vec!["youtube".into()],
+        };
+
+        let match_profile = build_audience_profile(&channels_match, &approach, &["youtube".into()]);
+        let miss_profile = build_audience_profile(&channels_miss, &approach, &["youtube".into()]);
+
+        assert!(match_profile.platform_alignment > miss_profile.platform_alignment);
+        assert!(match_profile.channel_focus > miss_profile.channel_focus);
+    }
+
+    #[test]
+    fn build_audience_profile_uses_channel_relative_weight() {
+        let approach = ApproachInput {
+            id: "multi-channel".into(),
+            angle: "Daily operator proof and market moves".into(),
+            format: "brief".into(),
+            channels: vec!["twitter".into(), "linkedin".into()],
+            tone: "credible".into(),
+            target: "operators".into(),
+            proof_points: vec!["proof".into()],
+            objection_handlers: vec![],
+            cta: None,
+            sequence: vec![],
+        };
+        let personas = sample_request_v2().personas;
+        let project = sample_request_v2().project;
+        let weighting = sample_request_v2().audience_weighting;
+
+        let high_weight_channels = vec![
+            ChannelContext {
+                channel: "twitter".into(),
+                norms: vec!["threads".into()],
+                constraints: vec![],
+                relative_weight: 2.0,
+            },
+            ChannelContext {
+                channel: "linkedin".into(),
+                norms: vec!["credibility".into()],
+                constraints: vec![],
+                relative_weight: 2.0,
+            },
+        ];
+        let low_weight_channels = vec![
+            ChannelContext {
+                relative_weight: 0.2,
+                ..high_weight_channels[0].clone()
+            },
+            ChannelContext {
+                relative_weight: 0.2,
+                ..high_weight_channels[1].clone()
+            },
+        ];
+
+        let high_seed =
+            project_context_to_seed_data(&project, &personas, &high_weight_channels, &weighting);
+        let low_seed =
+            project_context_to_seed_data(&project, &personas, &low_weight_channels, &weighting);
+        let high_platforms = MarketingSimulationRequestV2 {
+            channels: high_weight_channels,
+            ..sample_request_v2()
+        };
+        let low_platforms = MarketingSimulationRequestV2 {
+            channels: low_weight_channels,
+            ..sample_request_v2()
+        };
+
+        let high_profile =
+            build_audience_profile(&high_seed, &approach, &v2_platforms(&high_platforms));
+        let low_profile =
+            build_audience_profile(&low_seed, &approach, &v2_platforms(&low_platforms));
+
+        assert!(high_profile.platform_alignment > low_profile.platform_alignment);
+        assert!(high_profile.channel_focus > low_profile.channel_focus);
     }
 
     #[test]

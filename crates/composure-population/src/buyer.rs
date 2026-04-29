@@ -70,7 +70,10 @@ impl Default for Buyer {
 impl Buyer {
     /// Record an exposure to a channel.
     pub fn record_exposure(&mut self, channel: &str) {
-        *self.exposure_history.entry(channel.to_string()).or_insert(0) += 1;
+        *self
+            .exposure_history
+            .entry(channel.to_string())
+            .or_insert(0) += 1;
     }
 
     /// Record a conversion attempt and its outcome.
