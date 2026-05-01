@@ -1,0 +1,675 @@
+{
+  "id": "ai-consumer-idea-portfolio",
+  "name": "AI Consumer Idea Portfolio",
+  "description": "# Consumer AI Idea Portfolio This is a plain-text idea scan in the same shape as a venture brainstorm. The draft command turns these rows into an editable `IdeaPortfolioRequest`, then the runner scores them across synthetic consumer segments and launch scen...",
+  "seed_base": 16054839104029675669,
+  "population": {
+    "target_count": 10000,
+    "sample_size": 24
+  },
+  "segments": [
+    {
+      "id": "gen_z_social_creators",
+      "name": "Gen Z Social Creators",
+      "share_weight": 0.24,
+      "traits": {
+        "ai_openness": 0.86,
+        "habit_openness": 0.72,
+        "social_sharing": 0.92,
+        "spending_power": 0.46,
+        "trend_adoption": 0.88
+      },
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x",
+        "discord"
+      ],
+      "pains": [
+        "needs fresh identity loops",
+        "hates obvious ai slop"
+      ]
+    },
+    {
+      "id": "creator_operators",
+      "name": "Creator Operators",
+      "share_weight": 0.2,
+      "traits": {
+        "ai_openness": 0.92,
+        "habit_openness": 0.66,
+        "social_sharing": 0.82,
+        "spending_power": 0.74,
+        "trend_adoption": 0.78
+      },
+      "channels": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "newsletter"
+      ],
+      "pains": [
+        "needs monetizable output",
+        "needs faster production"
+      ]
+    },
+    {
+      "id": "local_business_owners",
+      "name": "Local Business Owners",
+      "share_weight": 0.16,
+      "traits": {
+        "ai_openness": 0.66,
+        "habit_openness": 0.54,
+        "social_sharing": 0.56,
+        "spending_power": 0.82,
+        "trend_adoption": 0.58
+      },
+      "channels": [
+        "instagram",
+        "google",
+        "facebook",
+        "tiktok"
+      ],
+      "pains": [
+        "needs customers now",
+        "has no time for content"
+      ]
+    },
+    {
+      "id": "parents_and_families",
+      "name": "Parents And Families",
+      "share_weight": 0.14,
+      "traits": {
+        "ai_openness": 0.58,
+        "habit_openness": 0.8,
+        "social_sharing": 0.7,
+        "spending_power": 0.76,
+        "trend_adoption": 0.52
+      },
+      "channels": [
+        "instagram",
+        "facebook",
+        "imessage",
+        "tiktok"
+      ],
+      "pains": [
+        "needs emotional keepsakes",
+        "needs trusted child-safe tools"
+      ]
+    },
+    {
+      "id": "gamers_and_builders",
+      "name": "Gamers And Builders",
+      "share_weight": 0.16,
+      "traits": {
+        "ai_openness": 0.9,
+        "habit_openness": 0.84,
+        "social_sharing": 0.78,
+        "spending_power": 0.62,
+        "trend_adoption": 0.74
+      },
+      "channels": [
+        "discord",
+        "tiktok",
+        "youtube",
+        "app_store"
+      ],
+      "pains": [
+        "wants playable creation",
+        "rejects shallow novelty"
+      ]
+    },
+    {
+      "id": "dating_app_fatigued",
+      "name": "Dating App Fatigued Adults",
+      "share_weight": 0.1,
+      "traits": {
+        "ai_openness": 0.54,
+        "habit_openness": 0.68,
+        "social_sharing": 0.62,
+        "spending_power": 0.7,
+        "trend_adoption": 0.62
+      },
+      "channels": [
+        "instagram",
+        "sms",
+        "events",
+        "tiktok"
+      ],
+      "pains": [
+        "wants irl connection",
+        "does not trust fake profiles"
+      ]
+    }
+  ],
+  "ideas": [
+    {
+      "id": "papergames",
+      "name": "PaperGames",
+      "summary": "Vibe-code mobile games with a real iOS game engine, Discord sharing, and daily playable drops.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "discord"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "concierge",
+      "name": "Concierge",
+      "summary": "Voice agent books restaurants and services for you; the viral loop is screenshots of the AI getting impossible reservations.",
+      "category": "agentic_services",
+      "target_segments": [
+        "local_business_owners"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "viral loop",
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity"
+      ]
+    },
+    {
+      "id": "tatt",
+      "name": "Tatt",
+      "summary": "AR tattoo try-on with AI-generated flash, Instagram polls, and local artist booking.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators",
+        "local_business_owners"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "local demand"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "bedtimestory",
+      "name": "BedtimeStory",
+      "summary": "Personalized illustrated bedtime stories for kids with parent-safe voice narration and nightly ritual retention.",
+      "category": "agentic_services",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "tiktok-shop-product-lab",
+      "name": "TikTok Shop Product Lab",
+      "summary": "Find underexploited social-commerce products, generate demo scripts, recruit creators, and launch in seven days.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "creator_operators",
+        "gen_z_social_creators",
+        "local_business_owners"
+      ],
+      "channels": [
+        "shopify",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1.0,
+        "spending_power": 0.9,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "creator monetization"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "friend-group-rpg",
+      "name": "Friend Group RPG",
+      "summary": "Turn friends into factions, quests, awards, and weekly lore cards that spread through group chats.",
+      "category": "social_irl",
+      "target_segments": [
+        "gamers_and_builders",
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1.0,
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "closet-resale-autopilot",
+      "name": "Closet Resale Autopilot",
+      "summary": "Agent photographs, writes listings, posts to resale marketplaces, replies to buyers, and shows dollars recovered.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "product-truth-layer",
+      "name": "Product Truth Layer",
+      "summary": "Browser overlay for TikTok Shop and Amazon with real UGC, fake-review warnings, price history, and shareable trust cards.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "creator_operators",
+        "gen_z_social_creators",
+        "local_business_owners"
+      ],
+      "channels": [
+        "shopify",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1.0,
+        "spending_power": 0.9,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "sober30",
+      "name": "Sober30",
+      "summary": "Thirty-day sobriety cohort with an AI sponsor, squad streaks, and day-30 medallion shares.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "habit_openness": 1.0,
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ai-music-video-for-indies",
+      "name": "AI Music Video for Indies",
+      "summary": "Suno song plus photos becomes a three-minute vertical music video for indie artists.",
+      "category": "creative_media",
+      "target_segments": [
+        "creator_operators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "video generation"
+      ],
+      "risks": [
+        "novelty decay",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "local-event-radar",
+      "name": "Local Event Radar",
+      "summary": "Scrape TikTok, Instagram, and X for underground events, popups, classes, and parties, then pull friends into plans.",
+      "category": "social_irl",
+      "target_segments": [
+        "dating_app_fatigued",
+        "gen_z_social_creators",
+        "local_business_owners"
+      ],
+      "channels": [
+        "events",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1.0,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "local demand"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "refundhunter",
+      "name": "RefundHunter",
+      "summary": "Agent reads Gmail for price drops, refundable charges, late fees, warranties, and files claims automatically.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "spending_power": 0.9
+      },
+      "strengths": [
+        "direct savings"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "tiktok_ig_viral_launch",
+      "name": "TikTok/IG Viral Launch",
+      "description": null,
+      "focus": "viral_launch",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "social_sharing": 1.0,
+        "trend_adoption": 0.8
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "social_commerce_conversion",
+      "name": "Social Commerce Conversion",
+      "description": null,
+      "focus": "social_commerce",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "shopify"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 0.4,
+        "spending_power": 0.9
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "novelty_decay_retention",
+      "name": "Novelty Decay Retention",
+      "description": null,
+      "focus": "retention",
+      "channels": [
+        "app_store",
+        "imessage",
+        "discord"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 0.5,
+        "habit_openness": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "paid_offer_pressure",
+      "name": "Paid Offer Pressure",
+      "description": null,
+      "focus": "paid_conversion",
+      "channels": [
+        "landing_page",
+        "app_store",
+        "email"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "spending_power": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "tiny_team_build_speed",
+      "name": "Tiny Team Build Speed",
+      "description": null,
+      "focus": "build_speed",
+      "channels": [
+        "app_store",
+        "web",
+        "api"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "ai_slop_backlash",
+      "name": "AI Slop Backlash",
+      "description": null,
+      "focus": "authenticity_backlash",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "social_sharing": 0.5,
+        "trend_adoption": 0.5
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "community_referral_loop",
+      "name": "Community Referral Loop",
+      "description": null,
+      "focus": "community_referral",
+      "channels": [
+        "discord",
+        "imessage",
+        "instagram",
+        "events"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "habit_openness": 0.7,
+        "social_sharing": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "idea_id": null,
+      "metric": "viral_loop",
+      "source": "Public trend scan",
+      "note": "Short-form social remains the distribution layer for consumer launches.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "ai_unlock",
+      "source": "AI tooling scan",
+      "note": "Coding agents, image/video generation, voice, and browser agents lower launch cost.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "risk_resilience",
+      "source": "AI slop backlash",
+      "note": "Generated novelty alone decays quickly unless tied to human proof, identity, or utility.",
+      "value": 0.48,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "willingness_to_pay",
+      "source": "Creator/social commerce benchmarks",
+      "note": "Creator, commerce, and utility workflows show stronger monetization than generic toys.",
+      "value": 0.68,
+      "sample_size": null
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "id": "selfrx-wedge-test",
+  "name": "SelfRX Acquisition Wedge Test",
+  "description": "First-pass concept test for choosing a control and challenger wedge.",
+  "seed_base": 42,
+  "population": {
+    "target_count": 10000,
+    "sample_size": 16
+  },
+  "segments": [
+    {
+      "id": "proof_seekers",
+      "name": "Proof-Hungry Optimizers",
+      "share_weight": 0.55,
+      "traits": {
+        "proof_hunger": 0.88,
+        "privacy_sensitivity": 0.42,
+        "logging_tolerance": 0.58,
+        "social_sharing": 0.36
+      },
+      "channels": ["landing_page", "reddit", "newsletter"],
+      "objections": ["not enough proof", "too much manual logging"]
+    },
+    {
+      "id": "privacy_trackers",
+      "name": "Privacy-First Trackers",
+      "share_weight": 0.45,
+      "traits": {
+        "proof_hunger": 0.56,
+        "privacy_sensitivity": 0.92,
+        "logging_tolerance": 0.44,
+        "social_sharing": 0.22
+      },
+      "channels": ["reddit", "newsletter", "community"],
+      "objections": ["privacy", "data sharing"]
+    }
+  ],
+  "variants": [
+    {
+      "id": "proof_first",
+      "name": "Proof First",
+      "summary": "Weekly proof with confidence scores and concrete progress snapshots.",
+      "target_segments": ["proof_seekers"],
+      "channels": ["landing_page", "reddit"],
+      "trait_weights": {
+        "proof_hunger": 1.0,
+        "logging_tolerance": 0.3
+      },
+      "strengths": ["proof", "case study", "confidence"],
+      "risks": ["may feel too analytical"]
+    },
+    {
+      "id": "privacy_first",
+      "name": "Privacy First",
+      "summary": "A private, exportable protocol tracker that keeps sensitive health data controlled by the user.",
+      "target_segments": ["privacy_trackers"],
+      "channels": ["reddit", "newsletter"],
+      "trait_weights": {
+        "privacy_sensitivity": 1.0,
+        "proof_hunger": 0.2
+      },
+      "strengths": ["privacy", "private", "secure export"],
+      "risks": ["could underplay measurable outcomes"]
+    }
+  ],
+  "scenario": {
+    "id": "first_wedge",
+    "name": "First Wedge",
+    "goal": "Choose the most promising first acquisition wedge.",
+    "decision": "Pick one control and one challenger for a real waitlist test.",
+    "channels": ["landing_page", "reddit", "newsletter"],
+    "time_steps": 8,
+    "success_metrics": ["signup_rate", "activation_rate", "referral_rate"],
+    "touchpoints": [
+      {
+        "id": "reddit_hook",
+        "label": "Reddit Hook",
+        "channel": "reddit",
+        "focus": "awareness",
+        "intensity": 1.0
+      },
+      {
+        "id": "proof_page",
+        "label": "Proof Page",
+        "channel": "landing_page",
+        "focus": "proof",
+        "intensity": 1.25,
+        "target_segments": ["proof_seekers"],
+        "variants": ["proof_first"],
+        "trait_weights": {
+          "proof_hunger": 1.0,
+          "logging_tolerance": 0.25
+        }
+      },
+      {
+        "id": "privacy_followup",
+        "label": "Privacy Follow-up",
+        "channel": "newsletter",
+        "focus": "objection_handling",
+        "intensity": 1.05,
+        "target_segments": ["privacy_trackers"],
+        "variants": ["privacy_first"],
+        "trait_weights": {
+          "privacy_sensitivity": 1.0
+        }
+      },
+      {
+        "id": "waitlist_cta",
+        "label": "Waitlist CTA",
+        "channel": "landing_page",
+        "focus": "conversion",
+        "intensity": 0.9
+      }
+    ]
+  },
+  "observed_outcomes": [
+    {
+      "variant_id": "proof_first",
+      "source": "pilot-waitlist",
+      "sample_size": 180,
+      "click_rate": 0.39,
+      "signup_rate": 0.16
+    },
+    {
+      "variant_id": "proof_first",
+      "touchpoint_id": "proof_page",
+      "source": "pilot-proof-page",
+      "sample_size": 90,
+      "click_rate": 0.44,
+      "signup_rate": 0.22
+    },
+    {
+      "variant_id": "privacy_first",
+      "touchpoint_id": "privacy_followup",
+      "source": "pilot-privacy-followup",
+      "sample_size": 75,
+      "click_rate": 0.31,
+      "signup_rate": 0.18
+    }
+  ]
+}

@@ -11,12 +11,16 @@ use composure_core::{
 };
 use composure_market::{MarketSimEngine, MarketSimulationConfig, MarketSimulationResult, Validate};
 use composure_marketing::{
-    simulate_marketing, simulate_marketing_v2, simulate_synthetic_market,
-    CampaignVariantDefinition, ChannelAssumption, EvaluatorConfig, MarketingSimulationRequest,
-    MarketingSimulationRequestV2, MarketingSimulationResultV2, MetricKind, ProductFrictionPrior,
-    SegmentBlueprint, SegmentOverlapAssumption, SyntheticMarketMetadata, SyntheticMarketPackage,
-    SyntheticMarketSimulationResult, SyntheticObservedOutcome, SyntheticScenarioDefinition,
-    ValueDriverPrior,
+    compare_concept_test_results, draft_concept_test_matrix, draft_idea_portfolio,
+    run_concept_test_matrix, run_idea_portfolio, simulate_concept_test, simulate_marketing,
+    simulate_marketing_v2, simulate_synthetic_market, CampaignVariantDefinition, ChannelAssumption,
+    ConceptTestComparisonInput, ConceptTestComparisonReport, ConceptTestMatrixDraftRequest,
+    ConceptTestMatrixRequest, ConceptTestMatrixResult, ConceptTestRequest, ConceptTestResult,
+    EvaluatorConfig, IdeaPortfolioDraftRequest, IdeaPortfolioRequest, IdeaPortfolioResult,
+    MarketingSimulationRequest, MarketingSimulationRequestV2, MarketingSimulationResultV2,
+    MetricKind, ProductFrictionPrior, SegmentBlueprint, SegmentOverlapAssumption,
+    SyntheticMarketMetadata, SyntheticMarketPackage, SyntheticMarketSimulationResult,
+    SyntheticObservedOutcome, SyntheticScenarioDefinition, ValueDriverPrior,
 };
 use composure_runtime::{
     default_run_id, load_counterfactual, load_pack, load_pack_for_run,
@@ -26,7 +30,9 @@ use marketing_llm::simulate_marketing_v2_assisted;
 use render::{
     format_bundle, format_calibration, format_comparison, format_counterfactual_result,
     format_report, format_summary, format_sweep, render_bundle_markdown, render_calibration_csv,
-    render_calibration_markdown, render_market_report_markdown,
+    render_calibration_markdown, render_concept_test_compare_markdown,
+    render_concept_test_matrix_markdown, render_concept_test_report_markdown,
+    render_idea_portfolio_markdown, render_market_report_markdown,
     render_marketing_v2_compare_markdown, render_marketing_v2_report_markdown,
     render_report_markdown, render_sweep_csv, render_sweep_markdown, render_sweep_summary_markdown,
     render_synthetic_market_report_markdown,
@@ -265,6 +271,44 @@ fn run(args: &[String]) -> Result<String, CliError> {
             let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
             write_output(output, options.output_path.as_deref())
         }
+        [_bin, command, path, tail @ ..] if command == "draft-concept-test-matrix" => {
+            let request = read_concept_test_matrix_draft_request(path)?;
+            let matrix =
+                draft_concept_test_matrix(&request).map_err(CliError::ConceptTestMatrixDraft)?;
+            let output = serde_json::to_string_pretty(&matrix).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "draft-idea-portfolio" => {
+            let request = read_idea_portfolio_draft_request(path)?;
+            let portfolio = draft_idea_portfolio(&request).map_err(CliError::IdeaPortfolioDraft)?;
+            let output =
+                serde_json::to_string_pretty(&portfolio).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "run-idea-portfolio" => {
+            let request = read_json::<IdeaPortfolioRequest>(path)?;
+            let result = run_idea_portfolio(&request).map_err(CliError::IdeaPortfolio)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "run-concept-test" => {
+            let request = read_json::<ConceptTestRequest>(path)?;
+            let result = simulate_concept_test(&request).map_err(CliError::ConceptTest)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "run-concept-test-matrix" => {
+            let request = read_json::<ConceptTestMatrixRequest>(path)?;
+            let result = run_concept_test_matrix(&request).map_err(CliError::ConceptTestMatrix)?;
+            let output = serde_json::to_string_pretty(&result).map_err(CliError::SerializeJson)?;
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, tail @ ..] if command == "compare-concept-tests" => {
+            let (paths, output_path) = parse_compare_concept_test_inputs(tail)?;
+            let report = build_concept_test_compare_report(&paths)?;
+            let output = serde_json::to_string_pretty(&report).map_err(CliError::SerializeJson)?;
+            write_output(output, output_path.as_deref())
+        }
         [_bin, command, path, scenario_id, tail @ ..] if command == "simulate-synthetic-market" => {
             let package = load_synthetic_market_package_dir(path)?;
             let result = simulate_synthetic_market(&package, scenario_id)
@@ -281,6 +325,26 @@ fn run(args: &[String]) -> Result<String, CliError> {
         [_bin, command, path, tail @ ..] if command == "export-marketing-v2-report-markdown" => {
             let result = read_json::<MarketingSimulationResultV2>(path)?;
             let output = render_marketing_v2_report_markdown(&result);
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "export-concept-test-report-markdown" => {
+            let result = read_json::<ConceptTestResult>(path)?;
+            let output = render_concept_test_report_markdown(&result);
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "export-concept-test-compare-markdown" => {
+            let report = read_json::<ConceptTestComparisonReport>(path)?;
+            let output = render_concept_test_compare_markdown(&report);
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "export-concept-test-matrix-markdown" => {
+            let result = read_json::<ConceptTestMatrixResult>(path)?;
+            let output = render_concept_test_matrix_markdown(&result);
+            write_output(output, parse_output_flag(tail)?)
+        }
+        [_bin, command, path, tail @ ..] if command == "export-idea-portfolio-markdown" => {
+            let result = read_json::<IdeaPortfolioResult>(path)?;
+            let output = render_idea_portfolio_markdown(&result);
             write_output(output, parse_output_flag(tail)?)
         }
         [_bin, command, path, tail @ ..]
@@ -355,6 +419,16 @@ fn usage() -> String {
         "  composure simulate-marketing <request-path> [--output <path>]",
         "  composure simulate-marketing-v2 <request-path> [--output <path>]",
         "  composure simulate-marketing-v2-assisted <request-path> [--provider <name>] [--model <name>] [--reasoning-effort <level>] [--output <path>]",
+        "  composure draft-concept-test-matrix <brief-path> [--output <path>]",
+        "  composure draft-idea-portfolio <brief-path> [--output <path>]",
+        "  composure run-idea-portfolio <request-path> [--output <path>]",
+        "  composure run-concept-test <request-path> [--output <path>]",
+        "  composure run-concept-test-matrix <request-path> [--output <path>]",
+        "  composure compare-concept-tests <result-path> <result-path> [more-paths...] [--output <path>]",
+        "  composure export-concept-test-report-markdown <path> [--output <path>]",
+        "  composure export-concept-test-compare-markdown <path> [--output <path>]",
+        "  composure export-concept-test-matrix-markdown <path> [--output <path>]",
+        "  composure export-idea-portfolio-markdown <path> [--output <path>]",
         "  composure simulate-synthetic-market <dir> <scenario-id> [--output <path>]",
         "  composure compare-marketing-v2-assisted <request-path> <request-path> [more-paths...] [--provider <name>] [--model <name>] [--reasoning-effort <level>] [--output <path>]",
         "  composure export-marketing-v2-report-markdown <path> [--output <path>]",
@@ -395,6 +469,16 @@ fn usage() -> String {
         "  simulate-marketing   Execute the marketing adapter against a request JSON payload",
         "  simulate-marketing-v2   Execute the marketing V2 adapter against a request JSON payload",
         "  simulate-marketing-v2-assisted   Execute the marketing V2 adapter and enrich the result with an LLM analysis",
+        "  draft-concept-test-matrix   Draft an editable ConceptTestMatrixRequest from a JSON or text brief",
+        "  draft-idea-portfolio   Draft an editable IdeaPortfolioRequest from a JSON or text idea brief",
+        "  run-idea-portfolio   Score many business ideas across synthetic buyer segments and scenarios",
+        "  run-concept-test   Execute a synthetic-population concept test and emit JSON",
+        "  run-concept-test-matrix   Execute one concept test across multiple scenario cases",
+        "  compare-concept-tests   Compare two or more ConceptTestResult JSON artifacts",
+        "  export-concept-test-report-markdown   Convert a ConceptTestResult JSON artifact into markdown",
+        "  export-concept-test-compare-markdown   Convert a ConceptTestComparisonReport JSON artifact into markdown",
+        "  export-concept-test-matrix-markdown   Convert a ConceptTestMatrixResult JSON artifact into markdown",
+        "  export-idea-portfolio-markdown   Convert an IdeaPortfolioResult JSON artifact into markdown",
         "  simulate-synthetic-market   Execute the synthetic market cohort simulator for one scenario",
         "  compare-marketing-v2-assisted   Execute multiple assisted marketing V2 scenarios and rank them side by side",
         "  export-marketing-v2-report-markdown   Convert a MarketingSimulationResultV2 JSON artifact into markdown",
@@ -429,6 +513,56 @@ where
         path: path.into(),
         source,
     })
+}
+
+fn read_concept_test_matrix_draft_request(
+    path: &str,
+) -> Result<ConceptTestMatrixDraftRequest, CliError> {
+    let raw = fs::read_to_string(path).map_err(|source| CliError::ReadFile {
+        path: path.into(),
+        source,
+    })?;
+    match serde_json::from_str::<ConceptTestMatrixDraftRequest>(&raw) {
+        Ok(request) => Ok(request),
+        Err(source) => {
+            let trimmed = raw.trim_start();
+            if trimmed.starts_with('{') || trimmed.starts_with('[') {
+                Err(CliError::ParseJson {
+                    path: path.into(),
+                    source,
+                })
+            } else {
+                Ok(ConceptTestMatrixDraftRequest {
+                    prompt: raw,
+                    ..ConceptTestMatrixDraftRequest::default()
+                })
+            }
+        }
+    }
+}
+
+fn read_idea_portfolio_draft_request(path: &str) -> Result<IdeaPortfolioDraftRequest, CliError> {
+    let raw = fs::read_to_string(path).map_err(|source| CliError::ReadFile {
+        path: path.into(),
+        source,
+    })?;
+    match serde_json::from_str::<IdeaPortfolioDraftRequest>(&raw) {
+        Ok(request) => Ok(request),
+        Err(source) => {
+            let trimmed = raw.trim_start();
+            if trimmed.starts_with('{') || trimmed.starts_with('[') {
+                Err(CliError::ParseJson {
+                    path: path.into(),
+                    source,
+                })
+            } else {
+                Ok(IdeaPortfolioDraftRequest {
+                    prompt: raw,
+                    ..IdeaPortfolioDraftRequest::default()
+                })
+            }
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -822,6 +956,39 @@ fn parse_marketing_v2_compare_inputs(
     Ok((request_paths, options))
 }
 
+fn parse_compare_concept_test_inputs(
+    args: &[String],
+) -> Result<(Vec<String>, Option<String>), CliError> {
+    let mut paths = Vec::new();
+    let mut output_path = None;
+    let mut index = 0;
+
+    while index < args.len() {
+        let arg = &args[index];
+        if arg == "--output" {
+            let value = args
+                .get(index + 1)
+                .ok_or_else(|| CliError::MissingFlagValue(arg.clone()))?;
+            output_path = Some(value.clone());
+            index += 2;
+            continue;
+        }
+        if arg.starts_with("--") {
+            return Err(CliError::UnknownFlag(arg.clone()));
+        }
+        paths.push(arg.clone());
+        index += 1;
+    }
+
+    if paths.len() < 2 {
+        return Err(CliError::Usage(
+            "compare-concept-tests requires at least two result paths".into(),
+        ));
+    }
+
+    Ok((paths, output_path))
+}
+
 fn parse_output_flag(args: &[String]) -> Result<Option<&str>, CliError> {
     match args {
         [] => Ok(None),
@@ -829,6 +996,21 @@ fn parse_output_flag(args: &[String]) -> Result<Option<&str>, CliError> {
         [flag] => Err(CliError::MissingFlagValue(flag.clone())),
         [flag, ..] => Err(CliError::UnknownFlag(flag.clone())),
     }
+}
+
+fn build_concept_test_compare_report(
+    paths: &[String],
+) -> Result<ConceptTestComparisonReport, CliError> {
+    let inputs = paths
+        .iter()
+        .map(|path| {
+            read_json::<ConceptTestResult>(path).map(|result| ConceptTestComparisonInput {
+                source: path.clone(),
+                result,
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    compare_concept_test_results(&inputs).map_err(CliError::ConceptTestCompare)
 }
 
 fn parse_flag<T>(value: &str, flag: &str) -> Result<T, CliError>
@@ -1211,6 +1393,18 @@ enum CliError {
     SyntheticMarketValidation(composure_marketing::SyntheticMarketValidationError),
     #[error("synthetic market simulation error: {0}")]
     SyntheticMarketSimulation(composure_marketing::SyntheticMarketSimulationError),
+    #[error("concept test error: {0}")]
+    ConceptTest(composure_marketing::ConceptTestError),
+    #[error("concept test comparison error: {0}")]
+    ConceptTestCompare(composure_marketing::ConceptTestCompareError),
+    #[error("concept test matrix error: {0}")]
+    ConceptTestMatrix(composure_marketing::ConceptTestMatrixError),
+    #[error("concept test matrix draft error: {0}")]
+    ConceptTestMatrixDraft(composure_marketing::ConceptTestMatrixDraftError),
+    #[error("idea portfolio error: {0}")]
+    IdeaPortfolio(composure_marketing::IdeaPortfolioError),
+    #[error("idea portfolio draft error: {0}")]
+    IdeaPortfolioDraft(composure_marketing::IdeaPortfolioDraftError),
     #[error("marketing LLM error: {0}")]
     MarketingLlm(marketing_llm::MarketingLlmError),
     #[error("failed to serialize JSON output: {0}")]
@@ -1593,6 +1787,183 @@ mod tests {
         }
     }
 
+    fn sample_concept_test_request_json() -> serde_json::Value {
+        serde_json::json!({
+            "id": "concept-smoke",
+            "name": "Concept Smoke Test",
+            "seed_base": 11,
+            "population": {
+                "target_count": 240,
+                "sample_size": 6
+            },
+            "segments": [
+                {
+                    "id": "proof_seekers",
+                    "name": "Proof Seekers",
+                    "share_weight": 0.6,
+                    "traits": {
+                        "proof_hunger": 0.88,
+                        "privacy_sensitivity": 0.35,
+                        "social_sharing": 0.40
+                    },
+                    "channels": ["landing_page", "reddit"],
+                    "objections": ["not enough proof"]
+                },
+                {
+                    "id": "privacy_trackers",
+                    "name": "Privacy Trackers",
+                    "share_weight": 0.4,
+                    "traits": {
+                        "proof_hunger": 0.55,
+                        "privacy_sensitivity": 0.92,
+                        "social_sharing": 0.25
+                    },
+                    "channels": ["reddit", "newsletter"],
+                    "objections": ["privacy"]
+                }
+            ],
+            "variants": [
+                {
+                    "id": "proof_first",
+                    "name": "Proof First",
+                    "summary": "Weekly proof with confidence scores",
+                    "target_segments": ["proof_seekers"],
+                    "channels": ["landing_page", "reddit"],
+                    "trait_weights": {
+                        "proof_hunger": 1.0
+                    },
+                    "strengths": ["proof", "case study"]
+                },
+                {
+                    "id": "privacy_first",
+                    "name": "Privacy First",
+                    "summary": "Private, exportable protocol tracking",
+                    "target_segments": ["privacy_trackers"],
+                    "channels": ["reddit", "newsletter"],
+                    "trait_weights": {
+                        "privacy_sensitivity": 1.0
+                    },
+                    "strengths": ["privacy", "secure export"]
+                }
+            ],
+            "scenario": {
+                "id": "wedge",
+                "name": "Wedge Test",
+                "goal": "Choose the first acquisition wedge",
+                "decision": "Pick a control and challenger",
+                "channels": ["landing_page", "reddit"],
+                "time_steps": 8,
+                "success_metrics": ["signup_rate", "activation_rate"],
+                "touchpoints": [
+                    {
+                        "id": "hook",
+                        "label": "Hook",
+                        "channel": "reddit",
+                        "focus": "awareness",
+                        "intensity": 1.0
+                    },
+                    {
+                        "id": "proof_followup",
+                        "label": "Proof Follow-up",
+                        "channel": "landing_page",
+                        "focus": "proof",
+                        "intensity": 1.2,
+                        "target_segments": ["proof_seekers"],
+                        "variants": ["proof_first"],
+                        "trait_weights": {
+                            "proof_hunger": 1.0
+                        }
+                    },
+                    {
+                        "id": "privacy_objections",
+                        "label": "Privacy Objections",
+                        "channel": "newsletter",
+                        "focus": "objection_handling",
+                        "intensity": 0.9,
+                        "target_segments": ["privacy_trackers"],
+                        "variants": ["privacy_first"],
+                        "trait_weights": {
+                            "privacy_sensitivity": 1.0
+                        }
+                    }
+                ]
+            },
+            "observed_outcomes": [
+                {
+                    "variant_id": "proof_first",
+                    "source": "smoke-waitlist",
+                    "sample_size": 120,
+                    "click_rate": 0.42,
+                    "signup_rate": 0.18
+                },
+                {
+                    "variant_id": "proof_first",
+                    "touchpoint_id": "proof_followup",
+                    "source": "smoke-step-proof",
+                    "sample_size": 80,
+                    "click_rate": 0.46,
+                    "signup_rate": 0.23
+                }
+            ]
+        })
+    }
+
+    fn sample_concept_test_matrix_request_json() -> serde_json::Value {
+        let base_request = sample_concept_test_request_json();
+
+        serde_json::json!({
+            "id": "concept-matrix-smoke",
+            "name": "Concept Matrix Smoke",
+            "base_request": base_request,
+            "cases": [
+                {
+                    "id": "trust",
+                    "name": "Trust Pressure",
+                    "preset": "trust_collapse",
+                    "seed_base": 31,
+                    "population": {
+                        "target_count": 240,
+                        "sample_size": 4
+                    }
+                },
+                {
+                    "id": "referral",
+                    "name": "Referral Loop",
+                    "preset": "referral_loop",
+                    "seed_base": 32,
+                    "population": {
+                        "target_count": 240,
+                        "sample_size": 4
+                    }
+                }
+            ]
+        })
+    }
+
+    fn sample_concept_test_matrix_draft_json() -> serde_json::Value {
+        serde_json::json!({
+            "product_name": "Mission Signal Kit",
+            "prompt": "Military product for field operators. Angle A: mission outcome proof for squad leaders. Angle B: integration-first deployment for technical evaluators.",
+            "case_count": 3,
+            "population": {
+                "target_count": 500,
+                "sample_size": 5
+            }
+        })
+    }
+
+    fn sample_idea_portfolio_brief() -> String {
+        r#"
+| # | Idea | First Wedge + Viral Loop |
+|---:|---|---|
+| 1 | PaperGames | Vibe code mobile games with a real iOS game engine and Discord sharing. |
+| 2 | Concierge | Voice agent books restaurants and services through SMS screenshots. |
+| 3 | Tatt | AR tattoo try-on with AI-generated flash and Instagram polls. |
+| 4 | BedtimeStory | Personalized illustrated bedtime stories for parents and kids. |
+"#
+        .into()
+    }
+
     #[test]
     fn test_load_synthetic_observed_outcomes_prefers_live_files_over_template() {
         let temp_dir = std::env::temp_dir().join(format!(
@@ -1899,6 +2270,16 @@ mod tests {
         assert!(output.contains("simulate-marketing"));
         assert!(output.contains("simulate-marketing-v2"));
         assert!(output.contains("simulate-marketing-v2-assisted"));
+        assert!(output.contains("draft-concept-test-matrix"));
+        assert!(output.contains("draft-idea-portfolio"));
+        assert!(output.contains("run-idea-portfolio"));
+        assert!(output.contains("run-concept-test"));
+        assert!(output.contains("run-concept-test-matrix"));
+        assert!(output.contains("compare-concept-tests"));
+        assert!(output.contains("export-concept-test-report-markdown"));
+        assert!(output.contains("export-concept-test-compare-markdown"));
+        assert!(output.contains("export-concept-test-matrix-markdown"));
+        assert!(output.contains("export-idea-portfolio-markdown"));
         assert!(output.contains("compare-marketing-v2-assisted"));
         assert!(output.contains("export-marketing-v2-report-markdown"));
         assert!(output.contains("export-marketing-v2-compare-markdown"));
@@ -2071,6 +2452,407 @@ mod tests {
         assert_eq!(parsed.engine.reasoning_effort.as_deref(), Some("high"));
 
         let _ = fs::remove_file(request_path);
+    }
+
+    #[test]
+    fn test_draft_concept_test_matrix_outputs_json() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-concept-matrix-draft.json");
+        fs::write(
+            &request_path,
+            sample_concept_test_matrix_draft_json().to_string(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "draft-concept-test-matrix".into(),
+            request_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let parsed: composure_marketing::ConceptTestMatrixRequest =
+            serde_json::from_str(&output).unwrap();
+        assert_eq!(parsed.name, "Mission Signal Kit Scenario Matrix");
+        assert_eq!(parsed.base_request.population.target_count, 500);
+        assert_eq!(parsed.cases.len(), 3);
+        assert_eq!(
+            parsed.cases[0].preset,
+            Some(composure_marketing::ConceptScenarioPreset::ProcurementSkepticism)
+        );
+
+        let _ = fs::remove_file(request_path);
+    }
+
+    #[test]
+    fn test_draft_concept_test_matrix_accepts_plain_text() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-concept-matrix-draft.txt");
+        fs::write(
+            &request_path,
+            "Gameplay test for a squad tactics loop. Angle A: mastery loop. Angle B: social coordination.",
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "draft-concept-test-matrix".into(),
+            request_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let parsed: composure_marketing::ConceptTestMatrixRequest =
+            serde_json::from_str(&output).unwrap();
+        assert!(parsed
+            .cases
+            .iter()
+            .any(|case| case.preset
+                == Some(composure_marketing::ConceptScenarioPreset::GameplayFatigue)));
+
+        let _ = fs::remove_file(request_path);
+    }
+
+    #[test]
+    fn test_draft_idea_portfolio_accepts_plain_text() {
+        let dir = temp_pack_dir("idea-portfolio-draft");
+        let brief_path = dir.join("ideas.md");
+        fs::write(&brief_path, sample_idea_portfolio_brief()).unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "draft-idea-portfolio".into(),
+            brief_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let parsed: composure_marketing::IdeaPortfolioRequest =
+            serde_json::from_str(&output).unwrap();
+        assert_eq!(parsed.ideas.len(), 4);
+        assert_eq!(parsed.ideas[0].id, "papergames");
+        assert_eq!(parsed.population.target_count, 10_000);
+        assert!(!parsed.scenarios.is_empty());
+
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn test_draft_idea_portfolio_writes_output_file() {
+        let dir = temp_pack_dir("idea-portfolio-draft-output");
+        let brief_path = dir.join("ideas.md");
+        let output_path = dir.join("portfolio.json");
+        fs::write(&brief_path, sample_idea_portfolio_brief()).unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "draft-idea-portfolio".into(),
+            brief_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("\"ideas\""));
+        assert!(written.contains("\"papergames\""));
+
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn test_run_idea_portfolio_outputs_json() {
+        let dir = temp_pack_dir("idea-portfolio-run");
+        let brief_path = dir.join("ideas.md");
+        let request_path = dir.join("portfolio.json");
+        fs::write(&brief_path, sample_idea_portfolio_brief()).unwrap();
+        run(&[
+            "composure".into(),
+            "draft-idea-portfolio".into(),
+            brief_path.display().to_string(),
+            "--output".into(),
+            request_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "run-idea-portfolio".into(),
+            request_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let parsed: composure_marketing::IdeaPortfolioResult =
+            serde_json::from_str(&output).unwrap();
+        assert_eq!(parsed.portfolio_id, "ai-consumer-idea-portfolio");
+        assert_eq!(parsed.ranked_ideas.len(), 4);
+        assert!(!parsed.scenario_summaries.is_empty());
+        // top_ranked_idea_id is always set; recommended_idea_id is gated on calibration
+        // and noise-threshold checks, so we can't assert it for arbitrary portfolios.
+        assert!(parsed.top_ranked_idea_id.is_some());
+
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn test_export_idea_portfolio_markdown() {
+        let dir = temp_pack_dir("idea-portfolio-markdown");
+        let brief_path = dir.join("ideas.md");
+        let request_path = dir.join("portfolio.json");
+        let artifact_path = dir.join("portfolio-result.json");
+        fs::write(&brief_path, sample_idea_portfolio_brief()).unwrap();
+        run(&[
+            "composure".into(),
+            "draft-idea-portfolio".into(),
+            brief_path.display().to_string(),
+            "--output".into(),
+            request_path.display().to_string(),
+        ])
+        .unwrap();
+        run(&[
+            "composure".into(),
+            "run-idea-portfolio".into(),
+            request_path.display().to_string(),
+            "--output".into(),
+            artifact_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let markdown = run(&[
+            "composure".into(),
+            "export-idea-portfolio-markdown".into(),
+            artifact_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(markdown.contains("Idea Portfolio Report"));
+        assert!(markdown.contains("Leaderboard"));
+        assert!(markdown.contains("Scenario Winners"));
+        assert!(markdown.contains("Sampled People"));
+
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn test_draft_concept_test_matrix_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-concept-matrix-draft-output-input.json");
+        let output_path = temp_dir.join("composure-cli-concept-matrix-draft-output.json");
+        fs::write(
+            &request_path,
+            sample_concept_test_matrix_draft_json().to_string(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "draft-concept-test-matrix".into(),
+            request_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("\"base_request\""));
+        assert!(written.contains("\"procurement_skepticism\""));
+
+        let _ = fs::remove_file(request_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_run_concept_test_outputs_json() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-concept-test.json");
+        fs::write(
+            &request_path,
+            sample_concept_test_request_json().to_string(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "run-concept-test".into(),
+            request_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let parsed: composure_marketing::ConceptTestResult = serde_json::from_str(&output).unwrap();
+        assert_eq!(parsed.concept_test_id, "concept-smoke");
+        assert_eq!(parsed.total_population, 240);
+        assert_eq!(parsed.ranked_variants.len(), 2);
+        assert!(parsed.recommended_variant_id.is_some());
+        assert_eq!(parsed.ranked_variants[0].touchpoint_results.len(), 3);
+        assert_eq!(parsed.touchpoint_calibration_summary.len(), 1);
+
+        let _ = fs::remove_file(request_path);
+    }
+
+    #[test]
+    fn test_run_concept_test_writes_output_file() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-concept-test-output-input.json");
+        let output_path = temp_dir.join("composure-cli-concept-test-output.json");
+        fs::write(
+            &request_path,
+            sample_concept_test_request_json().to_string(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "run-concept-test".into(),
+            request_path.display().to_string(),
+            "--output".into(),
+            output_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(output.contains("Wrote artifact"));
+        let written = fs::read_to_string(&output_path).unwrap();
+        assert!(written.contains("\"ranked_variants\""));
+
+        let _ = fs::remove_file(request_path);
+        let _ = fs::remove_file(output_path);
+    }
+
+    #[test]
+    fn test_export_concept_test_report_markdown() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-concept-test-report-input.json");
+        let artifact_path = temp_dir.join("composure-cli-concept-test-report.json");
+        fs::write(
+            &request_path,
+            sample_concept_test_request_json().to_string(),
+        )
+        .unwrap();
+
+        run(&[
+            "composure".into(),
+            "run-concept-test".into(),
+            request_path.display().to_string(),
+            "--output".into(),
+            artifact_path.display().to_string(),
+        ])
+        .unwrap();
+
+        let markdown = run(&[
+            "composure".into(),
+            "export-concept-test-report-markdown".into(),
+            artifact_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(markdown.contains("Concept Test Report"));
+        assert!(markdown.contains("Variant Leaderboard"));
+        assert!(markdown.contains("Timeline"));
+        assert!(markdown.contains("Touchpoint Calibration"));
+        assert!(markdown.contains("Segment Winners"));
+
+        let _ = fs::remove_file(request_path);
+        let _ = fs::remove_file(artifact_path);
+    }
+
+    #[test]
+    fn test_compare_concept_tests_and_export_markdown() {
+        let temp_dir = std::env::temp_dir();
+        let request_a = temp_dir.join("composure-cli-concept-compare-a-input.json");
+        let request_b = temp_dir.join("composure-cli-concept-compare-b-input.json");
+        let result_a = temp_dir.join("composure-cli-concept-compare-a.json");
+        let result_b = temp_dir.join("composure-cli-concept-compare-b.json");
+        let compare_path = temp_dir.join("composure-cli-concept-compare.json");
+
+        fs::write(&request_a, sample_concept_test_request_json().to_string()).unwrap();
+        let mut request_b_json = sample_concept_test_request_json();
+        request_b_json["id"] = serde_json::json!("concept-smoke-alt");
+        request_b_json["name"] = serde_json::json!("Concept Smoke Alt");
+        request_b_json["variants"][0]["trait_weights"] = serde_json::json!({
+            "proof_hunger": 1.0,
+            "social_sharing": 0.7
+        });
+        fs::write(&request_b, request_b_json.to_string()).unwrap();
+
+        for (request_path, result_path) in [(&request_a, &result_a), (&request_b, &result_b)] {
+            run(&[
+                "composure".into(),
+                "run-concept-test".into(),
+                request_path.display().to_string(),
+                "--output".into(),
+                result_path.display().to_string(),
+            ])
+            .unwrap();
+        }
+
+        let output = run(&[
+            "composure".into(),
+            "compare-concept-tests".into(),
+            result_a.display().to_string(),
+            result_b.display().to_string(),
+            "--output".into(),
+            compare_path.display().to_string(),
+        ])
+        .unwrap();
+        assert!(output.contains("Wrote artifact"));
+
+        let markdown = run(&[
+            "composure".into(),
+            "export-concept-test-compare-markdown".into(),
+            compare_path.display().to_string(),
+        ])
+        .unwrap();
+
+        assert!(markdown.contains("Concept Test Comparison"));
+        assert!(markdown.contains("Leaderboard"));
+        assert!(markdown.contains("Metric Deltas"));
+
+        let _ = fs::remove_file(request_a);
+        let _ = fs::remove_file(request_b);
+        let _ = fs::remove_file(result_a);
+        let _ = fs::remove_file(result_b);
+        let _ = fs::remove_file(compare_path);
+    }
+
+    #[test]
+    fn test_run_concept_test_matrix_and_export_markdown() {
+        let temp_dir = std::env::temp_dir();
+        let request_path = temp_dir.join("composure-cli-concept-matrix-input.json");
+        let artifact_path = temp_dir.join("composure-cli-concept-matrix.json");
+        fs::write(
+            &request_path,
+            sample_concept_test_matrix_request_json().to_string(),
+        )
+        .unwrap();
+
+        let output = run(&[
+            "composure".into(),
+            "run-concept-test-matrix".into(),
+            request_path.display().to_string(),
+            "--output".into(),
+            artifact_path.display().to_string(),
+        ])
+        .unwrap();
+        assert!(output.contains("Wrote artifact"));
+
+        let written = fs::read_to_string(&artifact_path).unwrap();
+        let parsed: composure_marketing::ConceptTestMatrixResult =
+            serde_json::from_str(&written).unwrap();
+        assert_eq!(parsed.matrix_id, "concept-matrix-smoke");
+        assert_eq!(parsed.cases.len(), 2);
+        assert!(!parsed.variant_rollups.is_empty());
+
+        let markdown = run(&[
+            "composure".into(),
+            "export-concept-test-matrix-markdown".into(),
+            artifact_path.display().to_string(),
+        ])
+        .unwrap();
+        assert!(markdown.contains("Concept Test Matrix"));
+        assert!(markdown.contains("Variant Robustness"));
+        assert!(markdown.contains("Case Leaderboard"));
+
+        let _ = fs::remove_file(request_path);
+        let _ = fs::remove_file(artifact_path);
     }
 
     #[test]

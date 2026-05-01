@@ -1,6 +1,3 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
-
 use composure_core::{
     analyze_composure_checked, run_scenario_monte_carlo_checked, summarize_run, Action, ActionType,
     Archetype, MonteCarloConfig, RunSummary, Scenario, SimState, Simulator,
@@ -8,10 +5,15 @@ use composure_core::{
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 use thiserror::Error;
 
+mod concept_test;
+mod idea_portfolio;
 mod synthetic_market;
 
+pub use concept_test::*;
+pub use idea_portfolio::*;
 pub use synthetic_market::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -3616,45 +3618,47 @@ fn sanitize_phrase(value: String) -> String {
 }
 
 fn derive_seed_base(request: &MarketingSimulationRequest, simulation_id: &str) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    simulation_id.hash(&mut hasher);
-    request.simulation_size.hash(&mut hasher);
-    hasher.finish()
+    let mut hasher = stable_hasher("marketing_v1_seed_base");
+    update_hash_str(&mut hasher, simulation_id);
+    update_hash_u64(&mut hasher, request.simulation_size as u64);
+    finish_hash_u64(hasher)
 }
 
 fn derive_seed_base_v2(request: &MarketingSimulationRequestV2, simulation_id: &str) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    deterministic_seed_fingerprint_v2(request).hash(&mut hasher);
-    simulation_id.hash(&mut hasher);
-    request.simulation_size.hash(&mut hasher);
-    request.scenario.time_steps.hash(&mut hasher);
-    hasher.finish()
+    let mut hasher = stable_hasher("marketing_v2_seed_base");
+    update_hash_str(&mut hasher, &deterministic_seed_fingerprint_v2(request));
+    update_hash_str(&mut hasher, simulation_id);
+    update_hash_u64(&mut hasher, request.simulation_size as u64);
+    update_hash_u64(&mut hasher, request.scenario.time_steps as u64);
+    finish_hash_u64(hasher)
 }
 
 fn build_simulation_id(request: &MarketingSimulationRequest) -> String {
-    let mut hasher = DefaultHasher::new();
-    request.seed_data.project_name.hash(&mut hasher);
-    request.seed_data.project_description.hash(&mut hasher);
-    request.simulation_size.hash(&mut hasher);
+    let mut hasher = stable_hasher("marketing_v1_simulation_id");
+    update_hash_str(&mut hasher, &request.seed_data.project_name);
+    update_hash_str(&mut hasher, &request.seed_data.project_description);
+    update_hash_u64(&mut hasher, request.simulation_size as u64);
     for approach in &request.approaches {
-        approach.id.hash(&mut hasher);
-        approach.angle.hash(&mut hasher);
-        approach.format.hash(&mut hasher);
-        approach.tone.hash(&mut hasher);
-        approach.target.hash(&mut hasher);
+        update_hash_str(&mut hasher, &approach.id);
+        update_hash_str(&mut hasher, &approach.angle);
+        update_hash_str(&mut hasher, &approach.format);
+        update_hash_str(&mut hasher, &approach.tone);
+        update_hash_str(&mut hasher, &approach.target);
         for channel in &approach.channels {
-            channel.hash(&mut hasher);
+            update_hash_str(&mut hasher, channel);
         }
     }
-    format!("sim-{:016x}", hasher.finish())
+    format!("sim-{}", finish_hash_hex16(hasher))
 }
 
 fn build_simulation_id_v2(request: &MarketingSimulationRequestV2) -> String {
-    let mut hasher = DefaultHasher::new();
-    serde_json::to_string(&canonicalize_v2_request_for_deterministic_hash(request))
-        .unwrap_or_default()
-        .hash(&mut hasher);
-    format!("sim-{:016x}", hasher.finish())
+    let mut hasher = stable_hasher("marketing_v2_simulation_id");
+    update_hash_str(
+        &mut hasher,
+        &serde_json::to_string(&canonicalize_v2_request_for_deterministic_hash(request))
+            .unwrap_or_default(),
+    );
+    format!("sim-{}", finish_hash_hex16(hasher))
 }
 
 fn deterministic_seed_fingerprint_v2(request: &MarketingSimulationRequestV2) -> String {
@@ -3671,6 +3675,36 @@ fn canonicalize_v2_request_for_deterministic_hash(
     canonical.observed_outcomes.clear();
     canonical.output = OutputOptions::default();
     canonical
+}
+
+fn stable_hasher(scope: &str) -> Sha256 {
+    let mut hasher = Sha256::new();
+    update_hash_str(&mut hasher, scope);
+    hasher
+}
+
+fn update_hash_str(hasher: &mut Sha256, value: &str) {
+    hasher.update((value.len() as u64).to_le_bytes());
+    hasher.update(value.as_bytes());
+}
+
+fn update_hash_u64(hasher: &mut Sha256, value: u64) {
+    hasher.update(value.to_le_bytes());
+}
+
+fn finish_hash_u64(hasher: Sha256) -> u64 {
+    let digest = hasher.finalize();
+    let mut bytes = [0_u8; 8];
+    bytes.copy_from_slice(&digest[..8]);
+    u64::from_le_bytes(bytes)
+}
+
+fn finish_hash_hex16(hasher: Sha256) -> String {
+    let digest = hasher.finalize();
+    digest[..8]
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 fn normalized_action_magnitude(action: &Action) -> f64 {

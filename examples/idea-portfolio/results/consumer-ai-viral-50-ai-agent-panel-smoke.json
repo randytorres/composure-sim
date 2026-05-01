@@ -1,0 +1,579 @@
+{
+  "kind": "ai_agent_persona_panel",
+  "created_at": "2026-04-30T04:05:55.693Z",
+  "model": "gpt-5.4",
+  "base_url": "http://127.0.0.1:8317/v1",
+  "reasoning_effort": "low",
+  "source_result": "examples/idea-portfolio/results/consumer-ai-viral-50-source-weighted-result.json",
+  "source_portfolio": "examples/idea-portfolio/results/consumer-ai-viral-50-source-weighted-portfolio.json",
+  "note": "This is not the deterministic simulator. Each panel row is an LLM call instructed to respond as one synthetic person/persona; aggregation is computed after those responses.",
+  "ideas": [
+    {
+      "rank": 1,
+      "idea_id": "meme-to-motion-studio",
+      "idea_name": "Meme-to-Motion Studio",
+      "simulator_score": 59,
+      "summary": "Convert screenshots, memes, and reaction images into motion clips, voiceovers, remix chains, and export-ready TikTok/Reels/X posts."
+    },
+    {
+      "rank": 2,
+      "idea_id": "pet-dub-universe",
+      "idea_name": "Pet Dub Universe",
+      "simulator_score": 55,
+      "summary": "Make a pet into a recurring character with consistent voice, expressions, episodic plots, captions, skit templates, and merch mockups."
+    },
+    {
+      "rank": 3,
+      "idea_id": "dating-profile-studio",
+      "idea_name": "Dating Profile Studio",
+      "simulator_score": 54,
+      "summary": "Optimize dating profiles with photo sequencing, prompt rewrites, opener suggestions, voice-note practice, mock conversations, and authenticity-first exports."
+    },
+    {
+      "rank": 4,
+      "idea_id": "family-lore-studio",
+      "idea_name": "Family Lore Studio",
+      "simulator_score": 54,
+      "summary": "Transform family photos, voice notes, and text into narrated mini-documentaries, timelines, gentle restorations, videos, books, and family-sharing artifacts."
+    },
+    {
+      "rank": 5,
+      "idea_id": "voice-journal-coach",
+      "idea_name": "Voice Journal Coach",
+      "simulator_score": 54,
+      "summary": "Transcribe voice journals into themes, progress arcs, weekly recaps, safety-aware reflection prompts, and optional polished share cards."
+    },
+    {
+      "rank": 6,
+      "idea_id": "couple-compatibility-show",
+      "idea_name": "Couple Compatibility Show",
+      "simulator_score": 53,
+      "summary": "Convert couple questionnaires, voice notes, and photos into a playful game-show-style compatibility recap with private sharing and event packs."
+    },
+    {
+      "rank": 7,
+      "idea_id": "language-roleplay-selfie-tutor",
+      "idea_name": "Language Roleplay Selfie Tutor",
+      "simulator_score": 53,
+      "summary": "Put the learner into visual roleplay scenes and practice everyday scenarios with AI voice, corrections, cues, and travel packs."
+    },
+    {
+      "rank": 8,
+      "idea_id": "ugc-ad-twin",
+      "idea_name": "UGC Ad Twin",
+      "simulator_score": 53,
+      "summary": "Turn a product link, a few photos, and a creator/persona choice into native-looking short-video ads for sellers, creators, resellers, and DTC micro-brands."
+    }
+  ],
+  "personas": [
+    {
+      "id": "maya-ugc-operator",
+      "name": "Maya",
+      "segment": "creator_operator",
+      "age": 27,
+      "context": "Runs a small TikTok Shop side hustle, makes product clips after work, watches creator economy YouTube, pays for tools if they save time.",
+      "budget": "$20-80/mo for tools that earn back money",
+      "habits": "TikTok, CapCut, Shopify, Instagram Reels, group chats with other sellers",
+      "skepticism": "Hates generic AI ads, worries about ad policy and fake-looking people."
+    },
+    {
+      "id": "jules-style-social",
+      "name": "Jules",
+      "segment": "gen_z_social_creator",
+      "age": 21,
+      "context": "College student, posts outfit and friend-group content, uses AI filters casually but deletes anything that feels cringe.",
+      "budget": "$0-12/mo, buys packs for special moments",
+      "habits": "TikTok search, Instagram Stories, Pinterest, Snapchat, iMessage",
+      "skepticism": "Won't pay unless the output makes her look cooler or saves embarrassment."
+    }
+  ],
+  "agent_runs": [
+    {
+      "persona_id": "maya-ugc-operator",
+      "persona_name": "Maya",
+      "segment": "creator_operator",
+      "raw_text": "{\n  \"persona_id\": \"maya-ugc-operator\",\n  \"first_person_summary\": \"I only really care if this helps me make better-performing content faster or gives me something I can actually post without it looking cheesy. I'm pretty open to paying for tools, but only when they clearly save editing time or help me test more hooks/creatives. The second it feels fake, policy-risky, or like generic AI slop, I'm out.\",\n  \"ranked_reactions\": [\n    {\n      \"idea_id\": \"meme-to-motion-studio\",\n      \"rank\": 1,\n      \"try_intent\": 86,\n      \"share_intent\": 78,\n      \"pay_intent\": 69,\n      \"retention_intent\": 73,\n      \"why_it_hits\": \"I already save screenshots, comments, memes, and product review moments that could become hooks, but turning them into clean motion clips still takes me time in CapCut. If this made ugly raw internet stuff feel native and fast for TikTok, I'd actually use it in my workflow.\",\n      \"biggest_objection\": \"My fear is it will over-automate the style and make everything look like the same AI-edited meme ad everyone is already tired of.\",\n      \"trigger_to_try\": \"If I could drag in 5 screenshots and get 3 actually-good TikTok hook variations in under 10 minutes, I'd try it this week.\",\n      \"price_ceiling\": \"I'd do maybe $15-25/month if the exports are good enough to post directly and it saves real editing time.\",\n      \"quote\": \"If this can turn my saved screenshots into decent hooks without making them look corny, that's actually useful.\"\n    },\n    {\n      \"idea_id\": \"ugc-ad-twin\",\n      \"rank\": 2,\n      \"try_intent\": 82,\n      \"share_intent\": 52,\n      \"pay_intent\": 61,\n      \"retention_intent\": 45,\n      \"why_it_hits\": \"This is super relevant to my world because I do product clips and always need more angles, hooks, and variants. I would absolutely test it for brainstorming or rough drafts, especially for low-stakes SKUs or creative testing.\",\n      \"biggest_objection\": \"I really do not want fake-looking creators or ads that get flagged or just feel shady. If it makes uncanny humans or overclaims products, that's a hard no.\",\n      \"trigger_to_try\": \"I'd test it immediately if it showed before-and-after examples that actually look native, plus clear ad-policy guardrails and editable scripts.\",\n      \"price_ceiling\": \"I'd maybe pay $20-40/month if it helps me produce multiple usable ad concepts, but not if I'm still redoing everything manually.\",\n      \"quote\": \"I don't mind AI helping with ad drafts, but I am not posting some weird fake girl holding a serum with six fingers.\"\n    },\n    {\n      \"idea_id\": \"pet-dub-universe\",\n      \"rank\": 3,\n      \"try_intent\": 58,\n      \"share_intent\": 74,\n      \"pay_intent\": 28,\n      \"retention_intent\": 31,\n      \"why_it_hits\": \"This is the kind of thing I'd try for fun because pets already win online and recurring characters are strong for content. If a friend's cat account was taking off, I could see us playing with this in group chat.\",\n      \"biggest_objection\": \"For me personally, it feels more like a novelty than a business tool, and I don't want to manage another content character unless it's clearly working.\",\n      \"trigger_to_try\": \"If it had a ridiculously funny free demo with one uploaded pet photo and a consistent voice/personality, I'd mess with it.\",\n      \"price_ceiling\": \"I'd only do like $5-10/month for fun, unless someone was actually building a pet page that made money.\",\n      \"quote\": \"This is cute, but it needs to be funny enough to justify the bit.\"\n    },\n    {\n      \"idea_id\": \"language-roleplay-selfie-tutor\",\n      \"rank\": 4,\n      \"try_intent\": 51,\n      \"share_intent\": 34,\n      \"pay_intent\": 24,\n      \"retention_intent\": 29,\n      \"why_it_hits\": \"I like practical learning tools, and the roleplay angle sounds more engaging than standard language apps. If I had a trip coming up, I could see using it for survival phrases.\",\n      \"biggest_objection\": \"The selfie part feels gimmicky to me. I care more about useful speaking practice than seeing myself awkwardly placed into scenes.\",\n      \"trigger_to_try\": \"A travel-specific pack like 'Japan convenience store + airport + restaurant' with good voice feedback would get me to test it.\",\n      \"price_ceiling\": \"Maybe $8-12/month if the speaking corrections are genuinely better than what's already out there.\",\n      \"quote\": \"I want less AI cosplay and more actually helping me not sound dumb ordering food.\"\n    },\n    {\n      \"idea_id\": \"voice-journal-coach\",\n      \"rank\": 5,\n      \"try_intent\": 37,\n      \"share_intent\": 18,\n      \"pay_intent\": 14,\n      \"retention_intent\": 22,\n      \"why_it_hits\": \"I do voice-note a lot, so the format fits my habits more than typing does. Weekly recaps could be nice when life gets chaotic.\",\n      \"biggest_objection\": \"I don't really want another self-improvement app trying to analyze my feelings, and I'd be worried about privacy with personal voice notes.\",\n      \"trigger_to_try\": \"I'd only try it if someone I know said it helped them notice patterns without being cringe or overly therapy-bot.\",\n      \"price_ceiling\": \"Honestly probably free or under $8/month for me.\",\n      \"quote\": \"I already talk to my friends in voice notes for free, so this has to do more than summarize my spiral.\"\n    },\n    {\n      \"idea_id\": \"family-lore-studio\",\n      \"rank\": 6,\n      \"try_intent\": 29,\n      \"share_intent\": 42,\n      \"pay_intent\": 18,\n      \"retention_intent\": 12,\n      \"why_it_hits\": \"This feels emotionally meaningful, and I can picture making something for my mom or grandparents if it handled old photos well.\",\n      \"biggest_objection\": \"It's not part of my regular life, so even if I like the idea, it's an occasional project not a recurring tool.\",\n      \"trigger_to_try\": \"A holiday or birthday use case with beautiful sample outputs would probably be the moment I'd test it.\",\n      \"price_ceiling\": \"I'd rather pay once per project, maybe $10-20, than another subscription.\",\n      \"quote\": \"This is sweet, just not something I'd use month to month.\"\n    },\n    {\n      \"idea_id\": \"dating-profile-studio\",\n      \"rank\": 7,\n      \"try_intent\": 26,\n      \"share_intent\": 30,\n      \"pay_intent\": 10,\n      \"retention_intent\": 11,\n      \"why_it_hits\": \"I get why people would use it because dating apps are exhausting and outside feedback can help.\",\n      \"biggest_objection\": \"I don't love the idea of AI optimizing my personality, and anything too polished starts feeling fake fast.\",\n      \"trigger_to_try\": \"I'd maybe try a free profile audit if I was actively dating again and it focused on authenticity instead of pickup-line nonsense.\",\n      \"price_ceiling\": \"Maybe a one-time $5-10 curiosity purchase, not a real subscription for me.\",\n      \"quote\": \"If AI writes your whole dating vibe, you're kind of outsourcing the point.\"\n    },\n    {\n      \"idea_id\": \"couple-compatibility-show\",\n      \"rank\": 8,\n      \"try_intent\": 17,\n      \"share_intent\": 27,\n      \"pay_intent\": 6,\n      \"retention_intent\": 7,\n      \"why_it_hits\": \"It could be funny for an anniversary or girls-night type thing, and the game-show framing is more fun than a serious compatibility test.\",\n      \"biggest_objection\": \"This feels like a one-off gimmick, and I'd be embarrassed if the tone was too cheesy or invasive.\",\n      \"trigger_to_try\": \"Only if a friend used it and the final output was actually hilarious, not corny.\",\n      \"price_ceiling\": \"A few dollars once, maybe, but definitely not a monthly subscription.\",\n      \"quote\": \"This sounds like something I'd try at 11 p.m. once and never open again.\"\n    }\n  ],\n  \"ignored_or_rejected\": [\n    {\n      \"idea_id\": \"couple-compatibility-show\",\n      \"reason\": \"I'd mostly ignore this because I'm not looking for relationship content tools, and it feels like a novelty rather than something useful.\"\n    },\n    {\n      \"idea_id\": \"dating-profile-studio\",\n      \"reason\": \"I'd ignore this unless I was actively dating, and even then I'd be wary of it making people sound AI-polished and inauthentic.\"\n    },\n    {\n      \"idea_id\": \"family-lore-studio\",\n      \"reason\": \"I like the concept, but it's too occasional for how I choose apps and not connected to how I spend time or money now.\"\n    },\n    {\n      \"idea_id\": \"voice-journal-coach\",\n      \"reason\": \"I don't really want to feed private thoughts into an app unless the value is extremely clear and the privacy is unusually trustworthy.\"\n    }\n  ],\n  \"most_viral_artifact\": \"A fast TikTok-ready motion clip built from screenshots of customer comments, meme reactions, and product benefits, with captioned hook variations I could test or send to my seller group chat.\",\n  \"trust_breaker\": \"If the app generates fake-looking humans, copies obvious ad claims that could get accounts flagged, or hides watermark/export limits until after I've uploaded my stuff, I'd delete it fast.\",\n  \"surprise\": \"Even though I'm a creator-tool buyer, the thing that pulls me most isn't fully generated ads. It's tools that remix existing internet-native material into better hooks, because that feels more controllable, safer, and closer to how good short-form content actually gets made.\"\n}",
+      "parsed": {
+        "persona_id": "maya-ugc-operator",
+        "first_person_summary": "I only really care if this helps me make better-performing content faster or gives me something I can actually post without it looking cheesy. I'm pretty open to paying for tools, but only when they clearly save editing time or help me test more hooks/creatives. The second it feels fake, policy-risky, or like generic AI slop, I'm out.",
+        "ranked_reactions": [
+          {
+            "idea_id": "meme-to-motion-studio",
+            "rank": 1,
+            "try_intent": 86,
+            "share_intent": 78,
+            "pay_intent": 69,
+            "retention_intent": 73,
+            "why_it_hits": "I already save screenshots, comments, memes, and product review moments that could become hooks, but turning them into clean motion clips still takes me time in CapCut. If this made ugly raw internet stuff feel native and fast for TikTok, I'd actually use it in my workflow.",
+            "biggest_objection": "My fear is it will over-automate the style and make everything look like the same AI-edited meme ad everyone is already tired of.",
+            "trigger_to_try": "If I could drag in 5 screenshots and get 3 actually-good TikTok hook variations in under 10 minutes, I'd try it this week.",
+            "price_ceiling": "I'd do maybe $15-25/month if the exports are good enough to post directly and it saves real editing time.",
+            "quote": "If this can turn my saved screenshots into decent hooks without making them look corny, that's actually useful."
+          },
+          {
+            "idea_id": "ugc-ad-twin",
+            "rank": 2,
+            "try_intent": 82,
+            "share_intent": 52,
+            "pay_intent": 61,
+            "retention_intent": 45,
+            "why_it_hits": "This is super relevant to my world because I do product clips and always need more angles, hooks, and variants. I would absolutely test it for brainstorming or rough drafts, especially for low-stakes SKUs or creative testing.",
+            "biggest_objection": "I really do not want fake-looking creators or ads that get flagged or just feel shady. If it makes uncanny humans or overclaims products, that's a hard no.",
+            "trigger_to_try": "I'd test it immediately if it showed before-and-after examples that actually look native, plus clear ad-policy guardrails and editable scripts.",
+            "price_ceiling": "I'd maybe pay $20-40/month if it helps me produce multiple usable ad concepts, but not if I'm still redoing everything manually.",
+            "quote": "I don't mind AI helping with ad drafts, but I am not posting some weird fake girl holding a serum with six fingers."
+          },
+          {
+            "idea_id": "pet-dub-universe",
+            "rank": 3,
+            "try_intent": 58,
+            "share_intent": 74,
+            "pay_intent": 28,
+            "retention_intent": 31,
+            "why_it_hits": "This is the kind of thing I'd try for fun because pets already win online and recurring characters are strong for content. If a friend's cat account was taking off, I could see us playing with this in group chat.",
+            "biggest_objection": "For me personally, it feels more like a novelty than a business tool, and I don't want to manage another content character unless it's clearly working.",
+            "trigger_to_try": "If it had a ridiculously funny free demo with one uploaded pet photo and a consistent voice/personality, I'd mess with it.",
+            "price_ceiling": "I'd only do like $5-10/month for fun, unless someone was actually building a pet page that made money.",
+            "quote": "This is cute, but it needs to be funny enough to justify the bit."
+          },
+          {
+            "idea_id": "language-roleplay-selfie-tutor",
+            "rank": 4,
+            "try_intent": 51,
+            "share_intent": 34,
+            "pay_intent": 24,
+            "retention_intent": 29,
+            "why_it_hits": "I like practical learning tools, and the roleplay angle sounds more engaging than standard language apps. If I had a trip coming up, I could see using it for survival phrases.",
+            "biggest_objection": "The selfie part feels gimmicky to me. I care more about useful speaking practice than seeing myself awkwardly placed into scenes.",
+            "trigger_to_try": "A travel-specific pack like 'Japan convenience store + airport + restaurant' with good voice feedback would get me to test it.",
+            "price_ceiling": "Maybe $8-12/month if the speaking corrections are genuinely better than what's already out there.",
+            "quote": "I want less AI cosplay and more actually helping me not sound dumb ordering food."
+          },
+          {
+            "idea_id": "voice-journal-coach",
+            "rank": 5,
+            "try_intent": 37,
+            "share_intent": 18,
+            "pay_intent": 14,
+            "retention_intent": 22,
+            "why_it_hits": "I do voice-note a lot, so the format fits my habits more than typing does. Weekly recaps could be nice when life gets chaotic.",
+            "biggest_objection": "I don't really want another self-improvement app trying to analyze my feelings, and I'd be worried about privacy with personal voice notes.",
+            "trigger_to_try": "I'd only try it if someone I know said it helped them notice patterns without being cringe or overly therapy-bot.",
+            "price_ceiling": "Honestly probably free or under $8/month for me.",
+            "quote": "I already talk to my friends in voice notes for free, so this has to do more than summarize my spiral."
+          },
+          {
+            "idea_id": "family-lore-studio",
+            "rank": 6,
+            "try_intent": 29,
+            "share_intent": 42,
+            "pay_intent": 18,
+            "retention_intent": 12,
+            "why_it_hits": "This feels emotionally meaningful, and I can picture making something for my mom or grandparents if it handled old photos well.",
+            "biggest_objection": "It's not part of my regular life, so even if I like the idea, it's an occasional project not a recurring tool.",
+            "trigger_to_try": "A holiday or birthday use case with beautiful sample outputs would probably be the moment I'd test it.",
+            "price_ceiling": "I'd rather pay once per project, maybe $10-20, than another subscription.",
+            "quote": "This is sweet, just not something I'd use month to month."
+          },
+          {
+            "idea_id": "dating-profile-studio",
+            "rank": 7,
+            "try_intent": 26,
+            "share_intent": 30,
+            "pay_intent": 10,
+            "retention_intent": 11,
+            "why_it_hits": "I get why people would use it because dating apps are exhausting and outside feedback can help.",
+            "biggest_objection": "I don't love the idea of AI optimizing my personality, and anything too polished starts feeling fake fast.",
+            "trigger_to_try": "I'd maybe try a free profile audit if I was actively dating again and it focused on authenticity instead of pickup-line nonsense.",
+            "price_ceiling": "Maybe a one-time $5-10 curiosity purchase, not a real subscription for me.",
+            "quote": "If AI writes your whole dating vibe, you're kind of outsourcing the point."
+          },
+          {
+            "idea_id": "couple-compatibility-show",
+            "rank": 8,
+            "try_intent": 17,
+            "share_intent": 27,
+            "pay_intent": 6,
+            "retention_intent": 7,
+            "why_it_hits": "It could be funny for an anniversary or girls-night type thing, and the game-show framing is more fun than a serious compatibility test.",
+            "biggest_objection": "This feels like a one-off gimmick, and I'd be embarrassed if the tone was too cheesy or invasive.",
+            "trigger_to_try": "Only if a friend used it and the final output was actually hilarious, not corny.",
+            "price_ceiling": "A few dollars once, maybe, but definitely not a monthly subscription.",
+            "quote": "This sounds like something I'd try at 11 p.m. once and never open again."
+          }
+        ],
+        "ignored_or_rejected": [
+          {
+            "idea_id": "couple-compatibility-show",
+            "reason": "I'd mostly ignore this because I'm not looking for relationship content tools, and it feels like a novelty rather than something useful."
+          },
+          {
+            "idea_id": "dating-profile-studio",
+            "reason": "I'd ignore this unless I was actively dating, and even then I'd be wary of it making people sound AI-polished and inauthentic."
+          },
+          {
+            "idea_id": "family-lore-studio",
+            "reason": "I like the concept, but it's too occasional for how I choose apps and not connected to how I spend time or money now."
+          },
+          {
+            "idea_id": "voice-journal-coach",
+            "reason": "I don't really want to feed private thoughts into an app unless the value is extremely clear and the privacy is unusually trustworthy."
+          }
+        ],
+        "most_viral_artifact": "A fast TikTok-ready motion clip built from screenshots of customer comments, meme reactions, and product benefits, with captioned hook variations I could test or send to my seller group chat.",
+        "trust_breaker": "If the app generates fake-looking humans, copies obvious ad claims that could get accounts flagged, or hides watermark/export limits until after I've uploaded my stuff, I'd delete it fast.",
+        "surprise": "Even though I'm a creator-tool buyer, the thing that pulls me most isn't fully generated ads. It's tools that remix existing internet-native material into better hooks, because that feels more controllable, safer, and closer to how good short-form content actually gets made."
+      }
+    },
+    {
+      "persona_id": "jules-style-social",
+      "persona_name": "Jules",
+      "segment": "gen_z_social_creator",
+      "raw_text": "{\n  \"persona_id\": \"jules-style-social\",\n  \"first_person_summary\": \"I’d try something fast if it makes my posts funnier, smoother, or less awkward with basically no effort. I’m not paying for “AI” just because it exists though — it has to either upgrade my social content or save me from a cringe situation. If it feels fake, overproduced, or too personal in a weird way, I’m out.\",\n  \"ranked_reactions\": [\n    {\n      \"idea_id\": \"meme-to-motion-studio\",\n      \"rank\": 1,\n      \"try_intent\": 86,\n      \"share_intent\": 82,\n      \"pay_intent\": 34,\n      \"retention_intent\": 58,\n      \"why_it_hits\": \"I already save screenshots, reaction pics, and random meme formats, so turning those into quick motion posts for Stories or TikTok is actually useful for how I post. If it helps me make inside-joke content with friends without editing forever, I’d use it.\",\n      \"biggest_objection\": \"I’m scared it would make everything look like corny AI-generated content instead of something actually funny or native to TikTok.\",\n      \"trigger_to_try\": \"If I saw a TikTok where someone turned a group chat screenshot into a hilarious animated post in like 20 seconds, I’d download it that week.\",\n      \"price_ceiling\": \"Free first, maybe a one-time pack or like $4.99 for a weekend/event, not a real subscription unless I start using it constantly.\",\n      \"quote\": \"If this makes my dumb screenshots look funnier without looking AI, I’m in.\"\n    },\n    {\n      \"idea_id\": \"dating-profile-studio\",\n      \"rank\": 2,\n      \"try_intent\": 72,\n      \"share_intent\": 39,\n      \"pay_intent\": 41,\n      \"retention_intent\": 45,\n      \"why_it_hits\": \"This is embarrassing enough that I’d actually want help, especially with picking photos, prompts, and openers that don’t make me sound lame. I’d use it privately because dating apps are one of those places where a small improvement could actually matter.\",\n      \"biggest_objection\": \"If the rewrites sound too polished or flirty in a robotic way, I’d rather keep my bad profile than seem fake.\",\n      \"trigger_to_try\": \"If one of my friends said it helped her get better matches without changing her whole personality, I’d test it before redoing a profile.\",\n      \"price_ceiling\": \"Maybe $7-10 one time when I’m actively updating a profile, but I would hate a recurring charge for this.\",\n      \"quote\": \"I’d pay a little if it made my profile feel hotter and less awkward, not more AI.\"\n    },\n    {\n      \"idea_id\": \"voice-journal-coach\",\n      \"rank\": 3,\n      \"try_intent\": 61,\n      \"share_intent\": 24,\n      \"pay_intent\": 18,\n      \"retention_intent\": 51,\n      \"why_it_hits\": \"I do leave random voice notes to myself or my friends when I’m spiraling, so getting a recap of what I’m actually stressed about could be helpful. The polished share cards are less interesting to me than just making my thoughts less messy.\",\n      \"biggest_objection\": \"I do not want an app acting like my therapist or giving me fake-deep summaries that feel invasive.\",\n      \"trigger_to_try\": \"If it had a super low-pressure vibe and I could drop in one voice note after a bad week and get a useful summary, I’d test it.\",\n      \"price_ceiling\": \"Needs a good free version; maybe $3-5 a month max if it becomes a habit.\",\n      \"quote\": \"If it can organize my brain without being weirdly preachy, I’d maybe keep it.\"\n    },\n    {\n      \"idea_id\": \"couple-compatibility-show\",\n      \"rank\": 4,\n      \"try_intent\": 56,\n      \"share_intent\": 67,\n      \"pay_intent\": 29,\n      \"retention_intent\": 22,\n      \"why_it_hits\": \"This feels like a funny thing I’d use for a birthday, anniversary, or just to send in the group chat if one of my friends is obsessed with her relationship. The game-show format is more fun than serious compatibility stuff.\",\n      \"biggest_objection\": \"I would only use this if it stays playful, because if it starts psychoanalyzing the relationship, that’s a hard no.\",\n      \"trigger_to_try\": \"If it had a cute template that made a private recap video from stuff we already answered in Notes or iMessage, I’d try it for a special occasion.\",\n      \"price_ceiling\": \"Event pack energy only — like $2.99 to $5.99 once, not monthly.\",\n      \"quote\": \"This is cute for one night, not a whole lifestyle.\"\n    },\n    {\n      \"idea_id\": \"family-lore-studio\",\n      \"rank\": 5,\n      \"try_intent\": 43,\n      \"share_intent\": 36,\n      \"pay_intent\": 26,\n      \"retention_intent\": 19,\n      \"why_it_hits\": \"I could see using this when my family wants something sentimental for a birthday or graduation, especially if it makes old photos into something actually nice. It’s not my daily vibe, but I do like having one meaningful artifact sometimes.\",\n      \"biggest_objection\": \"I’d be nervous it turns real family stuff into cheesy AI slop or over-edited fake nostalgia.\",\n      \"trigger_to_try\": \"If I needed a gift for my mom or grandparents and it could make something polished from photos I already have, that would push me.\",\n      \"price_ceiling\": \"I’d only pay for a one-off project, maybe $8-12 if the result looked genuinely gift-worthy.\",\n      \"quote\": \"I wouldn’t use this for me, but I might use it to make my mom cry in a good way.\"\n    },\n    {\n      \"idea_id\": \"pet-dub-universe\",\n      \"rank\": 6,\n      \"try_intent\": 47,\n      \"share_intent\": 63,\n      \"pay_intent\": 16,\n      \"retention_intent\": 27,\n      \"why_it_hits\": \"If I had a pet with a funny face or strong personality, making one or two recurring videos could be adorable and very shareable in Stories. The best part is the joke being specific to my pet, not generic talking-animal content.\",\n      \"biggest_objection\": \"This could get old insanely fast, and if the voice is too try-hard or millennial-brand funny, I’d delete it.\",\n      \"trigger_to_try\": \"If my friend made one genuinely hilarious clip of her cat that didn’t feel over-edited, I’d try it with a borrowed dog pic or my own pet.\",\n      \"price_ceiling\": \"Free only, or maybe cheap sticker/voice packs under $3 if I’m doing it for a holiday.\",\n      \"quote\": \"Cute for a bit, but it better be actually funny and not Facebook-core.\"\n    },\n    {\n      \"idea_id\": \"language-roleplay-selfie-tutor\",\n      \"rank\": 7,\n      \"try_intent\": 38,\n      \"share_intent\": 21,\n      \"pay_intent\": 24,\n      \"retention_intent\": 33,\n      \"why_it_hits\": \"The scenario practice part is more interesting than regular language apps, especially for travel or everyday phrases. Putting me into visual scenes is kind of fun if it helps with confidence.\",\n      \"biggest_objection\": \"The selfie part could feel gimmicky fast, and I don’t want to look at AI versions of myself doing fake travel scenes.\",\n      \"trigger_to_try\": \"If I had a trip coming up and the app had short, practical packs for ordering food, directions, and basic conversation, I’d try it.\",\n      \"price_ceiling\": \"Maybe $5-8 for a travel pack, but not unless I have a real reason.\",\n      \"quote\": \"I want useful travel confidence, not AI Duolingo cosplay.\"\n    },\n    {\n      \"idea_id\": \"ugc-ad-twin\",\n      \"rank\": 8,\n      \"try_intent\": 26,\n      \"share_intent\": 18,\n      \"pay_intent\": 14,\n      \"retention_intent\": 17,\n      \"why_it_hits\": \"I can see why a small seller or creator would use this, and I do notice when ads look more native. If I ever sold vintage stuff or posted for a brand, I might test it.\",\n      \"biggest_objection\": \"As a normal user, this feels like making more ads, and I’m already tired of fake UGC that pretends to be authentic.\",\n      \"trigger_to_try\": \"Only if I was trying to sell something and needed a fast ad without filming a whole bunch of takes.\",\n      \"price_ceiling\": \"Would have to be project-based; I wouldn’t casually subscribe to an ad maker.\",\n      \"quote\": \"Useful if I’m selling, but otherwise this is just helping the internet produce more ads.\"\n    }\n  ],\n  \"ignored_or_rejected\": [],\n  \"most_viral_artifact\": \"A TikTok or IG Story clip turning a group chat screenshot or reaction meme into a fast animated inside-joke post with captions and sound.\",\n  \"trust_breaker\": \"If the app posts obvious AI-looking content, uses my photos/voice without being super clear, or makes me sound like a bot trying to be funny, I’d delete it immediately.\",\n  \"surprise\": \"I’m more willing to pay for private embarrassment-reduction like dating profile help than for louder, more publicly 'creative' AI tools, because looking normal-cute is worth more to me than looking artificially impressive.\"\n}",
+      "parsed": {
+        "persona_id": "jules-style-social",
+        "first_person_summary": "I’d try something fast if it makes my posts funnier, smoother, or less awkward with basically no effort. I’m not paying for “AI” just because it exists though — it has to either upgrade my social content or save me from a cringe situation. If it feels fake, overproduced, or too personal in a weird way, I’m out.",
+        "ranked_reactions": [
+          {
+            "idea_id": "meme-to-motion-studio",
+            "rank": 1,
+            "try_intent": 86,
+            "share_intent": 82,
+            "pay_intent": 34,
+            "retention_intent": 58,
+            "why_it_hits": "I already save screenshots, reaction pics, and random meme formats, so turning those into quick motion posts for Stories or TikTok is actually useful for how I post. If it helps me make inside-joke content with friends without editing forever, I’d use it.",
+            "biggest_objection": "I’m scared it would make everything look like corny AI-generated content instead of something actually funny or native to TikTok.",
+            "trigger_to_try": "If I saw a TikTok where someone turned a group chat screenshot into a hilarious animated post in like 20 seconds, I’d download it that week.",
+            "price_ceiling": "Free first, maybe a one-time pack or like $4.99 for a weekend/event, not a real subscription unless I start using it constantly.",
+            "quote": "If this makes my dumb screenshots look funnier without looking AI, I’m in."
+          },
+          {
+            "idea_id": "dating-profile-studio",
+            "rank": 2,
+            "try_intent": 72,
+            "share_intent": 39,
+            "pay_intent": 41,
+            "retention_intent": 45,
+            "why_it_hits": "This is embarrassing enough that I’d actually want help, especially with picking photos, prompts, and openers that don’t make me sound lame. I’d use it privately because dating apps are one of those places where a small improvement could actually matter.",
+            "biggest_objection": "If the rewrites sound too polished or flirty in a robotic way, I’d rather keep my bad profile than seem fake.",
+            "trigger_to_try": "If one of my friends said it helped her get better matches without changing her whole personality, I’d test it before redoing a profile.",
+            "price_ceiling": "Maybe $7-10 one time when I’m actively updating a profile, but I would hate a recurring charge for this.",
+            "quote": "I’d pay a little if it made my profile feel hotter and less awkward, not more AI."
+          },
+          {
+            "idea_id": "voice-journal-coach",
+            "rank": 3,
+            "try_intent": 61,
+            "share_intent": 24,
+            "pay_intent": 18,
+            "retention_intent": 51,
+            "why_it_hits": "I do leave random voice notes to myself or my friends when I’m spiraling, so getting a recap of what I’m actually stressed about could be helpful. The polished share cards are less interesting to me than just making my thoughts less messy.",
+            "biggest_objection": "I do not want an app acting like my therapist or giving me fake-deep summaries that feel invasive.",
+            "trigger_to_try": "If it had a super low-pressure vibe and I could drop in one voice note after a bad week and get a useful summary, I’d test it.",
+            "price_ceiling": "Needs a good free version; maybe $3-5 a month max if it becomes a habit.",
+            "quote": "If it can organize my brain without being weirdly preachy, I’d maybe keep it."
+          },
+          {
+            "idea_id": "couple-compatibility-show",
+            "rank": 4,
+            "try_intent": 56,
+            "share_intent": 67,
+            "pay_intent": 29,
+            "retention_intent": 22,
+            "why_it_hits": "This feels like a funny thing I’d use for a birthday, anniversary, or just to send in the group chat if one of my friends is obsessed with her relationship. The game-show format is more fun than serious compatibility stuff.",
+            "biggest_objection": "I would only use this if it stays playful, because if it starts psychoanalyzing the relationship, that’s a hard no.",
+            "trigger_to_try": "If it had a cute template that made a private recap video from stuff we already answered in Notes or iMessage, I’d try it for a special occasion.",
+            "price_ceiling": "Event pack energy only — like $2.99 to $5.99 once, not monthly.",
+            "quote": "This is cute for one night, not a whole lifestyle."
+          },
+          {
+            "idea_id": "family-lore-studio",
+            "rank": 5,
+            "try_intent": 43,
+            "share_intent": 36,
+            "pay_intent": 26,
+            "retention_intent": 19,
+            "why_it_hits": "I could see using this when my family wants something sentimental for a birthday or graduation, especially if it makes old photos into something actually nice. It’s not my daily vibe, but I do like having one meaningful artifact sometimes.",
+            "biggest_objection": "I’d be nervous it turns real family stuff into cheesy AI slop or over-edited fake nostalgia.",
+            "trigger_to_try": "If I needed a gift for my mom or grandparents and it could make something polished from photos I already have, that would push me.",
+            "price_ceiling": "I’d only pay for a one-off project, maybe $8-12 if the result looked genuinely gift-worthy.",
+            "quote": "I wouldn’t use this for me, but I might use it to make my mom cry in a good way."
+          },
+          {
+            "idea_id": "pet-dub-universe",
+            "rank": 6,
+            "try_intent": 47,
+            "share_intent": 63,
+            "pay_intent": 16,
+            "retention_intent": 27,
+            "why_it_hits": "If I had a pet with a funny face or strong personality, making one or two recurring videos could be adorable and very shareable in Stories. The best part is the joke being specific to my pet, not generic talking-animal content.",
+            "biggest_objection": "This could get old insanely fast, and if the voice is too try-hard or millennial-brand funny, I’d delete it.",
+            "trigger_to_try": "If my friend made one genuinely hilarious clip of her cat that didn’t feel over-edited, I’d try it with a borrowed dog pic or my own pet.",
+            "price_ceiling": "Free only, or maybe cheap sticker/voice packs under $3 if I’m doing it for a holiday.",
+            "quote": "Cute for a bit, but it better be actually funny and not Facebook-core."
+          },
+          {
+            "idea_id": "language-roleplay-selfie-tutor",
+            "rank": 7,
+            "try_intent": 38,
+            "share_intent": 21,
+            "pay_intent": 24,
+            "retention_intent": 33,
+            "why_it_hits": "The scenario practice part is more interesting than regular language apps, especially for travel or everyday phrases. Putting me into visual scenes is kind of fun if it helps with confidence.",
+            "biggest_objection": "The selfie part could feel gimmicky fast, and I don’t want to look at AI versions of myself doing fake travel scenes.",
+            "trigger_to_try": "If I had a trip coming up and the app had short, practical packs for ordering food, directions, and basic conversation, I’d try it.",
+            "price_ceiling": "Maybe $5-8 for a travel pack, but not unless I have a real reason.",
+            "quote": "I want useful travel confidence, not AI Duolingo cosplay."
+          },
+          {
+            "idea_id": "ugc-ad-twin",
+            "rank": 8,
+            "try_intent": 26,
+            "share_intent": 18,
+            "pay_intent": 14,
+            "retention_intent": 17,
+            "why_it_hits": "I can see why a small seller or creator would use this, and I do notice when ads look more native. If I ever sold vintage stuff or posted for a brand, I might test it.",
+            "biggest_objection": "As a normal user, this feels like making more ads, and I’m already tired of fake UGC that pretends to be authentic.",
+            "trigger_to_try": "Only if I was trying to sell something and needed a fast ad without filming a whole bunch of takes.",
+            "price_ceiling": "Would have to be project-based; I wouldn’t casually subscribe to an ad maker.",
+            "quote": "Useful if I’m selling, but otherwise this is just helping the internet produce more ads."
+          }
+        ],
+        "ignored_or_rejected": [],
+        "most_viral_artifact": "A TikTok or IG Story clip turning a group chat screenshot or reaction meme into a fast animated inside-joke post with captions and sound.",
+        "trust_breaker": "If the app posts obvious AI-looking content, uses my photos/voice without being super clear, or makes me sound like a bot trying to be funny, I’d delete it immediately.",
+        "surprise": "I’m more willing to pay for private embarrassment-reduction like dating profile help than for louder, more publicly 'creative' AI tools, because looking normal-cute is worth more to me than looking artificially impressive."
+      }
+    }
+  ],
+  "aggregate": {
+    "ranked": [
+      {
+        "idea_id": "meme-to-motion-studio",
+        "idea_name": "Meme-to-Motion Studio",
+        "simulator_score": 59,
+        "mentions": 2,
+        "first_place_votes": 2,
+        "try_intent_sum": 172,
+        "share_intent_sum": 160,
+        "pay_intent_sum": 103,
+        "retention_intent_sum": 131,
+        "quotes": [
+          "Maya: If this can turn my saved screenshots into decent hooks without making them look corny, that's actually useful.",
+          "Jules: If this makes my dumb screenshots look funnier without looking AI, I’m in."
+        ],
+        "objections": [
+          "Maya: My fear is it will over-automate the style and make everything look like the same AI-edited meme ad everyone is already tired of.",
+          "Jules: I’m scared it would make everything look like corny AI-generated content instead of something actually funny or native to TikTok."
+        ],
+        "triggers": [
+          "Maya: If I could drag in 5 screenshots and get 3 actually-good TikTok hook variations in under 10 minutes, I'd try it this week.",
+          "Jules: If I saw a TikTok where someone turned a group chat screenshot into a hilarious animated post in like 20 seconds, I’d download it that week."
+        ],
+        "avg_try_intent": 86,
+        "avg_share_intent": 80,
+        "avg_pay_intent": 52,
+        "avg_retention_intent": 66,
+        "ai_panel_score": 74
+      },
+      {
+        "idea_id": "pet-dub-universe",
+        "idea_name": "Pet Dub Universe",
+        "simulator_score": 55,
+        "mentions": 2,
+        "first_place_votes": 0,
+        "try_intent_sum": 105,
+        "share_intent_sum": 137,
+        "pay_intent_sum": 44,
+        "retention_intent_sum": 58,
+        "quotes": [
+          "Maya: This is cute, but it needs to be funny enough to justify the bit.",
+          "Jules: Cute for a bit, but it better be actually funny and not Facebook-core."
+        ],
+        "objections": [
+          "Maya: For me personally, it feels more like a novelty than a business tool, and I don't want to manage another content character unless it's clearly working.",
+          "Jules: This could get old insanely fast, and if the voice is too try-hard or millennial-brand funny, I’d delete it."
+        ],
+        "triggers": [
+          "Maya: If it had a ridiculously funny free demo with one uploaded pet photo and a consistent voice/personality, I'd mess with it.",
+          "Jules: If my friend made one genuinely hilarious clip of her cat that didn’t feel over-edited, I’d try it with a borrowed dog pic or my own pet."
+        ],
+        "avg_try_intent": 53,
+        "avg_share_intent": 69,
+        "avg_pay_intent": 22,
+        "avg_retention_intent": 29,
+        "ai_panel_score": 43
+      },
+      {
+        "idea_id": "ugc-ad-twin",
+        "idea_name": "UGC Ad Twin",
+        "simulator_score": 53,
+        "mentions": 2,
+        "first_place_votes": 0,
+        "try_intent_sum": 108,
+        "share_intent_sum": 70,
+        "pay_intent_sum": 75,
+        "retention_intent_sum": 62,
+        "quotes": [
+          "Maya: I don't mind AI helping with ad drafts, but I am not posting some weird fake girl holding a serum with six fingers.",
+          "Jules: Useful if I’m selling, but otherwise this is just helping the internet produce more ads."
+        ],
+        "objections": [
+          "Maya: I really do not want fake-looking creators or ads that get flagged or just feel shady. If it makes uncanny humans or overclaims products, that's a hard no.",
+          "Jules: As a normal user, this feels like making more ads, and I’m already tired of fake UGC that pretends to be authentic."
+        ],
+        "triggers": [
+          "Maya: I'd test it immediately if it showed before-and-after examples that actually look native, plus clear ad-policy guardrails and editable scripts.",
+          "Jules: Only if I was trying to sell something and needed a fast ad without filming a whole bunch of takes."
+        ],
+        "avg_try_intent": 54,
+        "avg_share_intent": 35,
+        "avg_pay_intent": 38,
+        "avg_retention_intent": 31,
+        "ai_panel_score": 39
+      },
+      {
+        "idea_id": "dating-profile-studio",
+        "idea_name": "Dating Profile Studio",
+        "simulator_score": 54,
+        "mentions": 2,
+        "first_place_votes": 0,
+        "try_intent_sum": 98,
+        "share_intent_sum": 69,
+        "pay_intent_sum": 51,
+        "retention_intent_sum": 56,
+        "quotes": [
+          "Maya: If AI writes your whole dating vibe, you're kind of outsourcing the point.",
+          "Jules: I’d pay a little if it made my profile feel hotter and less awkward, not more AI."
+        ],
+        "objections": [
+          "Maya: I don't love the idea of AI optimizing my personality, and anything too polished starts feeling fake fast.",
+          "Jules: If the rewrites sound too polished or flirty in a robotic way, I’d rather keep my bad profile than seem fake."
+        ],
+        "triggers": [
+          "Maya: I'd maybe try a free profile audit if I was actively dating again and it focused on authenticity instead of pickup-line nonsense.",
+          "Jules: If one of my friends said it helped her get better matches without changing her whole personality, I’d test it before redoing a profile."
+        ],
+        "avg_try_intent": 49,
+        "avg_share_intent": 35,
+        "avg_pay_intent": 26,
+        "avg_retention_intent": 28,
+        "ai_panel_score": 34
+      },
+      {
+        "idea_id": "language-roleplay-selfie-tutor",
+        "idea_name": "Language Roleplay Selfie Tutor",
+        "simulator_score": 53,
+        "mentions": 2,
+        "first_place_votes": 0,
+        "try_intent_sum": 89,
+        "share_intent_sum": 55,
+        "pay_intent_sum": 48,
+        "retention_intent_sum": 62,
+        "quotes": [
+          "Maya: I want less AI cosplay and more actually helping me not sound dumb ordering food.",
+          "Jules: I want useful travel confidence, not AI Duolingo cosplay."
+        ],
+        "objections": [
+          "Maya: The selfie part feels gimmicky to me. I care more about useful speaking practice than seeing myself awkwardly placed into scenes.",
+          "Jules: The selfie part could feel gimmicky fast, and I don’t want to look at AI versions of myself doing fake travel scenes."
+        ],
+        "triggers": [
+          "Maya: A travel-specific pack like 'Japan convenience store + airport + restaurant' with good voice feedback would get me to test it.",
+          "Jules: If I had a trip coming up and the app had short, practical packs for ordering food, directions, and basic conversation, I’d try it."
+        ],
+        "avg_try_intent": 45,
+        "avg_share_intent": 28,
+        "avg_pay_intent": 24,
+        "avg_retention_intent": 31,
+        "ai_panel_score": 32
+      },
+      {
+        "idea_id": "voice-journal-coach",
+        "idea_name": "Voice Journal Coach",
+        "simulator_score": 54,
+        "mentions": 2,
+        "first_place_votes": 0,
+        "try_intent_sum": 98,
+        "share_intent_sum": 42,
+        "pay_intent_sum": 32,
+        "retention_intent_sum": 73,
+        "quotes": [
+          "Maya: I already talk to my friends in voice notes for free, so this has to do more than summarize my spiral.",
+          "Jules: If it can organize my brain without being weirdly preachy, I’d maybe keep it."
+        ],
+        "objections": [
+          "Maya: I don't really want another self-improvement app trying to analyze my feelings, and I'd be worried about privacy with personal voice notes.",
+          "Jules: I do not want an app acting like my therapist or giving me fake-deep summaries that feel invasive."
+        ],
+        "triggers": [
+          "Maya: I'd only try it if someone I know said it helped them notice patterns without being cringe or overly therapy-bot.",
+          "Jules: If it had a super low-pressure vibe and I could drop in one voice note after a bad week and get a useful summary, I’d test it."
+        ],
+        "avg_try_intent": 49,
+        "avg_share_intent": 21,
+        "avg_pay_intent": 16,
+        "avg_retention_intent": 37,
+        "ai_panel_score": 31
+      },
+      {
+        "idea_id": "couple-compatibility-show",
+        "idea_name": "Couple Compatibility Show",
+        "simulator_score": 53,
+        "mentions": 2,
+        "first_place_votes": 0,
+        "try_intent_sum": 73,
+        "share_intent_sum": 94,
+        "pay_intent_sum": 35,
+        "retention_intent_sum": 29,
+        "quotes": [
+          "Maya: This sounds like something I'd try at 11 p.m. once and never open again.",
+          "Jules: This is cute for one night, not a whole lifestyle."
+        ],
+        "objections": [
+          "Maya: This feels like a one-off gimmick, and I'd be embarrassed if the tone was too cheesy or invasive.",
+          "Jules: I would only use this if it stays playful, because if it starts psychoanalyzing the relationship, that’s a hard no."
+        ],
+        "triggers": [
+          "Maya: Only if a friend used it and the final output was actually hilarious, not corny.",
+          "Jules: If it had a cute template that made a private recap video from stuff we already answered in Notes or iMessage, I’d try it for a special occasion."
+        ],
+        "avg_try_intent": 37,
+        "avg_share_intent": 47,
+        "avg_pay_intent": 18,
+        "avg_retention_intent": 15,
+        "ai_panel_score": 29
+      },
+      {
+        "idea_id": "family-lore-studio",
+        "idea_name": "Family Lore Studio",
+        "simulator_score": 54,
+        "mentions": 2,
+        "first_place_votes": 0,
+        "try_intent_sum": 72,
+        "share_intent_sum": 78,
+        "pay_intent_sum": 44,
+        "retention_intent_sum": 31,
+        "quotes": [
+          "Maya: This is sweet, just not something I'd use month to month.",
+          "Jules: I wouldn’t use this for me, but I might use it to make my mom cry in a good way."
+        ],
+        "objections": [
+          "Maya: It's not part of my regular life, so even if I like the idea, it's an occasional project not a recurring tool.",
+          "Jules: I’d be nervous it turns real family stuff into cheesy AI slop or over-edited fake nostalgia."
+        ],
+        "triggers": [
+          "Maya: A holiday or birthday use case with beautiful sample outputs would probably be the moment I'd test it.",
+          "Jules: If I needed a gift for my mom or grandparents and it could make something polished from photos I already have, that would push me."
+        ],
+        "avg_try_intent": 36,
+        "avg_share_intent": 39,
+        "avg_pay_intent": 22,
+        "avg_retention_intent": 16,
+        "ai_panel_score": 28
+      }
+    ],
+    "persona_count": 2,
+    "top_idea_id": "meme-to-motion-studio"
+  }
+}

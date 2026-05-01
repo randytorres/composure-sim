@@ -1,0 +1,117 @@
+{
+  "id": "selfrx-scenario-matrix",
+  "name": "SelfRX Scenario Matrix",
+  "description": "Runs the same acquisition wedge test across different launch worlds.",
+  "base_request": {
+    "id": "selfrx-matrix-base",
+    "name": "SelfRX Matrix Base",
+    "description": "Base variants and population for scenario matrix testing.",
+    "seed_base": 51,
+    "population": {
+      "target_count": 8000,
+      "sample_size": 12
+    },
+    "segments": [
+      {
+        "id": "proof_seekers",
+        "name": "Proof-Hungry Optimizers",
+        "share_weight": 0.55,
+        "traits": {
+          "proof_hunger": 0.88,
+          "privacy_sensitivity": 0.42,
+          "logging_tolerance": 0.58,
+          "social_sharing": 0.36
+        },
+        "channels": ["landing_page", "reddit", "newsletter"],
+        "objections": ["not enough proof", "too much manual logging"]
+      },
+      {
+        "id": "privacy_trackers",
+        "name": "Privacy-First Trackers",
+        "share_weight": 0.45,
+        "traits": {
+          "proof_hunger": 0.56,
+          "privacy_sensitivity": 0.92,
+          "logging_tolerance": 0.44,
+          "social_sharing": 0.22
+        },
+        "channels": ["reddit", "newsletter", "community"],
+        "objections": ["privacy", "data sharing"]
+      }
+    ],
+    "variants": [
+      {
+        "id": "proof_first",
+        "name": "Proof First",
+        "summary": "Weekly proof with confidence scores and concrete progress snapshots.",
+        "target_segments": ["proof_seekers"],
+        "channels": ["landing_page", "reddit"],
+        "trait_weights": {
+          "proof_hunger": 1.0,
+          "logging_tolerance": 0.3
+        },
+        "strengths": ["proof", "case study", "confidence"],
+        "risks": ["may feel too analytical"]
+      },
+      {
+        "id": "privacy_first",
+        "name": "Privacy First",
+        "summary": "A private, exportable protocol tracker that keeps sensitive health data controlled by the user.",
+        "target_segments": ["privacy_trackers"],
+        "channels": ["reddit", "newsletter"],
+        "trait_weights": {
+          "privacy_sensitivity": 1.0,
+          "proof_hunger": 0.2
+        },
+        "strengths": ["privacy", "private", "secure export"],
+        "risks": ["could underplay measurable outcomes"]
+      }
+    ],
+    "scenario": {
+      "id": "base",
+      "name": "Base",
+      "goal": "Base scenario for matrix overrides.",
+      "decision": "Pick one control and one challenger.",
+      "channels": ["landing_page", "reddit", "newsletter"],
+      "time_steps": 8,
+      "success_metrics": ["signup_rate", "activation_rate", "referral_rate"]
+    }
+  },
+  "cases": [
+    {
+      "id": "cheap_acquisition",
+      "name": "Cheap Acquisition",
+      "description": "Fast top-of-funnel test with Reddit and landing page pressure.",
+      "preset": "cheap_acquisition",
+      "seed_base": 61
+    },
+    {
+      "id": "trust_collapse",
+      "name": "Trust Collapse",
+      "description": "Privacy objections spike before conversion.",
+      "preset": "trust_collapse",
+      "seed_base": 62
+    },
+    {
+      "id": "referral_loop",
+      "name": "Referral Loop",
+      "description": "Community-sharing scenario that rewards second-order spread.",
+      "preset": "referral_loop",
+      "seed_base": 63
+    },
+    {
+      "id": "procurement_skepticism",
+      "name": "Procurement Skepticism",
+      "description": "Military or enterprise-style review with technical proof and buyer skepticism.",
+      "preset": "procurement_skepticism",
+      "seed_base": 64
+    },
+    {
+      "id": "gameplay_fatigue",
+      "name": "Gameplay Fatigue",
+      "description": "Repeated-session fatigue pattern for gameplay or loop-based products.",
+      "preset": "gameplay_fatigue",
+      "seed_base": 65
+    }
+  ]
+}

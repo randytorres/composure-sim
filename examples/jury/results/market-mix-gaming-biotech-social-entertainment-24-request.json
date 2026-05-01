@@ -1,0 +1,385 @@
+{
+  "id": "market-mix-gaming-biotech-social-entertainment-24",
+  "name": "Market Mix: Gaming / Biotech / Social / Entertainment",
+  "description": "Fresh GPT-5.5 comparative jury request. Mixes existing founder-fit sparks with market-researched new ideas across gaming worlds, biotech/body evidence, social rituals, entertainment formats, AGON/The Escape style seasons, and proof artifacts. Avoids generic AI tools and tests first artifacts.",
+  "run_mode": "comparative",
+  "concepts": [
+    {
+      "id": "realm-oath-court-mini",
+      "name": "REALM Oath Court Mini",
+      "summary": "Five nobles, one oath, one witness, one hidden grudge, one betrayal, and one Daily Raven receipt.",
+      "details": "First artifact: a 10-minute three-turn betrayal demo where the player can explain motive, oath, witness role, betrayal, and consequence without narrator help.",
+      "category": "gaming-story"
+    },
+    {
+      "id": "realm-witness-market",
+      "name": "REALM Witness Market",
+      "summary": "Every promise needs a witness, and witnesses can be bribed, protected, discredited, or exposed.",
+      "details": "Tests whether trust itself can become a playable economy rather than just a recap layer.",
+      "category": "gaming-story"
+    },
+    {
+      "id": "paragon-civilian-triage-crisis",
+      "name": "PARAGON Civilian Triage Crisis",
+      "summary": "One superhero mission where every save changes public trust, faction power, identity exposure, and civilian harm.",
+      "details": "First artifact: a crisis result card showing who was saved, what was damaged, who now hates you, and which faction gained leverage.",
+      "category": "gaming-story"
+    },
+    {
+      "id": "the-shop-after-midnight",
+      "name": "THE SHOP After Midnight",
+      "summary": "One late shift in a neighborhood shop with supplier failure, regulars, inspection risk, cash pressure, and one illegal favor.",
+      "details": "Grounded job sim with cozy routine plus moral stress. First artifact: shift report with customer consequences and cash drawer truth.",
+      "category": "job-sim"
+    },
+    {
+      "id": "tow-yard-cold-dispatch",
+      "name": "Tow Yard Cold Dispatch",
+      "summary": "Dispatch tow calls while cops, angry owners, impound rules, repair favors, and cash shortages pressure each choice.",
+      "details": "A blue-collar bureaucracy sim with teeth. First artifact: dispatch log that reveals whether the player became predatory, fair, or broke.",
+      "category": "job-sim"
+    },
+    {
+      "id": "cartel-heat-ledger",
+      "name": "Cartel Heat Ledger",
+      "summary": "Anti-glamour logistics strategy about routes, family pressure, informants, enforcement heat, and irreversible betrayal.",
+      "details": "First artifact: a cold ledger of damage, exposure, and betrayal. Must avoid cosplay/glorification.",
+      "category": "dark-strategy"
+    },
+    {
+      "id": "starlight-rival-district-week",
+      "name": "STARLIGHT Rival District Week",
+      "summary": "Anime/idol crews compete for district reputation, rehearsal slots, scandals, fan status, and generated clips from play.",
+      "details": "Tests whether STARLIGHT works better as a management/social game than as an episode generator.",
+      "category": "anime-entertainment"
+    },
+    {
+      "id": "the-witness-board",
+      "name": "The Witness Board",
+      "summary": "Social deduction where every claim needs a witness and every witness can sell, distort, or reveal the receipt.",
+      "details": "Discord-native social game. First artifact: a witness board that shows claim chains, contradictions, and betrayals.",
+      "category": "social-game"
+    },
+    {
+      "id": "bloodwork-mystery-board",
+      "name": "Bloodwork Mystery Board",
+      "summary": "Labs, wearables, symptoms, and protocol changes become a source-backed case board with open questions, not diagnosis.",
+      "details": "First artifact: lab mystery board with timeline, confounders, source citations, questions for provider/coach, and uncertainty labels.",
+      "category": "biotech-body-evidence"
+    },
+    {
+      "id": "cgm-meal-boss-battles",
+      "name": "CGM Meal Boss Battles",
+      "summary": "Meal experiments become quests: prediction, glucose curve, sleep/recovery context, and a shareable boss-defeated-or-not card.",
+      "details": "Consumer health as playful experiment design for OTC CGM and GLP-1 users, with no medical diagnosis claims.",
+      "category": "biotech-body-evidence"
+    },
+    {
+      "id": "glp1-muscle-shield-league",
+      "name": "GLP-1 Muscle Shield League",
+      "summary": "Protein, lifting, side effects, strength retention, and body-composition proof for people on GLP-1s who fear losing muscle.",
+      "details": "First audience is month-3 to month-9 GLP-1 users. First artifact: weekly muscle-retention proof card for clinician/coach discussion.",
+      "category": "biotech-body-evidence"
+    },
+    {
+      "id": "supplement-court-of-claims",
+      "name": "Supplement Court Of Claims",
+      "summary": "Every stack claim gets mechanistic evidence, human data quality, interaction cautions, cost, and what would falsify this cards.",
+      "details": "Tests whether skeptical biohackers want adversarial evidence more than another protocol tracker.",
+      "category": "biotech-body-evidence"
+    },
+    {
+      "id": "sleep-debt-escape-room",
+      "name": "Sleep Debt Escape Room",
+      "summary": "Friend/squad challenge where sleep, alcohol, late meals, training, and stress become a weekly escape puzzle with proof and penalties.",
+      "details": "AGON/The Escape crossed with wearable data. First artifact: squad escape board and body-data clue trail.",
+      "category": "biotech-social-game"
+    },
+    {
+      "id": "body-data-black-box",
+      "name": "Body Data Black Box",
+      "summary": "When a wearable score crashes, it reconstructs the likely causal chain from sleep, food, stress, training, illness, and context.",
+      "details": "First artifact: a crash reconstruction report with confidence labels, not generic wellness advice.",
+      "category": "biotech-body-evidence"
+    },
+    {
+      "id": "agon-seven-day-escape-pilot",
+      "name": "AGON Seven-Day Escape Pilot",
+      "summary": "Seven days, three-person squads, proof missions, public scoreboard, captain pressure, and one final in-person task.",
+      "details": "Smaller, less grandiose AGON test. First artifact: mission cards, proof feed, captain notes, and final squad report.",
+      "category": "agon-escape"
+    },
+    {
+      "id": "the-escape-city-keys",
+      "name": "The Escape City Keys",
+      "summary": "A city-based season where teams unlock physical locations, social tasks, endurance challenges, and proof cards.",
+      "details": "Tests The Escape as shared city ritual rather than grindset app. First audience: run clubs, founder groups, friend crews.",
+      "category": "agon-escape"
+    },
+    {
+      "id": "discord-quest-tribunal",
+      "name": "Discord Quest Tribunal",
+      "summary": "Communities run weekly quests, disputes, appeals, badges, and recap posts inside Discord.",
+      "details": "First artifact: quest verdict board that gives mods structure without custom live-ops chaos.",
+      "category": "social-ritual"
+    },
+    {
+      "id": "friend-group-newspaper-receipts",
+      "name": "Friend Group Newspaper With Receipts",
+      "summary": "Private weekly newspaper from approved photos, polls, jokes, claims, apologies, plans, and running lore.",
+      "details": "Tests whether the Daily Raven mechanism works for real friend groups, not just fantasy worlds.",
+      "category": "social-ritual"
+    },
+    {
+      "id": "reputation-weather-room",
+      "name": "Reputation Weather Room",
+      "summary": "Reputation shifts for fictional creators, companies, or factions visualized as weather fronts with evidence and counter-moves.",
+      "details": "A safe fictional strategy room for public perception mechanics. Avoids real-person harassment by default.",
+      "category": "social-strategy"
+    },
+    {
+      "id": "creator-feud-simulator-fiction",
+      "name": "Creator Feud Simulator: Safe Fiction",
+      "summary": "Fictionalized PR blowups where creators test fan factions, receipts, apologies, and escalation without targeting real people.",
+      "details": "First artifact: escalation map plus safe response scripts. Tests usefulness without feeding real drama.",
+      "category": "entertainment-strategy"
+    },
+    {
+      "id": "playable-trailer-lab",
+      "name": "Playable Trailer Lab",
+      "summary": "A film, album, game, or product pitch becomes a 60-second playable scene with replay stats and a shareable output.",
+      "details": "Tests whether entertainment pitches should be playable before they are watched.",
+      "category": "entertainment-format"
+    },
+    {
+      "id": "episode-aftermath-cards",
+      "name": "Episode Aftermath Cards",
+      "summary": "YouTube, Twitch, podcast, or anime episodes produce claim cards, faction polls, evidence links, character/status updates, and fan missions.",
+      "details": "First artifact: post-episode social kit that turns passive watching into community action.",
+      "category": "entertainment-format"
+    },
+    {
+      "id": "skywatch-unknown-card",
+      "name": "Skywatch Unknown Card",
+      "summary": "Film a weird sky object and receive a source-backed card with likely candidates, confidence, and what cannot be known.",
+      "details": "Sells honest uncertainty, not UFO bait. First artifact: beautiful field card with source links and confidence labels.",
+      "category": "mystery-proof"
+    },
+    {
+      "id": "specter-rf-ghost-replay",
+      "name": "SPECTER RF Ghost Replay",
+      "summary": "Strange RF, drone, noise, or signal events become replayable evidence packets with assumptions and provenance.",
+      "details": "Niche technical proof product. First artifact: RF ghost replay with source data, operator notes, and confidence labels.",
+      "category": "mystery-proof"
+    }
+  ],
+  "personas": [
+    {
+      "id": "randy_founder_fit",
+      "name": "Randy, founder choosing what world to live in",
+      "backstory": "Randy likes systems with taste: native games, simulation, operators, cinematic proof, serious worldbuilding, body-data weirdness, social artifacts, and command surfaces. He gets bored by generic SaaS, wellness dashboards, and creator-campaign ops even if they can make money.",
+      "priorities": [
+        "founder obsession",
+        "first artifact",
+        "taste advantage",
+        "worldbuilding leverage",
+        "non-generic audience"
+      ],
+      "turn_offs": [
+        "generic AI wrapper",
+        "boring admin",
+        "feature soup",
+        "fake enthusiasm",
+        "scope trap"
+      ],
+      "context": "He is deciding which idea is worth iterating on next, not merely which one sounds monetizable."
+    },
+    {
+      "id": "elena_game_investor",
+      "name": "Elena, 36, early-stage gaming investor",
+      "backstory": "Elena sees many AI game pitches and distrusts playable-looking videos. She likes narrow playable proof, retention loops, social drama, and systems that can ship before becoming a universe.",
+      "priorities": [
+        "real playable proof",
+        "retention loop",
+        "scope control",
+        "marketable artifact",
+        "team credibility"
+      ],
+      "turn_offs": [
+        "MMO first",
+        "fake trailers",
+        "AI content landfill",
+        "unbounded live ops"
+      ],
+      "context": "She judges what could earn a meeting or seed check."
+    },
+    {
+      "id": "maya_indie_producer",
+      "name": "Maya, 41, indie mobile producer",
+      "backstory": "Maya ships mobile games with tiny teams. She cares about the first playable, production burden, retention, creator assets, and whether a game survives real phones.",
+      "priorities": [
+        "small first loop",
+        "shipping feasibility",
+        "production cost",
+        "player clarity",
+        "repeatable content"
+      ],
+      "turn_offs": [
+        "giant lore bibles",
+        "custom cinematic treadmill",
+        "server complexity too early",
+        "unclear core loop"
+      ],
+      "context": "She asks what can ship as a first slice."
+    },
+    {
+      "id": "kai_streamer",
+      "name": "Kai, 22, streamer and Discord instigator",
+      "backstory": "Kai streams games, lore rabbit holes, weird tools, and public alphas. His chat wants things to argue about, clip, join, and turn into status.",
+      "priorities": [
+        "clipability",
+        "instant drama",
+        "chat participation",
+        "inside jokes",
+        "weird memorable artifacts"
+      ],
+      "turn_offs": [
+        "boring dashboards",
+        "long onboarding",
+        "fake lore",
+        "corporate creator tools"
+      ],
+      "context": "He asks whether this becomes a live bit, Discord obsession, or dead tab."
+    },
+    {
+      "id": "sasha_entertainment_producer",
+      "name": "Sasha, 34, creator and entertainment producer",
+      "backstory": "Sasha helps creators, musicians, and small studios launch fan activations. She wants repeatable formats that drive participation without turning each launch into fragile custom production.",
+      "priorities": [
+        "repeatable format",
+        "safe moderation",
+        "fan participation",
+        "assets to post",
+        "clear sponsor or ticket value"
+      ],
+      "turn_offs": [
+        "custom chaos",
+        "leaderboard disputes",
+        "unsafe fan drama",
+        "no measurable artifact"
+      ],
+      "context": "She judges whether a format can be sold and run more than once."
+    },
+    {
+      "id": "leah_discord_mod",
+      "name": "Leah, 29, Discord community moderator",
+      "backstory": "Leah moderates a 35k-member gaming and anime Discord. She has watched quests, rankings, lore debates, and social games turn fun for 36 hours and then become disputes.",
+      "priorities": [
+        "moderation control",
+        "low setup",
+        "appeals and receipts",
+        "clear rules",
+        "community energy"
+      ],
+      "turn_offs": [
+        "tools that create fights she has to clean up",
+        "opaque scoring",
+        "real-person dogpiling",
+        "account requirements"
+      ],
+      "context": "She is the skeptic for social and creator-community ideas."
+    },
+    {
+      "id": "theo_biohacker",
+      "name": "Theo, 38, longevity-focused biohacker",
+      "backstory": "Theo pays for quarterly bloodwork, wears an Oura ring, has tried Levels, and tracks supplements in a spreadsheet. He is tired of dashboards that show numbers without mechanistic explanation or exportable evidence.",
+      "priorities": [
+        "source-backed interpretation",
+        "experiment design",
+        "exportable data",
+        "confounder tracking",
+        "provider-readable output"
+      ],
+      "turn_offs": [
+        "vague wellness tips",
+        "diagnosis cosplay",
+        "locked data",
+        "beginner content"
+      ],
+      "context": "He will pay for precision and credibility, but only if the product treats him as advanced."
+    },
+    {
+      "id": "connie_glp1_user",
+      "name": "Connie, 47, GLP-1 user in month four",
+      "backstory": "Connie is down 22 pounds on semaglutide but is worried about muscle loss, protein intake, nausea, and whether she is doing this sustainably. She cancelled Noom and gets more practical advice from Reddit than her prescribing portal.",
+      "priorities": [
+        "muscle retention",
+        "simple food/lift proof",
+        "doctor-safe language",
+        "less shame",
+        "clear weekly progress"
+      ],
+      "turn_offs": [
+        "calorie guilt",
+        "medical overclaims",
+        "daily logging burden",
+        "body transformation cringe"
+      ],
+      "context": "She wants useful support without feeling like she joined a biohacker cult."
+    },
+    {
+      "id": "avery_clinician_skeptic",
+      "name": "Avery, 45, preventive medicine clinician",
+      "backstory": "Avery sees patients arrive with wearable screenshots, supplement stacks, online lab panels, and AI interpretations. Some are helpful, some are dangerous, and most lack context.",
+      "priorities": [
+        "no diagnosis claims",
+        "source quality",
+        "medication interaction caution",
+        "clinician-readable timeline",
+        "clear uncertainty"
+      ],
+      "turn_offs": [
+        "reckless protocol advice",
+        "supplement hype",
+        "ignoring contraindications",
+        "black-box scores"
+      ],
+      "context": "They judge whether a body-data product would make care easier or create cleanup work."
+    },
+    {
+      "id": "nate_escape_buyer",
+      "name": "Nate, 28, sober growth seeker and cohort buyer",
+      "backstory": "Nate is one year sober and has tried run clubs, men's circles, martial arts gyms, and a paid founder challenge. He wants real structure and brotherhood without cringe domination language.",
+      "priorities": [
+        "real-world action",
+        "small squads",
+        "earned status",
+        "emotional safety",
+        "a finale that means something"
+      ],
+      "turn_offs": [
+        "grindset branding",
+        "fake vulnerability",
+        "public humiliation",
+        "leaderboard theater"
+      ],
+      "context": "He is the buyer for AGON/The Escape-like products if they feel human rather than performative."
+    }
+  ],
+  "models": [
+    {
+      "id": "gpt-5-5",
+      "provider": "cliproxyapi",
+      "model": "gpt-5.5",
+      "max_output_tokens": 4096
+    }
+  ],
+  "samples_per_cell": 1,
+  "questions": [
+    "What is the strongest first artifact or first scene?",
+    "Would you try it, pay for it, tell a friend, or only admire it?",
+    "What makes this feel non-generic or founder-fit?",
+    "What is the most likely scope trap, safety issue, or trust failure?",
+    "What sharper variant should be tested next?"
+  ]
+}

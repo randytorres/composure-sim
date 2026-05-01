@@ -1,0 +1,1515 @@
+{
+  "id": "ai-consumer-idea-portfolio",
+  "name": "AI Consumer Idea Portfolio",
+  "description": "# Randy Stack 50 Cool, fun, challenging, rewarding ideas shaped around SAMAEL, REALM, AGON, Roviq, SelfRX, Forge, Airspace, Sentinel, and composure-sim. 1. OMEN PROVE - Build the DIU OMEN submission as an iPad demo with composure-sim running contested-envir...",
+  "seed_base": 9805647382296491687,
+  "population": {
+    "target_count": 10000,
+    "sample_size": 24
+  },
+  "segments": [
+    {
+      "id": "gen_z_social_creators",
+      "name": "Gen Z Social Creators",
+      "share_weight": 0.24,
+      "traits": {
+        "ai_openness": 0.86,
+        "habit_openness": 0.72,
+        "social_sharing": 0.92,
+        "spending_power": 0.46,
+        "trend_adoption": 0.88
+      },
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x",
+        "discord"
+      ],
+      "pains": [
+        "needs fresh identity loops",
+        "hates obvious ai slop"
+      ]
+    },
+    {
+      "id": "creator_operators",
+      "name": "Creator Operators",
+      "share_weight": 0.2,
+      "traits": {
+        "ai_openness": 0.92,
+        "habit_openness": 0.66,
+        "social_sharing": 0.82,
+        "spending_power": 0.74,
+        "trend_adoption": 0.78
+      },
+      "channels": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "newsletter"
+      ],
+      "pains": [
+        "needs monetizable output",
+        "needs faster production"
+      ]
+    },
+    {
+      "id": "local_business_owners",
+      "name": "Local Business Owners",
+      "share_weight": 0.16,
+      "traits": {
+        "ai_openness": 0.66,
+        "habit_openness": 0.54,
+        "social_sharing": 0.56,
+        "spending_power": 0.82,
+        "trend_adoption": 0.58
+      },
+      "channels": [
+        "instagram",
+        "google",
+        "facebook",
+        "tiktok"
+      ],
+      "pains": [
+        "needs customers now",
+        "has no time for content"
+      ]
+    },
+    {
+      "id": "parents_and_families",
+      "name": "Parents And Families",
+      "share_weight": 0.14,
+      "traits": {
+        "ai_openness": 0.58,
+        "habit_openness": 0.8,
+        "social_sharing": 0.7,
+        "spending_power": 0.76,
+        "trend_adoption": 0.52
+      },
+      "channels": [
+        "instagram",
+        "facebook",
+        "imessage",
+        "tiktok"
+      ],
+      "pains": [
+        "needs emotional keepsakes",
+        "needs trusted child-safe tools"
+      ]
+    },
+    {
+      "id": "gamers_and_builders",
+      "name": "Gamers And Builders",
+      "share_weight": 0.16,
+      "traits": {
+        "ai_openness": 0.9,
+        "habit_openness": 0.84,
+        "social_sharing": 0.78,
+        "spending_power": 0.62,
+        "trend_adoption": 0.74
+      },
+      "channels": [
+        "discord",
+        "tiktok",
+        "youtube",
+        "app_store"
+      ],
+      "pains": [
+        "wants playable creation",
+        "rejects shallow novelty"
+      ]
+    },
+    {
+      "id": "dating_app_fatigued",
+      "name": "Dating App Fatigued Adults",
+      "share_weight": 0.1,
+      "traits": {
+        "ai_openness": 0.54,
+        "habit_openness": 0.68,
+        "social_sharing": 0.62,
+        "spending_power": 0.7,
+        "trend_adoption": 0.62
+      },
+      "channels": [
+        "instagram",
+        "sms",
+        "events",
+        "tiktok"
+      ],
+      "pains": [
+        "wants irl connection",
+        "does not trust fake profiles"
+      ]
+    }
+  ],
+  "ideas": [
+    {
+      "id": "omen-prove",
+      "name": "OMEN PROVE",
+      "summary": "Build the DIU OMEN submission as an iPad demo with composure-sim running contested-environment scenarios and SAMAEL CORE underneath.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "breach-zero",
+      "name": "BREACH ZERO",
+      "summary": "Single-operator live SOC console with Sentinel feeds, AGON-tier UI, and a proof that one person plus engines can run an ops center.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "range-live",
+      "name": "RANGE LIVE",
+      "summary": "Mission rehearsal simulator with deterministic replay, branching outcomes, and generated after-action review.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-core",
+      "name": "SAMAEL CORE",
+      "summary": "Rust kernel and plugin architecture so BREACH, FLIGHT, RANGE, and defense modules become configs of one platform.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "skywatch",
+      "name": "SKYWATCH",
+      "summary": "iPhone sky AR that names and tracks aircraft, satellites, balloons, and drones from ADS-B, FAA, Starlink, and space data.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "wavehunt",
+      "name": "WAVEHUNT",
+      "summary": "Maritime intelligence app for vessels, AIS, weather, currents, and sanctions matches.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "coverstory",
+      "name": "COVERSTORY",
+      "summary": "Digital identity and OPSEC generator for journalists, activists, and dissidents with account orchestration and threat scoring.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "counterscope",
+      "name": "COUNTERSCOPE",
+      "summary": "Personal OSINT scanner that finds doxxing, family exposure, home address leaks, and online pattern risk.",
+      "category": "family",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "emotional utility"
+      ],
+      "risks": [
+        "trust and privacy sensitivity"
+      ]
+    },
+    {
+      "id": "realm-phase-1",
+      "name": "REALM PHASE 1",
+      "summary": "Ship Vhaegor live with a 1000-player server and egg, hatch, bond, POV, and battlefield loop end-to-end.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "cartel",
+      "name": "CARTEL",
+      "summary": "Roviq cartel strategy game mixing Risk, Narcos, real geopolitics, player economies, and cinematic season episodes.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "starlight",
+      "name": "STARLIGHT",
+      "summary": "Anime franchise as visual novel, city builder, multiplayer game, and generated seasonal episode arc.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ascendant",
+      "name": "ASCENDANT",
+      "summary": "Superhero game where Apple Watch biometrics change power, recovery, and embodied MMO progression.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-shop",
+      "name": "THE SHOP",
+      "summary": "Cozy job-sim where players build a real-feeling coffee shop, barbershop, or dispensary with a live economy.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "local_business_owners"
+      ],
+      "channels": [
+        "shopify"
+      ],
+      "trait_weights": {
+        "spending_power": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "the-week",
+      "name": "THE WEEK",
+      "summary": "Seven-day live-event strategy game for 100 players with alliances, betrayal, cash pot, and replay-based AAR.",
+      "category": "games",
+      "target_segments": [
+        "dating_app_fatigued",
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "events"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "grove",
+      "name": "GROVE",
+      "summary": "Forever D&D voice product with AI DM, persistent world memory, and six-month group campaigns.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity"
+      ]
+    },
+    {
+      "id": "vhaegor",
+      "name": "VHAEGOR",
+      "summary": "Standalone cinematic single-player chapter with Vision Pro showcase potential.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "order",
+      "name": "ORDER",
+      "summary": "Long-arc AGON graduation path with stages, Naming Day, Annual Book, and a ten-year identity game.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "the-annual-book",
+      "name": "THE ANNUAL BOOK",
+      "summary": "Physical AGON cohort artifact with letterpress, linen, foil, and beautiful proof that members were there.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "agon-fathers",
+      "name": "AGON FATHERS",
+      "summary": "Ninety-day brotherhood cohort for new dads starting in the third trimester.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "agon-founders",
+      "name": "AGON FOUNDERS",
+      "summary": "Ninety-day founder cohort where the Captain reviews code, pitch, runway, and shipping progress.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-pentathlon",
+      "name": "THE PENTATHLON",
+      "summary": "One-day regional AGON physical and mental competition with training cycle and winner-take-all prize.",
+      "category": "family",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-atlas",
+      "name": "THE ATLAS",
+      "summary": "Canon reading, listening, and watching platform with cohort-visible marginalia and slow serious media.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "captain-os",
+      "name": "CAPTAIN OS",
+      "summary": "Standalone AI captain for recurring groups like poker nights, run clubs, study groups, and founder dinners.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "council",
+      "name": "COUNCIL",
+      "summary": "Seven archetypal voices framework sold into grief, founder, religious, and recovery apps.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "the-bond-studio",
+      "name": "THE BOND STUDIO",
+      "summary": "Five photos and questions become a personalized spy film with cinematography, score, and gifting loop.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "starlight-episode",
+      "name": "STARLIGHT EPISODE",
+      "summary": "Prompt-to-eight-minute anime episode pipeline in the Starlight franchise style.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "annual-film",
+      "name": "ANNUAL FILM",
+      "summary": "Camera roll becomes a four-minute cinematic year film with cloned narration and original score.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "polish-poster-studio",
+      "name": "POLISH POSTER STUDIO",
+      "summary": "Brand-bible generator in the AC and AGON visual register with locked visual systems and outputs.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "nano-banana-studio",
+      "name": "NANO BANANA STUDIO",
+      "summary": "Daily content engine for serious creators with AC-tier discipline and automated image pipeline.",
+      "category": "creative_media",
+      "target_segments": [
+        "creator_operators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "habit_openness": 1.0,
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "creator monetization",
+        "image generation"
+      ],
+      "risks": [
+        "novelty decay"
+      ]
+    },
+    {
+      "id": "the-letter",
+      "name": "THE LETTER",
+      "summary": "Personalized animated short letter for birthdays, congratulations, breakups, eulogies, and intimate gifting.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "cartel-universe",
+      "name": "CARTEL UNIVERSE",
+      "summary": "Game and weekly prestige episodes where show events drive game state and game state drives show events.",
+      "category": "games",
+      "target_segments": [
+        "dating_app_fatigued",
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "events",
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ac-films",
+      "name": "AC FILMS",
+      "summary": "Daily automated AC branded short films with brand-bible enforcement and 365-spots-per-year discipline.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "selfrx-clinic",
+      "name": "SELFRX CLINIC",
+      "summary": "Compliant peptide telemedicine with real doctors, Quest/Labcorp labs, pharmacy, tracker, and aligned protocols.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "bloodwork",
+      "name": "BLOODWORK",
+      "summary": "Upload labs and receive research-grade narrative reports with citations and five-year trend tracking.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "hormone-os",
+      "name": "HORMONE OS",
+      "summary": "Tracker for TRT, HRT, and peptide users combining labs, symptoms, cycles, dose, and sleep.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "performance-os",
+      "name": "PERFORMANCE OS",
+      "summary": "Whole-life daily performance score across sleep, food, lift, RX, mood, recovery, and behavior.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-stack",
+      "name": "THE STACK",
+      "summary": "Personal longevity protocol app where users build, track, and share their own stack like Letterboxd for health.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ac-protocol",
+      "name": "AC PROTOCOL",
+      "summary": "Cannabis-as-tool recovery protocol app with AC brand discipline and prosumer daily tracking.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "forge-game",
+      "name": "FORGE GAME",
+      "summary": "Lovable for native iOS games: prompt to playable game with real Metal engine and Airspace updates.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "airspace-studio",
+      "name": "AIRSPACE STUDIO",
+      "summary": "OTA IR SaaS for indie iOS developers, like Vercel for app experiences.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "composure-play",
+      "name": "COMPOSURE PLAY",
+      "summary": "Deterministic replay product for poker games, fantasy matchups, sports events, and AAR for everything.",
+      "category": "games",
+      "target_segments": [
+        "dating_app_fatigued",
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "events"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "sentinel-consumer",
+      "name": "SENTINEL CONSUMER",
+      "summary": "Pro-class intel terminal for journalists, defense nerds, sailors, pilots, and prosumers.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "twinforge",
+      "name": "TWINFORGE",
+      "summary": "Digital twin product combining composure-sim, Sentinel, and Forge around one focused personal or operational twin.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "the-studio",
+      "name": "THE STUDIO",
+      "summary": "License Forge, Airspace, Sentinel, and Composure as the Roviq Tech Stack for indie game studios.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-order-pendant",
+      "name": "THE ORDER PENDANT",
+      "summary": "Physical AGON graduate artifact with aluminum, NFC, cohort page, and collectible status.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "counter-drone-home",
+      "name": "COUNTER-DRONE HOME",
+      "summary": "Civilian counter-UAS companion that identifies and logs what flew over your house.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-war-room",
+      "name": "THE WAR ROOM",
+      "summary": "Physical room kit with monitors, Mac mini, Sentinel, and custom AGON aesthetic case.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ronin-os",
+      "name": "RONIN OS",
+      "summary": "Focused sovereignty and wandering-warrior product around the RONIN concept.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "wargame",
+      "name": "WARGAME",
+      "summary": "Mobile multiplayer geopolitical sim with real-world data, deterministic replay, and seasonal country strategy.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "the-samael-anthology",
+      "name": "THE SAMAEL ANTHOLOGY",
+      "summary": "Annual physical book documenting the SAMAEL platform, modules, operators, and declassified achievements.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "tiktok_ig_viral_launch",
+      "name": "TikTok/IG Viral Launch",
+      "description": null,
+      "focus": "viral_launch",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "social_sharing": 1.0,
+        "trend_adoption": 0.8
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "social_commerce_conversion",
+      "name": "Social Commerce Conversion",
+      "description": null,
+      "focus": "social_commerce",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "shopify"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 0.4,
+        "spending_power": 0.9
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "novelty_decay_retention",
+      "name": "Novelty Decay Retention",
+      "description": null,
+      "focus": "retention",
+      "channels": [
+        "app_store",
+        "imessage",
+        "discord"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 0.5,
+        "habit_openness": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "paid_offer_pressure",
+      "name": "Paid Offer Pressure",
+      "description": null,
+      "focus": "paid_conversion",
+      "channels": [
+        "landing_page",
+        "app_store",
+        "email"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "spending_power": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "tiny_team_build_speed",
+      "name": "Tiny Team Build Speed",
+      "description": null,
+      "focus": "build_speed",
+      "channels": [
+        "app_store",
+        "web",
+        "api"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "ai_slop_backlash",
+      "name": "AI Slop Backlash",
+      "description": null,
+      "focus": "authenticity_backlash",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "social_sharing": 0.5,
+        "trend_adoption": 0.5
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "community_referral_loop",
+      "name": "Community Referral Loop",
+      "description": null,
+      "focus": "community_referral",
+      "channels": [
+        "discord",
+        "imessage",
+        "instagram",
+        "events"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "habit_openness": 0.7,
+        "social_sharing": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "idea_id": null,
+      "metric": "viral_loop",
+      "source": "Public trend scan",
+      "note": "Short-form social remains the distribution layer for consumer launches.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "ai_unlock",
+      "source": "AI tooling scan",
+      "note": "Coding agents, image/video generation, voice, and browser agents lower launch cost.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "risk_resilience",
+      "source": "AI slop backlash",
+      "note": "Generated novelty alone decays quickly unless tied to human proof, identity, or utility.",
+      "value": 0.48,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "willingness_to_pay",
+      "source": "Creator/social commerce benchmarks",
+      "note": "Creator, commerce, and utility workflows show stronger monetization than generic toys.",
+      "value": 0.68,
+      "sample_size": null
+    }
+  ]
+}

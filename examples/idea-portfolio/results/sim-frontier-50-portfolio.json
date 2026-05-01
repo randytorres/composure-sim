@@ -1,0 +1,1558 @@
+{
+  "id": "ai-consumer-idea-portfolio",
+  "name": "AI Consumer Idea Portfolio",
+  "description": "# Simulation Frontier 50 Broader product ideas around simulation, agents, games, life systems, local discovery, brand labs, and Roviq-scale worldbuilding. 1. The Life Strategy Simulator - composure-sim for real life: health, money, focus, dating, career, an...",
+  "seed_base": 9496267745528711797,
+  "population": {
+    "target_count": 10000,
+    "sample_size": 24
+  },
+  "segments": [
+    {
+      "id": "gen_z_social_creators",
+      "name": "Gen Z Social Creators",
+      "share_weight": 0.24,
+      "traits": {
+        "ai_openness": 0.86,
+        "habit_openness": 0.72,
+        "social_sharing": 0.92,
+        "spending_power": 0.46,
+        "trend_adoption": 0.88
+      },
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x",
+        "discord"
+      ],
+      "pains": [
+        "needs fresh identity loops",
+        "hates obvious ai slop"
+      ]
+    },
+    {
+      "id": "creator_operators",
+      "name": "Creator Operators",
+      "share_weight": 0.2,
+      "traits": {
+        "ai_openness": 0.92,
+        "habit_openness": 0.66,
+        "social_sharing": 0.82,
+        "spending_power": 0.74,
+        "trend_adoption": 0.78
+      },
+      "channels": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "newsletter"
+      ],
+      "pains": [
+        "needs monetizable output",
+        "needs faster production"
+      ]
+    },
+    {
+      "id": "local_business_owners",
+      "name": "Local Business Owners",
+      "share_weight": 0.16,
+      "traits": {
+        "ai_openness": 0.66,
+        "habit_openness": 0.54,
+        "social_sharing": 0.56,
+        "spending_power": 0.82,
+        "trend_adoption": 0.58
+      },
+      "channels": [
+        "instagram",
+        "google",
+        "facebook",
+        "tiktok"
+      ],
+      "pains": [
+        "needs customers now",
+        "has no time for content"
+      ]
+    },
+    {
+      "id": "parents_and_families",
+      "name": "Parents And Families",
+      "share_weight": 0.14,
+      "traits": {
+        "ai_openness": 0.58,
+        "habit_openness": 0.8,
+        "social_sharing": 0.7,
+        "spending_power": 0.76,
+        "trend_adoption": 0.52
+      },
+      "channels": [
+        "instagram",
+        "facebook",
+        "imessage",
+        "tiktok"
+      ],
+      "pains": [
+        "needs emotional keepsakes",
+        "needs trusted child-safe tools"
+      ]
+    },
+    {
+      "id": "gamers_and_builders",
+      "name": "Gamers And Builders",
+      "share_weight": 0.16,
+      "traits": {
+        "ai_openness": 0.9,
+        "habit_openness": 0.84,
+        "social_sharing": 0.78,
+        "spending_power": 0.62,
+        "trend_adoption": 0.74
+      },
+      "channels": [
+        "discord",
+        "tiktok",
+        "youtube",
+        "app_store"
+      ],
+      "pains": [
+        "wants playable creation",
+        "rejects shallow novelty"
+      ]
+    },
+    {
+      "id": "dating_app_fatigued",
+      "name": "Dating App Fatigued Adults",
+      "share_weight": 0.1,
+      "traits": {
+        "ai_openness": 0.54,
+        "habit_openness": 0.68,
+        "social_sharing": 0.62,
+        "spending_power": 0.7,
+        "trend_adoption": 0.62
+      },
+      "channels": [
+        "instagram",
+        "sms",
+        "events",
+        "tiktok"
+      ],
+      "pains": [
+        "wants irl connection",
+        "does not trust fake profiles"
+      ]
+    }
+  ],
+  "ideas": [
+    {
+      "id": "the-life-strategy-simulator",
+      "name": "The Life Strategy Simulator",
+      "summary": "composure-sim for real life: health, money, focus, dating, career, and risk.",
+      "category": "social_irl",
+      "target_segments": [
+        "dating_app_fatigued"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "founder-wargame",
+      "name": "Founder Wargame",
+      "summary": "Simulate startup moves, competitors, capital, distribution, and founder psychology.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders",
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "30-day-quest-league",
+      "name": "30-Day Quest League",
+      "summary": "Real-world challenge app where people form crews, compete, post proof, and level up.",
+      "category": "family",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "ai-game-studio-in-a-box",
+      "name": "AI Game Studio-in-a-Box",
+      "summary": "Agents make tiny iOS games from concept to art, mechanics, builds, and App Store copy.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders",
+        "local_business_owners"
+      ],
+      "channels": [
+        "app_store"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "playable-meme-engine",
+      "name": "Playable Meme Engine",
+      "summary": "Turn current memes and trends into microgames within 24 hours.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders",
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "social_sharing": 1.0,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "novelty decay"
+      ]
+    },
+    {
+      "id": "realm-builder-os",
+      "name": "Realm Builder OS",
+      "summary": "Worldbuilding tool for lore, factions, maps, economies, quests, and cinematic assets.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "personal-mythology-app",
+      "name": "Personal Mythology App",
+      "summary": "Turn your life, friends, goals, and conflicts into a private RPG.",
+      "category": "social_irl",
+      "target_segments": [
+        "gamers_and_builders",
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-anti-dating-app-dating-game",
+      "name": "The Anti-Dating-App Dating Game",
+      "summary": "IRL missions, group challenges, status, banter, and no endless swiping.",
+      "category": "games",
+      "target_segments": [
+        "dating_app_fatigued",
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "creator-owned-social-games",
+      "name": "Creator-Owned Social Games",
+      "summary": "Let influencers launch fan games with leaderboards, drops, and lore.",
+      "category": "games",
+      "target_segments": [
+        "creator_operators",
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "creator monetization",
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "marketing-war-room",
+      "name": "Marketing War Room",
+      "summary": "Agents monitor trends, generate campaigns, simulate outcomes, and deploy assets.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "taste-engine",
+      "name": "Taste Engine",
+      "summary": "AI that learns aesthetic judgment and becomes a creative director instead of a chatbot.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "product-launch-simulator",
+      "name": "Product Launch Simulator",
+      "summary": "Run 1000 simulated launch paths before spending ad money.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "tiktok-shop-combat-lab",
+      "name": "TikTok Shop Combat Lab",
+      "summary": "Social commerce spyglass plus AI creative factory plus creator outreach.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "creator_operators",
+        "gen_z_social_creators",
+        "local_business_owners"
+      ],
+      "channels": [
+        "shopify",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "social_sharing": 1.0,
+        "spending_power": 0.9,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "creator monetization"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-cool-local-stuff-radar",
+      "name": "The Cool Local Stuff Radar",
+      "summary": "Underground events, popups, gyms, barbers, food, music, and style scenes.",
+      "category": "creative_media",
+      "target_segments": [
+        "creator_operators",
+        "dating_app_fatigued",
+        "gen_z_social_creators",
+        "local_business_owners"
+      ],
+      "channels": [
+        "events"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "local demand"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ai-club-commissioner",
+      "name": "AI Club Commissioner",
+      "summary": "Software for leagues across fitness, poker, founders, creators, style, dating, and sports.",
+      "category": "social_irl",
+      "target_segments": [
+        "creator_operators",
+        "dating_app_fatigued",
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "social_sharing": 1.0,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "creator monetization"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "social-status-gym",
+      "name": "Social Status Gym",
+      "summary": "Challenges that train confidence, conversation, taste, fitness, and charisma.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "narrative-fitness-app",
+      "name": "Narrative Fitness App",
+      "summary": "Workouts become missions where progress unlocks story, rivalry, rank, and gear.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "agentic-resale-empire",
+      "name": "Agentic Resale Empire",
+      "summary": "Browser agents list, price, negotiate, and sell your closet or garage.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "personal-board-of-advisors",
+      "name": "Personal Board of Advisors",
+      "summary": "Persistent agents with roles such as strategist, critic, operator, trainer, and stylist.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "indie-game-clip-machine",
+      "name": "Indie Game Clip Machine",
+      "summary": "Records gameplay, finds moments, edits reels, writes captions, and posts.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "ai-brand-blacksite",
+      "name": "AI Brand Blacksite",
+      "summary": "Private lab where brands generate wild campaign concepts before public launch.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "world-in-a-weekend-engine",
+      "name": "World-in-a-Weekend Engine",
+      "summary": "Create a playable fictional universe from a paragraph.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "the-escape-app",
+      "name": "The Escape App",
+      "summary": "Men's 30-day league for physical, social, and mental capability.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "simulation-based-coaching",
+      "name": "Simulation-Based Coaching",
+      "summary": "Before you decide, run the model for career, habits, business, and relationships.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "local_business_owners"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1.0,
+        "spending_power": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "interactive-political-fantasy-mmo-prototype",
+      "name": "Interactive Political Fantasy MMO Prototype",
+      "summary": "Start with one city, one faction war, and real players.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ai-dungeon-master-for-real-life",
+      "name": "AI Dungeon Master for Real Life",
+      "summary": "Weekend missions for friend groups, couples, teams, and bachelor parties.",
+      "category": "social_irl",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "high-agency-kids-game-maker",
+      "name": "High-Agency Kids Game Maker",
+      "summary": "Kids draw or talk and the app turns it into playable games and storybooks.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders",
+        "parents_and_families"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "trust and privacy sensitivity"
+      ]
+    },
+    {
+      "id": "local-business-glow-up-bot",
+      "name": "Local Business Glow-Up Bot",
+      "summary": "Generate site, menu, ads, reels, and offers for small businesses.",
+      "category": "creative_media",
+      "target_segments": [
+        "local_business_owners"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "spending_power": 0.9
+      },
+      "strengths": [
+        "local demand"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "social-proof-engine",
+      "name": "Social Proof Engine",
+      "summary": "Capture wins, testimonials, transformations, and make them postable.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "decision-replay-system",
+      "name": "Decision Replay System",
+      "summary": "Record major decisions, assumptions, outcomes, and learn your own patterns.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "airspace-for-app-experiences",
+      "name": "Airspace for App Experiences",
+      "summary": "Remote-delivered SwiftUI surfaces so apps can evolve like websites.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "autonomous-qa-swarm",
+      "name": "Autonomous QA Swarm",
+      "summary": "Browser and computer agents test apps like impatient humans.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "personal-ops-center",
+      "name": "Personal Ops Center",
+      "summary": "One dashboard for projects, agents, tasks, money, health, content, and calendar.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ai-creative-sparring-partner",
+      "name": "AI Creative Sparring Partner",
+      "summary": "A non-polite assistant that argues, improves, pressure-tests, and provokes.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "viral-hook-casino",
+      "name": "Viral Hook Casino",
+      "summary": "Generate 100 hooks, simulate audiences, test micro-ads, and crown winners.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "viral loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "the-proof-not-promises-network",
+      "name": "The Proof Not Promises Network",
+      "summary": "Social app where every post requires real-world evidence.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "mission-rehearsal-for-civilians",
+      "name": "Mission Rehearsal for Civilians",
+      "summary": "Disaster prep, travel safety, home security, outdoor plans, and family ops.",
+      "category": "family",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "emotional utility"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "cinematic-memory-engine",
+      "name": "Cinematic Memory Engine",
+      "summary": "Convert life events into trailers, posters, fake documentaries, and recap reels.",
+      "category": "creative_media",
+      "target_segments": [
+        "dating_app_fatigued"
+      ],
+      "channels": [
+        "events"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "fictional-startup-generator",
+      "name": "Fictional Startup Generator",
+      "summary": "Build fake brands and products as art, satire, merch, games, or experiments.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ai-agency-with-no-employees",
+      "name": "AI Agency With No Employees",
+      "summary": "Coding, browser, image, and video agents run fulfillment behind a human taste layer.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "image generation",
+        "video generation"
+      ],
+      "risks": [
+        "novelty decay"
+      ]
+    },
+    {
+      "id": "game-feel-laboratory",
+      "name": "Game Feel Laboratory",
+      "summary": "Tooling to tune motion, hit feedback, controls, juice, difficulty, and retention.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "one-person-pixar-for-shorts",
+      "name": "One-Person Pixar for Shorts",
+      "summary": "Repeatable character, image, voice, animation, and publishing pipeline.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "voice agent",
+        "image generation"
+      ],
+      "risks": [
+        "novelty decay",
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "crowd-controlled-story-worlds",
+      "name": "Crowd-Controlled Story Worlds",
+      "summary": "Audiences vote, sabotage, ally, fund, and alter narrative outcomes.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "reality-show-app-for-friend-groups",
+      "name": "Reality Show App for Friend Groups",
+      "summary": "Weekly prompts, confessionals, awards, edits, and private or public modes.",
+      "category": "social_irl",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1.0,
+        "social_sharing": 1.0
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ai-style-rivalry-app",
+      "name": "AI Style Rivalry App",
+      "summary": "Outfit, room, brand, and profile battles judged by humans and AI.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "founder-arena",
+      "name": "Founder Arena",
+      "summary": "Competitive founder challenges to ship, sell, recruit, pitch, negotiate, and survive.",
+      "category": "family",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "cannabis-culture-commerce-engine",
+      "name": "Cannabis Culture Commerce Engine",
+      "summary": "Drops, strain storytelling, local events, creator reviews, and loyalty.",
+      "category": "social_irl",
+      "target_segments": [
+        "creator_operators",
+        "dating_app_fatigued",
+        "local_business_owners"
+      ],
+      "channels": [
+        "events"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0,
+        "social_sharing": 1.0,
+        "spending_power": 0.9
+      },
+      "strengths": [
+        "creator monetization",
+        "local demand"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "synthetic-media-attribution-game",
+      "name": "Synthetic Media Attribution Game",
+      "summary": "Teach people to detect AI content through competitive challenges.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders",
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "operator-training-simulator",
+      "name": "Operator Training Simulator",
+      "summary": "Tactical, logistics, and decision games with real-world seriousness and game polish.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "roviq-universe",
+      "name": "Roviq Universe",
+      "summary": "Connected house of tools, games, leagues, agents, and worlds with one recognizable taste.",
+      "category": "games",
+      "target_segments": [
+        "gamers_and_builders"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "strengths": [
+        "playable loop"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "tiktok_ig_viral_launch",
+      "name": "TikTok/IG Viral Launch",
+      "description": null,
+      "focus": "viral_launch",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "social_sharing": 1.0,
+        "trend_adoption": 0.8
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "social_commerce_conversion",
+      "name": "Social Commerce Conversion",
+      "description": null,
+      "focus": "social_commerce",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "shopify"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 0.4,
+        "spending_power": 0.9
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "novelty_decay_retention",
+      "name": "Novelty Decay Retention",
+      "description": null,
+      "focus": "retention",
+      "channels": [
+        "app_store",
+        "imessage",
+        "discord"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 0.5,
+        "habit_openness": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "paid_offer_pressure",
+      "name": "Paid Offer Pressure",
+      "description": null,
+      "focus": "paid_conversion",
+      "channels": [
+        "landing_page",
+        "app_store",
+        "email"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "spending_power": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "tiny_team_build_speed",
+      "name": "Tiny Team Build Speed",
+      "description": null,
+      "focus": "build_speed",
+      "channels": [
+        "app_store",
+        "web",
+        "api"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "ai_openness": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "ai_slop_backlash",
+      "name": "AI Slop Backlash",
+      "description": null,
+      "focus": "authenticity_backlash",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "social_sharing": 0.5,
+        "trend_adoption": 0.5
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "community_referral_loop",
+      "name": "Community Referral Loop",
+      "description": null,
+      "focus": "community_referral",
+      "channels": [
+        "discord",
+        "imessage",
+        "instagram",
+        "events"
+      ],
+      "weight": 1.0,
+      "intensity": 1.0,
+      "trait_weights": {
+        "habit_openness": 0.7,
+        "social_sharing": 1.0
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "idea_id": null,
+      "metric": "viral_loop",
+      "source": "Public trend scan",
+      "note": "Short-form social remains the distribution layer for consumer launches.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "ai_unlock",
+      "source": "AI tooling scan",
+      "note": "Coding agents, image/video generation, voice, and browser agents lower launch cost.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "risk_resilience",
+      "source": "AI slop backlash",
+      "note": "Generated novelty alone decays quickly unless tied to human proof, identity, or utility.",
+      "value": 0.48,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "willingness_to_pay",
+      "source": "Creator/social commerce benchmarks",
+      "note": "Creator, commerce, and utility workflows show stronger monetization than generic toys.",
+      "value": 0.68,
+      "sample_size": null
+    }
+  ]
+}

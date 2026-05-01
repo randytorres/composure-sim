@@ -1,0 +1,8 @@
+Gameplay test for a squad tactics loop.
+
+Angle A: mastery loop with repeatable skill growth.
+Angle B: social coordination loop for squads and community sharing.
+Angle C: novelty loop with surprising mission events.
+
+Stress the ideas against first-session activation, repeated play fatigue,
+referral loops, onboarding friction, trust collapse, and pricing pressure.

@@ -1,0 +1,9 @@
+{
+  "product_name": "Mission Signal Kit",
+  "prompt": "Military product for field operators and procurement buyers. Angle A: mission outcome proof for squad leaders. Angle B: integration-first deployment for technical evaluators. Angle C: procurement risk reduction for budget owners. Stress it against adoption friction, pricing pressure, trust collapse, and repeat field use.",
+  "case_count": 6,
+  "population": {
+    "target_count": 10000,
+    "sample_size": 24
+  }
+}

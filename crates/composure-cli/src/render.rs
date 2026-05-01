@@ -6,7 +6,9 @@ use composure_core::{
 };
 use composure_market::MarketSimulationResult;
 use composure_marketing::{
-    MarketingSimulationResultV2, MetricKind, SyntheticMarketSimulationResult,
+    ConceptRecommendationStatus, ConceptTestComparisonReport, ConceptTestMatrixResult,
+    ConceptTestResult, IdeaPortfolioResult, IdeaRecommendationStatus, MarketingSimulationResultV2,
+    MetricKind, SyntheticMarketSimulationResult,
 };
 
 pub(crate) fn format_bundle(bundle: &ExperimentBundle) -> String {
@@ -1550,7 +1552,7 @@ fn comparison_metric_labels(report: &MarketingV2ComparisonReport) -> Vec<String>
 
     let mut metrics = deltas_by_metric
         .into_iter()
-        .map(|(label, deltas)| (label, metric_delta_swing(deltas.into_iter())))
+        .map(|(label, deltas)| (label, metric_delta_swing(deltas)))
         .collect::<Vec<_>>();
     metrics.sort_by(|left, right| right.1.cmp(&left.1).then_with(|| left.0.cmp(&right.0)));
     metrics.into_iter().map(|(label, _)| label).collect()
@@ -1763,6 +1765,22 @@ where
         .unwrap_or_else(|| "n/a".into())
 }
 
+fn format_compare_metric_value(label: &str, value: f64) -> String {
+    if label == "overall_score" {
+        format!("{value:.0}")
+    } else {
+        format!("{:.2}%", value * 100.0)
+    }
+}
+
+fn format_compare_metric_delta(label: &str, value: f64) -> String {
+    if label == "overall_score" {
+        format!("{value:+.1}")
+    } else {
+        format!("{:+.2}pp", value * 100.0)
+    }
+}
+
 fn format_llm_usage(usage: &composure_marketing::LlmUsage) -> String {
     let mut parts = Vec::new();
     if let Some(input) = usage.input_tokens {
@@ -1874,6 +1892,633 @@ pub(crate) fn render_market_report_markdown(result: &MarketSimulationResult) -> 
         if result.buyers.len() > 20 {
             lines.push(String::new());
             lines.push(format!("... ({} more buyers)", result.buyers.len() - 20));
+        }
+    }
+
+    lines.join("\n")
+}
+
+pub(crate) fn render_concept_test_report_markdown(result: &ConceptTestResult) -> String {
+    let status_banner = match result.recommendation_status {
+        ConceptRecommendationStatus::Uncalibrated => format!(
+            "Status: top-ranked `{}` (uncalibrated — directional only)",
+            result
+                .top_ranked_variant_id
+                .as_deref()
+                .or(result.recommended_variant_id.as_deref())
+                .unwrap_or("n/a")
+        ),
+        ConceptRecommendationStatus::TiedWithinNoise => format!(
+            "Status: top-ranked `{}` (tied within noise — score CIs overlap)",
+            result
+                .top_ranked_variant_id
+                .as_deref()
+                .or(result.recommended_variant_id.as_deref())
+                .unwrap_or("n/a")
+        ),
+        ConceptRecommendationStatus::CalibratedRecommended => format!(
+            "Status: recommended `{}` (calibrated, top-2 score CIs do not overlap)",
+            result.recommended_variant_id.as_deref().unwrap_or("n/a")
+        ),
+    };
+    let mut lines = vec![
+        "# Concept Test Report".into(),
+        String::new(),
+        format!(
+            "Concept test: `{}` (`{}`)",
+            result.name, result.concept_test_id
+        ),
+        format!(
+            "Scenario: `{}` (`{}`)",
+            result.scenario.name, result.scenario.id
+        ),
+        format!("Population simulated: `{}`", result.total_population),
+        format!("Seed base: `{}`", result.seed_base),
+        status_banner,
+        String::new(),
+        "## Recommendation Notes".into(),
+    ];
+
+    if result.notes.is_empty() {
+        lines.push("No notes recorded.".into());
+    } else {
+        for note in &result.notes {
+            lines.push(format!("- {note}"));
+        }
+    }
+    lines.push(String::new());
+
+    lines.push("## Variant Leaderboard".into());
+    lines.push(String::new());
+    lines.push(
+        "| Rank | Variant | Score | 95% CI | Click | Signup | Activation | Retention | Referral | Strongest Segments |"
+            .into(),
+    );
+    lines.push("| --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |".into());
+    let top_score = result
+        .ranked_variants
+        .first()
+        .map(|variant| variant.overall_score);
+    for (index, variant) in result.ranked_variants.iter().enumerate() {
+        let ci = if variant.score_interval.sample_size >= 2 {
+            format!(
+                "{}-{}",
+                variant.score_interval.lower, variant.score_interval.upper
+            )
+        } else {
+            "n/a".into()
+        };
+        let score_cell = match top_score {
+            Some(top) if index > 0 => format!(
+                "{} ({:+})",
+                variant.overall_score,
+                variant.overall_score as i32 - top as i32
+            ),
+            _ => variant.overall_score.to_string(),
+        };
+        lines.push(format!(
+            "| {} | `{}` | {} | {} | {:.2}% | {:.2}% | {:.2}% | {:.2}% | {:.2}% | {} |",
+            index + 1,
+            variant.variant_id,
+            score_cell,
+            ci,
+            variant.funnel.click_rate * 100.0,
+            variant.funnel.signup_rate * 100.0,
+            variant.funnel.activation_rate * 100.0,
+            variant.funnel.retention_rate * 100.0,
+            variant.funnel.referral_rate * 100.0,
+            if variant.strongest_segments.is_empty() {
+                "n/a".into()
+            } else {
+                variant.strongest_segments.join(", ")
+            }
+        ));
+    }
+    lines.push(String::new());
+
+    if result
+        .ranked_variants
+        .iter()
+        .any(|variant| !variant.touchpoint_results.is_empty())
+    {
+        lines.push("## Timeline".into());
+        for variant in &result.ranked_variants {
+            if variant.touchpoint_results.is_empty() {
+                continue;
+            }
+            lines.push(String::new());
+            lines.push(format!("### {}", variant.variant_name));
+            lines.push(String::new());
+            lines.push("| Step | Focus | Channel | Score | Lift | Signup | Retention |".into());
+            lines.push("| --- | --- | --- | ---: | ---: | ---: | ---: |".into());
+            for touchpoint in &variant.touchpoint_results {
+                lines.push(format!(
+                    "| {} | `{}` | {} | {} | {} | {:.2}% | {:.2}% |",
+                    touchpoint.label,
+                    touchpoint.focus,
+                    touchpoint.channel.as_deref().unwrap_or("n/a"),
+                    touchpoint.score,
+                    touchpoint
+                        .lift_vs_previous_score
+                        .map(|value| value.to_string())
+                        .unwrap_or_else(|| "n/a".into()),
+                    touchpoint.funnel.signup_rate * 100.0,
+                    touchpoint.funnel.retention_rate * 100.0,
+                ));
+            }
+        }
+        lines.push(String::new());
+    }
+
+    if !result.segment_summaries.is_empty() {
+        lines.push("## Segment Winners".into());
+        lines.push(String::new());
+        lines.push("| Segment | Buyers | Winner | Score | Runner-up |".into());
+        lines.push("| --- | ---: | --- | ---: | --- |".into());
+        for segment in &result.segment_summaries {
+            lines.push(format!(
+                "| {} | {} | `{}` | {} | {} |",
+                segment.segment_name,
+                segment.buyers_simulated,
+                segment.best_variant_id,
+                segment.best_score,
+                segment.runner_up_variant_id.as_deref().unwrap_or("n/a")
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    if !result.calibration_summary.is_empty() {
+        lines.push("## Calibration".into());
+        lines.push(String::new());
+        lines.push("| Variant | Records | Usable | Sample | Metrics | Note |".into());
+        lines.push("| --- | ---: | ---: | ---: | --- | --- |".into());
+        for summary in &result.calibration_summary {
+            lines.push(format!(
+                "| `{}` | {} | {} | {} | {} | {} |",
+                summary.variant_id,
+                summary.observed_records,
+                summary.usable_observed_records,
+                summary
+                    .observed_sample_size
+                    .map(|value| value.to_string())
+                    .unwrap_or_else(|| "n/a".into()),
+                if summary.compared_metrics.is_empty() {
+                    "n/a".into()
+                } else {
+                    summary.compared_metrics.join(", ")
+                },
+                summary.note
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    if !result.touchpoint_calibration_summary.is_empty() {
+        lines.push("## Touchpoint Calibration".into());
+        lines.push(String::new());
+        lines.push("| Variant | Touchpoint | Records | Usable | Sample | Metrics | Note |".into());
+        lines.push("| --- | --- | ---: | ---: | ---: | --- | --- |".into());
+        for summary in &result.touchpoint_calibration_summary {
+            lines.push(format!(
+                "| `{}` | `{}` | {} | {} | {} | {} | {} |",
+                summary.variant_id,
+                summary.touchpoint_id.as_deref().unwrap_or("n/a"),
+                summary.observed_records,
+                summary.usable_observed_records,
+                summary
+                    .observed_sample_size
+                    .map(|value| value.to_string())
+                    .unwrap_or_else(|| "n/a".into()),
+                if summary.compared_metrics.is_empty() {
+                    "n/a".into()
+                } else {
+                    summary.compared_metrics.join(", ")
+                },
+                summary.note
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    if !result.sampled_individuals.is_empty() {
+        lines.push("## Sampled Individuals".into());
+        lines.push(String::new());
+        lines.push("| Individual | Segment | Top Variant | Score | Signup% | Activation% |".into());
+        lines.push("| --- | --- | --- | ---: | ---: | ---: |".into());
+        for individual in result.sampled_individuals.iter().take(20) {
+            lines.push(format!(
+                "| `{}` | `{}` | `{}` | {} | {} | {} |",
+                individual.individual_id,
+                individual.segment_id,
+                individual.top_variant_id,
+                individual.top_variant_score,
+                individual.signup_probability,
+                individual.activation_probability
+            ));
+        }
+    }
+
+    lines.join("\n")
+}
+
+pub(crate) fn render_idea_portfolio_markdown(result: &IdeaPortfolioResult) -> String {
+    let top_id = result
+        .top_ranked_idea_id
+        .as_deref()
+        .or(result.recommended_idea_id.as_deref())
+        .unwrap_or("n/a");
+    let status_banner = match result.recommendation_status {
+        IdeaRecommendationStatus::Uncalibrated => format!(
+            "Status: top-ranked `{top_id}` (uncalibrated — directional only)"
+        ),
+        IdeaRecommendationStatus::TiedWithinNoise => format!(
+            "Status: top-ranked `{top_id}` (tied within noise — top-2 score gap is below kernel resolution)"
+        ),
+        IdeaRecommendationStatus::EvidenceBackedRecommended => format!(
+            "Status: recommended `{}` (evidence-backed, clear lead)",
+            result.recommended_idea_id.as_deref().unwrap_or("n/a")
+        ),
+    };
+    let mut lines = vec![
+        "# Idea Portfolio Report".into(),
+        String::new(),
+        format!("Portfolio: `{}` (`{}`)", result.name, result.portfolio_id),
+        format!("Population simulated: `{}`", result.total_population),
+        format!("Seed base: `{}`", result.seed_base),
+        status_banner,
+    ];
+
+    if let Some(description) = &result.description {
+        lines.push(format!("Description: {description}"));
+    }
+
+    lines.push(String::new());
+    lines.push("## Notes".into());
+    if result.notes.is_empty() {
+        lines.push("No notes recorded.".into());
+    } else {
+        for note in &result.notes {
+            lines.push(format!("- {note}"));
+        }
+    }
+    lines.push(String::new());
+
+    lines.push("## Leaderboard".into());
+    lines.push(String::new());
+    lines.push("| Rank | Idea | Score | Gap | Market | Viral | Build | AI | Pay | Retention | Founder Fit | Strongest Segments |".into());
+    lines.push(
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |".into(),
+    );
+    let top_score = result.ranked_ideas.first().map(|idea| idea.overall_score);
+    for (index, idea) in result.ranked_ideas.iter().enumerate() {
+        let gap = match (top_score, index) {
+            (Some(top), idx) if idx > 0 => format!("{:+}", idea.overall_score as i32 - top as i32),
+            _ => "—".into(),
+        };
+        lines.push(format!(
+            "| {} | `{}` | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+            index + 1,
+            idea.idea_id,
+            idea.overall_score,
+            gap,
+            idea_metric_score(idea, "Market Pull"),
+            idea_metric_score(idea, "Viral Loop"),
+            idea_metric_score(idea, "Build Speed"),
+            idea_metric_score(idea, "AI Unlock"),
+            idea_metric_score(idea, "Willingness To Pay"),
+            idea_metric_score(idea, "Retention Fit"),
+            idea_metric_score(idea, "Founder Fit"),
+            joined_or_na(&idea.strongest_segments)
+        ));
+    }
+    lines.push(String::new());
+
+    if !result.scenario_summaries.is_empty() {
+        lines.push("## Scenario Winners".into());
+        lines.push(String::new());
+        lines.push("| Scenario | Focus | Winner | Score | Runner-up | Gap |".into());
+        lines.push("| --- | --- | --- | ---: | --- | ---: |".into());
+        for scenario in &result.scenario_summaries {
+            lines.push(format!(
+                "| {} | `{}` | `{}` | {} | {} | {} |",
+                scenario.scenario_name,
+                scenario.focus,
+                scenario.top_idea_id,
+                scenario.top_score,
+                scenario.runner_up_idea_id.as_deref().unwrap_or("n/a"),
+                scenario
+                    .score_gap_vs_runner_up
+                    .map(|value| value.to_string())
+                    .unwrap_or_else(|| "n/a".into())
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    for idea in result.ranked_ideas.iter().take(10) {
+        lines.push(format!("## {}", idea.idea_name));
+        lines.push(String::new());
+        lines.push(format!("- Idea ID: `{}`", idea.idea_id));
+        lines.push(format!("- Overall score: `{}`", idea.overall_score));
+        lines.push(format!(
+            "- Strongest segments: {}",
+            joined_or_na(&idea.strongest_segments)
+        ));
+        lines.push(format!(
+            "- Weakest segments: {}",
+            joined_or_na(&idea.weakest_segments)
+        ));
+        if !idea.evidence_notes.is_empty() {
+            lines.push(format!(
+                "- Evidence notes: {}",
+                idea.evidence_notes.join("; ")
+            ));
+        }
+        lines.push(String::new());
+        lines.push("| Scenario | Focus | Score | Adoption | Share | Pay | Best Segment |".into());
+        lines.push("| --- | --- | ---: | ---: | ---: | ---: | --- |".into());
+        for scenario in &idea.scenario_results {
+            let best_segment = scenario
+                .segment_results
+                .iter()
+                .max_by_key(|segment| segment.score)
+                .map(|segment| format!("{} ({})", segment.segment_name, segment.score))
+                .unwrap_or_else(|| "n/a".into());
+            let adoption = scenario
+                .segment_results
+                .iter()
+                .map(|segment| segment.adoption_probability)
+                .max()
+                .unwrap_or_default();
+            let share = scenario
+                .segment_results
+                .iter()
+                .map(|segment| segment.share_probability)
+                .max()
+                .unwrap_or_default();
+            let pay = scenario
+                .segment_results
+                .iter()
+                .map(|segment| segment.pay_probability)
+                .max()
+                .unwrap_or_default();
+            lines.push(format!(
+                "| {} | `{}` | {} | {} | {} | {} | {} |",
+                scenario.scenario_name,
+                scenario.focus,
+                scenario.score,
+                adoption,
+                share,
+                pay,
+                best_segment
+            ));
+        }
+        lines.push(String::new());
+    }
+
+    if !result.sampled_people.is_empty() {
+        lines.push("## Sampled People".into());
+        lines.push(String::new());
+        lines.push(
+            "| Person | Segment | Top Idea | Score | Runner-up | Adoption | Share | Pay |".into(),
+        );
+        lines.push("| --- | --- | --- | ---: | --- | ---: | ---: | ---: |".into());
+        for person in result.sampled_people.iter().take(30) {
+            lines.push(format!(
+                "| `{}` | `{}` | `{}` | {} | {} | {} | {} | {} |",
+                person.individual_id,
+                person.segment_id,
+                person.top_idea_id,
+                person.top_idea_score,
+                person.runner_up_idea_id.as_deref().unwrap_or("n/a"),
+                person.adoption_probability,
+                person.share_probability,
+                person.pay_probability
+            ));
+        }
+    }
+
+    lines.join("\n")
+}
+
+fn idea_metric_score(idea: &composure_marketing::IdeaResult, label: &str) -> u32 {
+    idea.metrics
+        .iter()
+        .find(|metric| metric.label == label)
+        .map(|metric| metric.score)
+        .unwrap_or_default()
+}
+
+fn joined_or_na(values: &[String]) -> String {
+    if values.is_empty() {
+        "n/a".into()
+    } else {
+        values.join(", ")
+    }
+}
+
+pub(crate) fn render_concept_test_compare_markdown(report: &ConceptTestComparisonReport) -> String {
+    let mut lines = vec![
+        "# Concept Test Comparison".into(),
+        String::new(),
+        format!("Comparison ID: `{}`", report.comparison_id),
+        format!("Compared tests: `{}`", report.compared_tests.len()),
+        String::new(),
+        "## Recommendation".into(),
+    ];
+
+    if report.recommendation.is_empty() {
+        lines.push("No recommendation generated.".into());
+    } else {
+        for note in &report.recommendation {
+            lines.push(format!("- {note}"));
+        }
+    }
+    if !report.repeated_winner_patterns.is_empty() {
+        lines.push(String::new());
+        lines.push("## Repeated Winner Patterns".into());
+        for pattern in &report.repeated_winner_patterns {
+            lines.push(format!("- {pattern}"));
+        }
+    }
+
+    lines.push(String::new());
+    lines.push("## Leaderboard".into());
+    lines.push(String::new());
+    lines.push(
+        "| Rank | Test | Scenario | Top Variant | Score | Gap | Signup | Activation | Calibration |"
+            .into(),
+    );
+    lines.push("| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |".into());
+    for (index, test) in report.tests.iter().enumerate() {
+        lines.push(format!(
+            "| {} | `{}` | {} | `{}` | {} | {} | {:.2}% | {:.2}% | `{}` |",
+            index + 1,
+            test.name,
+            test.scenario_name,
+            test.top_variant_id,
+            test.top_variant_score,
+            test.score_gap_vs_runner_up
+                .map(|value| value.to_string())
+                .unwrap_or_else(|| "n/a".into()),
+            test.top_variant_funnel.signup_rate * 100.0,
+            test.top_variant_funnel.activation_rate * 100.0,
+            test.calibration_status
+        ));
+    }
+
+    for test in &report.tests {
+        lines.push(String::new());
+        lines.push(format!("## {}", test.name));
+        lines.push(String::new());
+        lines.push(format!("- Source: `{}`", test.source));
+        lines.push(format!("- Top variant: `{}`", test.top_variant_id));
+        if let Some(runner_up) = &test.runner_up_variant_id {
+            lines.push(format!("- Runner-up: `{runner_up}`"));
+        }
+        if !test.segment_winners.is_empty() {
+            lines.push(String::new());
+            lines.push("### Segment Winners".into());
+            lines.push("| Segment | Winner | Score |".into());
+            lines.push("| --- | --- | ---: |".into());
+            for segment in &test.segment_winners {
+                lines.push(format!(
+                    "| {} | `{}` | {} |",
+                    segment.segment_name, segment.best_variant_id, segment.best_score
+                ));
+            }
+        }
+        if !test.metric_deltas.is_empty() {
+            lines.push(String::new());
+            lines.push("### Metric Deltas".into());
+            lines.push("| Metric | Value | Delta vs Avg | Rank | Leaders |".into());
+            lines.push("| --- | ---: | ---: | ---: | --- |".into());
+            for metric in &test.metric_deltas {
+                lines.push(format!(
+                    "| {} | {} | {} | {}/{} | {} |",
+                    metric.label,
+                    format_compare_metric_value(&metric.label, metric.value),
+                    format_compare_metric_delta(&metric.label, metric.delta_vs_compare_average),
+                    metric.compare_set_rank,
+                    metric.compare_set_size,
+                    if metric.leading_tests.is_empty() {
+                        "n/a".into()
+                    } else {
+                        metric.leading_tests.join(", ")
+                    }
+                ));
+            }
+        }
+    }
+
+    lines.join("\n")
+}
+
+pub(crate) fn render_concept_test_matrix_markdown(result: &ConceptTestMatrixResult) -> String {
+    let mut lines = vec![
+        "# Concept Test Matrix".into(),
+        String::new(),
+        format!("Matrix: `{}` (`{}`)", result.name, result.matrix_id),
+        format!("Cases: `{}`", result.cases.len()),
+        String::new(),
+        "## Recommendation".into(),
+    ];
+
+    if result.recommendation.is_empty() {
+        lines.push("No recommendation generated.".into());
+    } else {
+        for note in &result.recommendation {
+            lines.push(format!("- {note}"));
+        }
+    }
+
+    if !result.notes.is_empty() {
+        lines.push(String::new());
+        lines.push("## Notes".into());
+        for note in &result.notes {
+            lines.push(format!("- {note}"));
+        }
+    }
+
+    lines.push(String::new());
+    lines.push("## Variant Robustness".into());
+    lines.push(String::new());
+    lines.push("| Rank | Variant | Wins | Avg Score | Floor | Ceiling | Signup | Retention | Strong Cases | Weak Cases |".into());
+    lines.push("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |".into());
+    for (index, rollup) in result.variant_rollups.iter().enumerate() {
+        lines.push(format!(
+            "| {} | `{}` | {}/{} | {} | {} | {} | {:.2}% | {:.2}% | {} | {} |",
+            index + 1,
+            rollup.variant_id,
+            rollup.wins,
+            rollup.appearances,
+            rollup.average_score,
+            rollup.min_score,
+            rollup.max_score,
+            rollup.average_signup_rate * 100.0,
+            rollup.average_retention_rate * 100.0,
+            if rollup.strong_cases.is_empty() {
+                "n/a".into()
+            } else {
+                rollup.strong_cases.join(", ")
+            },
+            if rollup.weak_cases.is_empty() {
+                "n/a".into()
+            } else {
+                rollup.weak_cases.join(", ")
+            },
+        ));
+    }
+
+    lines.push(String::new());
+    lines.push("## Case Leaderboard".into());
+    lines.push(String::new());
+    lines.push("| Case | Scenario | Winner | Score | Gap | Signup | Calibration |".into());
+    lines.push("| --- | --- | --- | ---: | ---: | ---: | --- |".into());
+    for case in &result.cases {
+        let signup = case
+            .result
+            .ranked_variants
+            .first()
+            .map(|variant| variant.funnel.signup_rate * 100.0)
+            .unwrap_or_default();
+        lines.push(format!(
+            "| `{}` | {} | `{}` | {} | {} | {:.2}% | `{}` |",
+            case.case_id,
+            case.scenario_name,
+            case.top_variant_id,
+            case.top_variant_score,
+            case.score_gap_vs_runner_up
+                .map(|gap| gap.to_string())
+                .unwrap_or_else(|| "n/a".into()),
+            signup,
+            case.calibration_status,
+        ));
+    }
+
+    for case in &result.cases {
+        lines.push(String::new());
+        lines.push(format!("## {}", case.case_name));
+        lines.push(String::new());
+        lines.push(format!("- Scenario: `{}`", case.scenario_id));
+        lines.push(format!("- Winner: `{}`", case.top_variant_id));
+        if let Some(runner_up) = &case.runner_up_variant_id {
+            lines.push(format!("- Runner-up: `{runner_up}`"));
+        }
+        lines.push(String::new());
+        lines.push("| Rank | Variant | Score | Signup | Activation | Retention |".into());
+        lines.push("| --- | --- | ---: | ---: | ---: | ---: |".into());
+        for (index, variant) in case.result.ranked_variants.iter().enumerate() {
+            lines.push(format!(
+                "| {} | `{}` | {} | {:.2}% | {:.2}% | {:.2}% |",
+                index + 1,
+                variant.variant_id,
+                variant.overall_score,
+                variant.funnel.signup_rate * 100.0,
+                variant.funnel.activation_rate * 100.0,
+                variant.funnel.retention_rate * 100.0,
+            ));
         }
     }
 

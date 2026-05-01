@@ -1,0 +1,1263 @@
+{
+  "id": "all-200-jury",
+  "name": "All 200 Ideas \u2014 Jury Run",
+  "description": "randy-stack-50 + sim-frontier-50 + project-informed-50 + consumer-ai-viral-50 through Claude Opus 4.7, GPT-5.5, DeepSeek V4 Flash.",
+  "concepts": [
+    {
+      "id": "randy-stack-omen-prove",
+      "name": "OMEN PROVE",
+      "summary": "Build the DIU OMEN submission as an iPad demo with composure-sim running contested-environment scenarios and SAMAEL CORE underneath.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-breach-zero",
+      "name": "BREACH ZERO",
+      "summary": "Single-operator live SOC console with Sentinel feeds, AGON-tier UI, and a proof that one person plus engines can run an ops center.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-range-live",
+      "name": "RANGE LIVE",
+      "summary": "Mission rehearsal simulator with deterministic replay, branching outcomes, and generated after-action review.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-samael-core",
+      "name": "SAMAEL CORE",
+      "summary": "Rust kernel and plugin architecture so BREACH, FLIGHT, RANGE, and defense modules become configs of one platform.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-skywatch",
+      "name": "SKYWATCH",
+      "summary": "iPhone sky AR that names and tracks aircraft, satellites, balloons, and drones from ADS-B, FAA, Starlink, and space data.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-wavehunt",
+      "name": "WAVEHUNT",
+      "summary": "Maritime intelligence app for vessels, AIS, weather, currents, and sanctions matches.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-coverstory",
+      "name": "COVERSTORY",
+      "summary": "Digital identity and OPSEC generator for journalists, activists, and dissidents with account orchestration and threat scoring.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-counterscope",
+      "name": "COUNTERSCOPE",
+      "summary": "Personal OSINT scanner that finds doxxing, family exposure, home address leaks, and online pattern risk.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-realm-phase-1",
+      "name": "REALM PHASE 1",
+      "summary": "Ship Vhaegor live with a 1000-player server and egg, hatch, bond, POV, and battlefield loop end-to-end.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-cartel",
+      "name": "CARTEL",
+      "summary": "Roviq cartel strategy game mixing Risk, Narcos, real geopolitics, player economies, and cinematic season episodes.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-starlight",
+      "name": "STARLIGHT",
+      "summary": "Anime franchise as visual novel, city builder, multiplayer game, and generated seasonal episode arc.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-ascendant",
+      "name": "ASCENDANT",
+      "summary": "Superhero game where Apple Watch biometrics change power, recovery, and embodied MMO progression.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-shop",
+      "name": "THE SHOP",
+      "summary": "Cozy job-sim where players build a real-feeling coffee shop, barbershop, or dispensary with a live economy.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-week",
+      "name": "THE WEEK",
+      "summary": "Seven-day live-event strategy game for 100 players with alliances, betrayal, cash pot, and replay-based AAR.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-grove",
+      "name": "GROVE",
+      "summary": "Forever D&D voice product with AI DM, persistent world memory, and six-month group campaigns.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-vhaegor",
+      "name": "VHAEGOR",
+      "summary": "Standalone cinematic single-player chapter with Vision Pro showcase potential.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-order",
+      "name": "ORDER",
+      "summary": "Long-arc AGON graduation path with stages, Naming Day, Annual Book, and a ten-year identity game.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-annual-book",
+      "name": "THE ANNUAL BOOK",
+      "summary": "Physical AGON cohort artifact with letterpress, linen, foil, and beautiful proof that members were there.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-agon-fathers",
+      "name": "AGON FATHERS",
+      "summary": "Ninety-day brotherhood cohort for new dads starting in the third trimester.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-agon-founders",
+      "name": "AGON FOUNDERS",
+      "summary": "Ninety-day founder cohort where the Captain reviews code, pitch, runway, and shipping progress.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-pentathlon",
+      "name": "THE PENTATHLON",
+      "summary": "One-day regional AGON physical and mental competition with training cycle and winner-take-all prize.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-atlas",
+      "name": "THE ATLAS",
+      "summary": "Canon reading, listening, and watching platform with cohort-visible marginalia and slow serious media.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-captain-os",
+      "name": "CAPTAIN OS",
+      "summary": "Standalone AI captain for recurring groups like poker nights, run clubs, study groups, and founder dinners.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-council",
+      "name": "COUNCIL",
+      "summary": "Seven archetypal voices framework sold into grief, founder, religious, and recovery apps.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-bond-studio",
+      "name": "THE BOND STUDIO",
+      "summary": "Five photos and questions become a personalized spy film with cinematography, score, and gifting loop.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-starlight-episode",
+      "name": "STARLIGHT EPISODE",
+      "summary": "Prompt-to-eight-minute anime episode pipeline in the Starlight franchise style.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-annual-film",
+      "name": "ANNUAL FILM",
+      "summary": "Camera roll becomes a four-minute cinematic year film with cloned narration and original score.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-polish-poster-studio",
+      "name": "POLISH POSTER STUDIO",
+      "summary": "Brand-bible generator in the AC and AGON visual register with locked visual systems and outputs.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-nano-banana-studio",
+      "name": "NANO BANANA STUDIO",
+      "summary": "Daily content engine for serious creators with AC-tier discipline and automated image pipeline.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-letter",
+      "name": "THE LETTER",
+      "summary": "Personalized animated short letter for birthdays, congratulations, breakups, eulogies, and intimate gifting.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-cartel-universe",
+      "name": "CARTEL UNIVERSE",
+      "summary": "Game and weekly prestige episodes where show events drive game state and game state drives show events.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-ac-films",
+      "name": "AC FILMS",
+      "summary": "Daily automated AC branded short films with brand-bible enforcement and 365-spots-per-year discipline.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-selfrx-clinic",
+      "name": "SELFRX CLINIC",
+      "summary": "Compliant peptide telemedicine with real doctors, Quest/Labcorp labs, pharmacy, tracker, and aligned protocols.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-bloodwork",
+      "name": "BLOODWORK",
+      "summary": "Upload labs and receive research-grade narrative reports with citations and five-year trend tracking.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-hormone-os",
+      "name": "HORMONE OS",
+      "summary": "Tracker for TRT, HRT, and peptide users combining labs, symptoms, cycles, dose, and sleep.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-performance-os",
+      "name": "PERFORMANCE OS",
+      "summary": "Whole-life daily performance score across sleep, food, lift, RX, mood, recovery, and behavior.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-stack",
+      "name": "THE STACK",
+      "summary": "Personal longevity protocol app where users build, track, and share their own stack like Letterboxd for health.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-ac-protocol",
+      "name": "AC PROTOCOL",
+      "summary": "Cannabis-as-tool recovery protocol app with AC brand discipline and prosumer daily tracking.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-forge-game",
+      "name": "FORGE GAME",
+      "summary": "Lovable for native iOS games: prompt to playable game with real Metal engine and Airspace updates.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-airspace-studio",
+      "name": "AIRSPACE STUDIO",
+      "summary": "OTA IR SaaS for indie iOS developers, like Vercel for app experiences.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-composure-play",
+      "name": "COMPOSURE PLAY",
+      "summary": "Deterministic replay product for poker games, fantasy matchups, sports events, and AAR for everything.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-sentinel-consumer",
+      "name": "SENTINEL CONSUMER",
+      "summary": "Pro-class intel terminal for journalists, defense nerds, sailors, pilots, and prosumers.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-twinforge",
+      "name": "TWINFORGE",
+      "summary": "Digital twin product combining composure-sim, Sentinel, and Forge around one focused personal or operational twin.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-studio",
+      "name": "THE STUDIO",
+      "summary": "License Forge, Airspace, Sentinel, and Composure as the Roviq Tech Stack for indie game studios.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-order-pendant",
+      "name": "THE ORDER PENDANT",
+      "summary": "Physical AGON graduate artifact with aluminum, NFC, cohort page, and collectible status.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-counter",
+      "name": "COUNTER",
+      "summary": "DRONE HOME - Civilian counter-UAS companion that identifies and logs what flew over your house.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-war-room",
+      "name": "THE WAR ROOM",
+      "summary": "Physical room kit with monitors, Mac mini, Sentinel, and custom AGON aesthetic case.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-ronin-os",
+      "name": "RONIN OS",
+      "summary": "Focused sovereignty and wandering-warrior product around the RONIN concept.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-wargame",
+      "name": "WARGAME",
+      "summary": "Mobile multiplayer geopolitical sim with real-world data, deterministic replay, and seasonal country strategy.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "randy-stack-the-samael-anthology",
+      "name": "THE SAMAEL ANTHOLOGY",
+      "summary": "Annual physical book documenting the SAMAEL platform, modules, operators, and declassified achievements.",
+      "category": "randy-stack-50"
+    },
+    {
+      "id": "sim-frontier-the-life-strategy-simulator",
+      "name": "The Life Strategy Simulator",
+      "summary": "composure-sim for real life: health, money, focus, dating, career, and risk.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-founder-wargame",
+      "name": "Founder Wargame",
+      "summary": "Simulate startup moves, competitors, capital, distribution, and founder psychology.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-30",
+      "name": "30",
+      "summary": "Day Quest League - Real-world challenge app where people form crews, compete, post proof, and level up.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-ai-game-studio",
+      "name": "AI Game Studio",
+      "summary": "in-a-Box - Agents make tiny iOS games from concept to art, mechanics, builds, and App Store copy.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-playable-meme-engine",
+      "name": "Playable Meme Engine",
+      "summary": "Turn current memes and trends into microgames within 24 hours.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-realm-builder-os",
+      "name": "Realm Builder OS",
+      "summary": "Worldbuilding tool for lore, factions, maps, economies, quests, and cinematic assets.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-personal-mythology-app",
+      "name": "Personal Mythology App",
+      "summary": "Turn your life, friends, goals, and conflicts into a private RPG.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-the-anti",
+      "name": "The Anti",
+      "summary": "Dating-App Dating Game - IRL missions, group challenges, status, banter, and no endless swiping.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-creator",
+      "name": "Creator",
+      "summary": "Owned Social Games - Let influencers launch fan games with leaderboards, drops, and lore.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-marketing-war-room",
+      "name": "Marketing War Room",
+      "summary": "Agents monitor trends, generate campaigns, simulate outcomes, and deploy assets.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-taste-engine",
+      "name": "Taste Engine",
+      "summary": "AI that learns aesthetic judgment and becomes a creative director instead of a chatbot.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-product-launch-simulator",
+      "name": "Product Launch Simulator",
+      "summary": "Run 1000 simulated launch paths before spending ad money.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-tiktok-shop-combat-lab",
+      "name": "TikTok Shop Combat Lab",
+      "summary": "Social commerce spyglass plus AI creative factory plus creator outreach.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-the-cool-local-stuff-radar",
+      "name": "The Cool Local Stuff Radar",
+      "summary": "Underground events, popups, gyms, barbers, food, music, and style scenes.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-ai-club-commissioner",
+      "name": "AI Club Commissioner",
+      "summary": "Software for leagues across fitness, poker, founders, creators, style, dating, and sports.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-social-status-gym",
+      "name": "Social Status Gym",
+      "summary": "Challenges that train confidence, conversation, taste, fitness, and charisma.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-narrative-fitness-app",
+      "name": "Narrative Fitness App",
+      "summary": "Workouts become missions where progress unlocks story, rivalry, rank, and gear.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-agentic-resale-empire",
+      "name": "Agentic Resale Empire",
+      "summary": "Browser agents list, price, negotiate, and sell your closet or garage.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-personal-board-of-advisors",
+      "name": "Personal Board of Advisors",
+      "summary": "Persistent agents with roles such as strategist, critic, operator, trainer, and stylist.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-indie-game-clip-machine",
+      "name": "Indie Game Clip Machine",
+      "summary": "Records gameplay, finds moments, edits reels, writes captions, and posts.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-ai-brand-blacksite",
+      "name": "AI Brand Blacksite",
+      "summary": "Private lab where brands generate wild campaign concepts before public launch.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-world",
+      "name": "World",
+      "summary": "in-a-Weekend Engine - Create a playable fictional universe from a paragraph.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-the-escape-app",
+      "name": "The Escape App",
+      "summary": "Men's 30-day league for physical, social, and mental capability.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-simulation",
+      "name": "Simulation",
+      "summary": "Based Coaching - Before you decide, run the model for career, habits, business, and relationships.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-interactive-political-fantasy-mmo-prototype",
+      "name": "Interactive Political Fantasy MMO Prototype",
+      "summary": "Start with one city, one faction war, and real players.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-ai-dungeon-master-for-real-life",
+      "name": "AI Dungeon Master for Real Life",
+      "summary": "Weekend missions for friend groups, couples, teams, and bachelor parties.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-high",
+      "name": "High",
+      "summary": "Agency Kids Game Maker - Kids draw or talk and the app turns it into playable games and storybooks.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-local-business-glow",
+      "name": "Local Business Glow",
+      "summary": "Up Bot - Generate site, menu, ads, reels, and offers for small businesses.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-social-proof-engine",
+      "name": "Social Proof Engine",
+      "summary": "Capture wins, testimonials, transformations, and make them postable.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-decision-replay-system",
+      "name": "Decision Replay System",
+      "summary": "Record major decisions, assumptions, outcomes, and learn your own patterns.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-airspace-for-app-experiences",
+      "name": "Airspace for App Experiences",
+      "summary": "Remote-delivered SwiftUI surfaces so apps can evolve like websites.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-autonomous-qa-swarm",
+      "name": "Autonomous QA Swarm",
+      "summary": "Browser and computer agents test apps like impatient humans.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-personal-ops-center",
+      "name": "Personal Ops Center",
+      "summary": "One dashboard for projects, agents, tasks, money, health, content, and calendar.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-ai-creative-sparring-partner",
+      "name": "AI Creative Sparring Partner",
+      "summary": "A non-polite assistant that argues, improves, pressure-tests, and provokes.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-viral-hook-casino",
+      "name": "Viral Hook Casino",
+      "summary": "Generate 100 hooks, simulate audiences, test micro-ads, and crown winners.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-the-proof-not-promises-network",
+      "name": "The Proof Not Promises Network",
+      "summary": "Social app where every post requires real-world evidence.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-mission-rehearsal-for-civilians",
+      "name": "Mission Rehearsal for Civilians",
+      "summary": "Disaster prep, travel safety, home security, outdoor plans, and family ops.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-cinematic-memory-engine",
+      "name": "Cinematic Memory Engine",
+      "summary": "Convert life events into trailers, posters, fake documentaries, and recap reels.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-fictional-startup-generator",
+      "name": "Fictional Startup Generator",
+      "summary": "Build fake brands and products as art, satire, merch, games, or experiments.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-ai-agency-with-no-employees",
+      "name": "AI Agency With No Employees",
+      "summary": "Coding, browser, image, and video agents run fulfillment behind a human taste layer.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-game-feel-laboratory",
+      "name": "Game Feel Laboratory",
+      "summary": "Tooling to tune motion, hit feedback, controls, juice, difficulty, and retention.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-one",
+      "name": "One",
+      "summary": "Person Pixar for Shorts - Repeatable character, image, voice, animation, and publishing pipeline.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-crowd",
+      "name": "Crowd",
+      "summary": "Controlled Story Worlds - Audiences vote, sabotage, ally, fund, and alter narrative outcomes.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-reality-show-app-for-friend-groups",
+      "name": "Reality Show App for Friend Groups",
+      "summary": "Weekly prompts, confessionals, awards, edits, and private or public modes.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-ai-style-rivalry-app",
+      "name": "AI Style Rivalry App",
+      "summary": "Outfit, room, brand, and profile battles judged by humans and AI.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-founder-arena",
+      "name": "Founder Arena",
+      "summary": "Competitive founder challenges to ship, sell, recruit, pitch, negotiate, and survive.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-cannabis-culture-commerce-engine",
+      "name": "Cannabis Culture Commerce Engine",
+      "summary": "Drops, strain storytelling, local events, creator reviews, and loyalty.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-synthetic-media-attribution-game",
+      "name": "Synthetic Media Attribution Game",
+      "summary": "Teach people to detect AI content through competitive challenges.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-operator-training-simulator",
+      "name": "Operator Training Simulator",
+      "summary": "Tactical, logistics, and decision games with real-world seriousness and game polish.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "sim-frontier-roviq-universe",
+      "name": "Roviq Universe",
+      "summary": "Connected house of tools, games, leagues, agents, and worlds with one recognizable taste.",
+      "category": "sim-frontier-50"
+    },
+    {
+      "id": "project-informed-forge-game",
+      "name": "FORGE GAME",
+      "summary": "Prompt-to-playable native iOS game maker built on Forge's C++20 runtime, Swift gameplay/editor layer, direct Metal renderer, haptics/audio feedback stack, replay/debug hooks, and AI patch-review control plane.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-vanguard-alpha",
+      "name": "PARAGON VANGUARD ALPHA",
+      "summary": "Mobile MMO superhero closed alpha with VANGUARD as the first playable faction, Public Trust, Court of Named People, identity exposure, rooftop arrival combat, civilian triage, and prestige drama as differentiation.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-vhaegor-proof",
+      "name": "REALM VHAEGOR PROOF",
+      "summary": "Ship the Phase 1 dragon proof path: egg discovery, hatching ritual, dragonrider bond, Dragon POV short session, battlefield consequence, and Vhaegor the Storm-Bringer as the named dragon target.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-breach-zero",
+      "name": "SAMAEL BREACH ZERO",
+      "summary": "Facility, ship, and compound rehearsal surface where evidence becomes STRATA world package, physics graph, VECTOR routes, SPECTER RF, MURMUR adversary/civilian behavior, and signed AAR.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-agon-the-first-watch",
+      "name": "AGON THE FIRST WATCH",
+      "summary": "100-man, 10-squad, 30-day Season 1 with $99 entry, Mission Card, Proof Feed, Locker Room, Captain orchestration, AGON Score, and Day-30 Pentathlon.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-roviq-forge-kit",
+      "name": "ROVIQ FORGE KIT",
+      "summary": "Shared adapter layer so PARAGON and REALM consume one Forge host bridge, one scene/runtime contract, and one gameplay/asset pipeline instead of drifting app-specific bridges.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-core-sdk",
+      "name": "SAMAEL CORE SDK",
+      "summary": "Public module SDK and conformance harness for physics modules, capability tokens, signed artifacts, CAL declarations, and third-party module trust classes.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-saint-caliber-forge-slice",
+      "name": "PARAGON SAINT CALIBER FORGE SLICE",
+      "summary": "First real Forge/Metal gameplay proof using Saint Caliber rooftop arrival, power configuration, combat HUD, hit feedback, and app-to-engine bridge.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-court-and-whispers",
+      "name": "REALM COURT AND WHISPERS",
+      "summary": "Dense iOS strategy surface around Court of Named People, Loyalty/Honor/Ambition/Grudge, raven intel, planted deception, oath witnesses, succession threats, and hidden political state.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-agon-captain-os",
+      "name": "AGON CAPTAIN OS",
+      "summary": "Standalone operator/coach AI that runs recurring groups, posts daily check-ins, weekly recaps, mission previews, proof acknowledgments, quiet-member nudges, and leaderboard drops.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-agon-council-api",
+      "name": "AGON COUNCIL API",
+      "summary": "Seven archetypal AAR voices with strict 5-part format, lineage-grounded citations, operator review flow, and the clean Captain-versus-Council separation.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-forge-premium-feel-lab",
+      "name": "FORGE PREMIUM FEEL LAB",
+      "summary": "Tooling and runtime assets for hit confirm, whiff, dodge, hurt, enemy windup, ambience, music state, haptic timing, thermal degradation, and content-backed feel diagnostics.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-identity-intel",
+      "name": "PARAGON IDENTITY INTEL",
+      "summary": "Superhero cover/exposure layer with secret identities, institutional surveillance, doxxing risk, faction intel, public trust cascades, and player-visible consequences.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-dance-of-the-realm",
+      "name": "REALM DANCE OF THE REALM",
+      "summary": "Monthly server-defining weekend event with cross-covenant teleports, scoring war, respite, retribution, cross-server invasions, and chronicles generated inside the game.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-branchpoint",
+      "name": "SAMAEL BRANCHPOINT",
+      "summary": "Composure-sim productized as SAMAEL's Monte Carlo branch engine for scenario branching, counterfactual forks, sweeps, sensitivity, and signed replayable mission outcomes.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-the-annual-book",
+      "name": "THE ANNUAL BOOK",
+      "summary": "Physical AGON cohort archive with verified missions, squad stats, founder letters, member pages, Pentathlon scorecards, and artifact economy.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-crisis-cycle",
+      "name": "PARAGON CRISIS CYCLE",
+      "summary": "Server-level superhero event architecture for Tier-0 emergence, faction war declaration, public trust collapse, power decay crisis, and cinematic consequences.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-daily-raven",
+      "name": "REALM DAILY RAVEN",
+      "summary": "In-world procedural newspaper and chronicle that turns oaths, battles, betrayals, dragon sightings, marriages, and court deaths into daily server storytelling.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-accuracy-ledger",
+      "name": "SAMAEL ACCURACY LEDGER",
+      "summary": "Signed provenance chain for world packages, geometry, material claims, route confidence, scenario lineage, and AAR auditability.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-forge-editor-desktop",
+      "name": "FORGE EDITOR DESKTOP",
+      "summary": "Swift editor workflow with document model, command system, undo/redo, hierarchy, inspector, viewport, console shell, and on-device game tuning.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-safety-charter-os",
+      "name": "PARAGON SAFETY CHARTER OS",
+      "summary": "Moderation and safety operations product for voice, Chronicles, suicide-content escalation, doxxing, faction abuse, appeals, and solo-beta policy enforcement.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-war-room-voice",
+      "name": "REALM WAR ROOM VOICE",
+      "summary": "Built-in alliance/covenant voice, live march overlays, context-tagged battle calls, rally formation, theater map, and replayable coordination history.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-strata-forge",
+      "name": "SAMAEL STRATA FORGE",
+      "summary": "World-building subsystem that ingests documents, scans, manual edits, and sensor hints, reconciles conflicts, records ledger provenance, and emits signed mission world packages.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-agon-proof-feed",
+      "name": "AGON PROOF FEED",
+      "summary": "Receipt-only squad feed with photo, GPS, HealthKit, screenshots, 60-second voice memos, structural proof checks, and no performative public feed.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-roviq-studio-stack",
+      "name": "ROVIQ STUDIO STACK",
+      "summary": "License Forge, Airspace, Sentinel, and Composure as a small-studio tech stack for systems-deep narrative games with AI-native asset and cinematic pipelines.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-six-faction-sim",
+      "name": "PARAGON SIX FACTION SIM",
+      "summary": "Original superhero universe with VANGUARD, SANCTUARY, DEPARTMENT 9, UNDERGROUND, OBSIDIAN, and HALCYON, each with a distinct moral compromise and gameplay loop.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-family-crypt",
+      "name": "REALM FAMILY CRYPT",
+      "summary": "Procedural multi-generational memory surface where dead named characters, family lineage, oaths, betrayals, and dragon records accumulate as permanent prestige.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-agon-pentathlon-live",
+      "name": "AGON PENTATHLON LIVE",
+      "summary": "Regional or synchronized Day-30 competition with bodyweight gauntlet, puzzle gauntlet, Lichess bracket, cold exposure cap, squad service hour, and founders patch.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-flight-omen",
+      "name": "SAMAEL FLIGHT OMEN",
+      "summary": "Aviation cockpit surface for tactical moving map, DDIL resilience, route preservation, aircraft authority under disconnect, and existing DIU OMEN pursuit.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-forge-ai-control-plane",
+      "name": "FORGE AI CONTROL PLANE",
+      "summary": "Context engine, structured tools, patch routing, review loops, provider adapters, Meshy orchestration, and AI-services integration for engine development.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-event-feed-chronicles",
+      "name": "PARAGON EVENT FEED CHRONICLES",
+      "summary": "Server narrative voice that turns player actions, faction politics, deaths, investigations, and crises into authored-feeling live history.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-mandate-engine",
+      "name": "REALM MANDATE ENGINE",
+      "summary": "Mechanics-as-morality system with Mandate of Heaven, Spirit Ward, Composure Curve, Oathbreaker penalties, anti-whale constraints, and attacker viability.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-range-live",
+      "name": "SAMAEL RANGE LIVE",
+      "summary": "Directed-energy test environment for beam path simulation, thermal coupling, atmospheric turbulence, safety envelopes, and post-test analysis.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-agon-order",
+      "name": "AGON ORDER",
+      "summary": "Long-arc post-cohort identity layer with stages, Naming Day, Annual Book, founder artifacts, and multi-season membership continuity.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-power-decay",
+      "name": "PARAGON POWER DECAY",
+      "summary": "Superhero power-cost system where abilities decay, public trust changes, corporate contracts bite, and player choices become moral liabilities.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-dragon-pov",
+      "name": "REALM DRAGON POV",
+      "summary": "Forge full-scene 3D flight at 60fps with bond state, dragon mood, abilities, battlefield relevance, and marquee technical flex.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-specter-console",
+      "name": "SAMAEL SPECTER CONSOLE",
+      "summary": "RF, spectrum, EW, emissions, propagation, jamming, geolocation, and pattern-of-life module as an operator-facing rehearsal view.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-forge-appstore-factory",
+      "name": "FORGE APPSTORE FACTORY",
+      "summary": "Apple build/sign/deploy/archive/upload pipeline, runtime diagnostics, release evidence, device profiling, and App Store copy/assets for generated games.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-court-of-named-people",
+      "name": "PARAGON COURT OF NAMED PEOPLE",
+      "summary": "Character system where every hero, asset, whistleblower, senator, or villain has Loyalty, Honor, Trait, Ambition, Grudge, leverage, and permanent death.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-oath-diplomacy",
+      "name": "REALM OATH DIPLOMACY",
+      "summary": "Formal treaty surface with oath proposals, witnesses, expiration, visible break costs, faith implications, house standing, and betrayal consequences.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-agon-fathers",
+      "name": "AGON FATHERS",
+      "summary": "90-day cohort for new dads using AGON's Captain, Proof Feed, Brotherhood scoring, daily micro-missions, and sober operator tone.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-vector-routes",
+      "name": "SAMAEL VECTOR ROUTES",
+      "summary": "Movement, exposure profile, timing distribution, deconfliction, route confidence, and cost-surface module for facilities, airspace, and range domains.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-war-room-voice",
+      "name": "PARAGON WAR ROOM VOICE",
+      "summary": "Faction coordination surface for voice, influence nodes, skirmish UI, crisis-cycle planning, alliances, and daily intel pulls.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-maester-library",
+      "name": "REALM MAESTER LIBRARY",
+      "summary": "Research, lore, raven cages, Dragonlore/Faithlore trees, candle-lit living scene, and knowledge-of-power progression.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-forge-game-feel-benchmark",
+      "name": "FORGE GAME FEEL BENCHMARK",
+      "summary": "Public benchmark suite showing native iOS motion, controls, haptics, thermal truth, draw-call residency, and repeated-entity scale.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-agon-atlas",
+      "name": "AGON ATLAS",
+      "summary": "Slow canon platform for reading, listening, watching, cohort-visible marginalia, Daily Passage, and serious anti-TikTok taste formation.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-samael-murmur-lab",
+      "name": "SAMAEL MURMUR LAB",
+      "summary": "Synthetic adversary, civilian panic/cooperation, sensor failure, and behavior modeling module for mission rehearsal and disaster/crisis simulation.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-paragon-prestige-episodes",
+      "name": "PARAGON PRESTIGE EPISODES",
+      "summary": "AI-cinematic weekly episodes where VANGUARD/HALCYON/UNDERGROUND events drive faction state and players see their server's story dramatized.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-realm-covenant-os",
+      "name": "REALM COVENANT OS",
+      "summary": "4-tier covenant hierarchy with shared buildings, seasonal prestige, daimyo/generals/officers/vassals, help loops, and visible oath culture.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "project-informed-the-roviq-universe",
+      "name": "THE ROVIQ UNIVERSE",
+      "summary": "A connected house of PARAGON, REALM, AGON, SAMAEL, Forge, Airspace, Sentinel, and Composure with one recognizable taste and reusable systems.",
+      "category": "project-informed-50"
+    },
+    {
+      "id": "consumer-viral-ugc-ad-twin",
+      "name": "UGC Ad Twin",
+      "summary": "Turn a product link, a few photos, and a creator/persona choice into native-looking short-video ads for sellers, creators, resellers, and DTC micro-brands.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-glow",
+      "name": "Glow",
+      "summary": "Up Coach - AI beauty, hair, makeup, skincare, and outfit transformations with try-on storyboards, daily plans, product links, and social before/after cards.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-meme",
+      "name": "Meme",
+      "summary": "to-Motion Studio - Convert screenshots, memes, and reaction images into motion clips, voiceovers, remix chains, and export-ready TikTok/Reels/X posts.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-photodump-director",
+      "name": "PhotoDump Director",
+      "summary": "Turn camera rolls into cinematic social mini-movies with scripts, cutdowns, subtitles, cover art, and trend-native 15/30/60-second edits.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-outfit-roulette",
+      "name": "Outfit Roulette",
+      "summary": "Scan a closet, weather, and calendar to generate daily outfits, visual try-on grids, and social \"rate my fit\" poll cards.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-pet-dub-universe",
+      "name": "Pet Dub Universe",
+      "summary": "Make a pet into a recurring character with consistent voice, expressions, episodic plots, captions, skit templates, and merch mockups.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-dating-profile-studio",
+      "name": "Dating Profile Studio",
+      "summary": "Optimize dating profiles with photo sequencing, prompt rewrites, opener suggestions, voice-note practice, mock conversations, and authenticity-first exports.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-family-lore-studio",
+      "name": "Family Lore Studio",
+      "summary": "Transform family photos, voice notes, and text into narrated mini-documentaries, timelines, gentle restorations, videos, books, and family-sharing artifacts.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-fan-trailer-generator",
+      "name": "Fan Trailer Generator",
+      "summary": "Turn prompts, original characters, or licensed-safe asset packs into \"coming soon\" trailers, posters, soundtrack moments, and fandom challenge exports.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-fridge",
+      "name": "Fridge",
+      "summary": "to-Recipe Reel - Turn fridge scans into step-by-step meals, grocery substitutions, nutrition ranges, and auto-generated cooking reels or recipe cards.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-room-remix",
+      "name": "Room Remix",
+      "summary": "Upload a room and get redesign options, mood variants, budget sliders, shoppable bundles, and social before/after comparison cards.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-future-self-simulator",
+      "name": "Future Self Simulator",
+      "summary": "Visualize future versions of yourself across fitness, fashion, career, location, family, aging, and aspirational life-path scenarios.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-goal-accountability-montage",
+      "name": "Goal Accountability Montage",
+      "summary": "Turn streaks and habits into weekly montage recaps, proof cards, friend competitions, group leaderboards, and milestone celebration clips.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-couple-compatibility-show",
+      "name": "Couple Compatibility Show",
+      "summary": "Convert couple questionnaires, voice notes, and photos into a playful game-show-style compatibility recap with private sharing and event packs.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-wedding-speech-studio",
+      "name": "Wedding Speech Studio",
+      "summary": "Create wedding speeches, roasts, rehearsal videos, timing feedback, cards, and keepsake outputs from memories and anecdotes.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-creator-comment",
+      "name": "Creator Comment",
+      "summary": "to-Video Engine - Let fans leave prompts or comments and turn them into creator-style response videos with scripts, moderation, and creator approval.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-gift-maker",
+      "name": "Gift Maker",
+      "summary": "Transform chat logs, photos, and memories into personalized roasts, tribute reels, cards, mini-sites, and printable social gifts.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-running-hype-clips",
+      "name": "Running Hype Clips",
+      "summary": "Turn run data, route maps, splits, and selfies into cinematic motivational edits with map animations, overlays, and race/event packs.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-workout-form-and-progress-coach",
+      "name": "Workout Form and Progress Coach",
+      "summary": "Combine form analysis, smart cues, exercise detection, and progress timelapse clips for gym-goers and home fitness users.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-personal-finance-money-story",
+      "name": "Personal Finance Money Story",
+      "summary": "Turn spending and saving behavior into story-driven recaps, money archetypes, anonymous comparison cards, and social savings challenges.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-friend-group-weekly-magazine",
+      "name": "Friend Group Weekly Magazine",
+      "summary": "Turn selected group-chat moments, photos, polls, and weekend highlights into a recurring magazine cover and recap issue.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-microlearning-quiz-battles",
+      "name": "Microlearning Quiz Battles",
+      "summary": "Generate 30-second quiz battles from any topic and let users challenge friends, creators, classrooms, or public audiences.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-parenting-milestone-storyteller",
+      "name": "Parenting Milestone Storyteller",
+      "summary": "Turn child milestones into tasteful recap stories, timeline reels, family invites, prints, and annual parent-friendly memory bundles.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-kids-storybook-studio",
+      "name": "Kids Storybook Studio",
+      "summary": "Make personalized children's books with consistent characters, illustrated pages, read-aloud audio, recurring series, and print bundles.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-screenshot-concierge",
+      "name": "Screenshot Concierge",
+      "summary": "Turn screenshots and saved posts into actionable plans, wishlists, shopping comparisons, trip boards, reminders, and shareable compare cards.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-beauty-routine-twin",
+      "name": "Beauty Routine Twin",
+      "summary": "Track skincare, cosmetics, and routines visually, then create progress reels, product organizers, week recaps, and cosmetic-not-diagnostic suggestions.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-closet-commerce-copilot",
+      "name": "Closet Commerce Copilot",
+      "summary": "Use closet photos and screenshots to find gaps, dupes, resale opportunities, outfit packs, and shop-your-closet capsule plans.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-dream-visualizer",
+      "name": "Dream Visualizer",
+      "summary": "Convert dream notes or voice memos into surreal visuals, mini-stories, style variants, printables, and a private creative journal.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-language-roleplay-selfie-tutor",
+      "name": "Language Roleplay Selfie Tutor",
+      "summary": "Put the learner into visual roleplay scenes and practice everyday scenarios with AI voice, corrections, cues, and travel packs.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-voice-journal-coach",
+      "name": "Voice Journal Coach",
+      "summary": "Transcribe voice journals into themes, progress arcs, weekly recaps, safety-aware reflection prompts, and optional polished share cards.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-travel-alternate-self-and-planner",
+      "name": "Travel Alternate Self and Planner",
+      "summary": "Show yourself in destinations, itineraries, and aesthetics before booking, then generate trip boards and sample plans.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-party-icebreaker-generator",
+      "name": "Party Icebreaker Generator",
+      "summary": "Create personalized party quizzes, dares, who-is-most-likely cards, themed decks, and mobile/projector party modes.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-local-event-social-planner",
+      "name": "Local Event Social Planner",
+      "summary": "Generate event itineraries, invite cards, group polls, social assets, and city weekend plans from local listings.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-digital-clone-for-dm-replies",
+      "name": "Digital Clone for DM Replies",
+      "summary": "Train a safe personal reply twin for creator FAQs, intros, routine messages, dating replies, and approval-based multi-channel responses.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-hobby-coach-with-brag-clips",
+      "name": "Hobby Coach With Brag Clips",
+      "summary": "Coach and showcase progress in guitar, chess, cooking, dance, and other hobbies with feedback, weekly clips, and niche challenges.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-news-bias-mirror",
+      "name": "News Bias Mirror",
+      "summary": "Compare how different outlets frame the same story in side-by-side cards or videos with citations and confidence labels.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-study-sprint-storymaker",
+      "name": "Study Sprint Storymaker",
+      "summary": "Turn study sessions into animated recaps, quiz cards, flashcard decks, streak brag posts, and student leaderboard clips.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-personal-myth-generator",
+      "name": "Personal Myth Generator",
+      "summary": "Turn a user's tastes, photos, and prompts into a personal fantasy lore universe with archetype quiz, portraits, lore cards, and trailer.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-roast-and-compliment-trading-cards",
+      "name": "Roast and Compliment Trading Cards",
+      "summary": "Turn opt-in personality inputs into funny trading cards, friend comparisons, roast battles, squad decks, and branded packs.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-creator-collab-graph",
+      "name": "Creator Collab Graph",
+      "summary": "Show creators who they should collaborate with based on audience/style overlap and generate pitch assets, intro decks, and marketplace leads.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-ai-debate-shorts",
+      "name": "AI Debate Shorts",
+      "summary": "Generate concise debate clips where users pick sides, cite sources, share their version, duet prompts, and build public argument threads.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-resume",
+      "name": "Resume",
+      "summary": "to-Content Career Coach - Convert a resume and goals into portfolio content, interview stories, career-brand assets, mock interviews, and LinkedIn post kits.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-moodboard",
+      "name": "Moodboard",
+      "summary": "to-Brand Kit - Turn a moodboard into name ideas, visual identity, colors, fonts, starter site, landing page, and social post templates.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-micro",
+      "name": "Micro",
+      "summary": "podcast Clip Maker - Turn voice notes or text into short social audio/video clips with motion graphics, captions, cover art, and summaries.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-baby-name-universe",
+      "name": "Baby Name Universe",
+      "summary": "Generate name aesthetics, meanings, nursery moodboards, pronunciation audio, registry links, and family poll cards for expectant parents.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-offline-private-bestie",
+      "name": "Offline Private Bestie",
+      "summary": "On-device private AI companion for journaling, notes, voice memories, local chat, document summarization, and paid local model packs.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-deal-and-dupe-scout",
+      "name": "Deal and Dupe Scout",
+      "summary": "Find cheaper lookalikes or better-value alternatives from screenshots and saved products with price tracking and shareable deal cards.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-fandom-trope-storyboard-studio",
+      "name": "Fandom Trope Storyboard Studio",
+      "summary": "Generate trope boards, scene cards, title cards, and original-character visual stories for fan creators and roleplayers.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-habit-league",
+      "name": "Habit League",
+      "summary": "Turn personal habits into seasonal leagues with team drafts, standings, weekly recap reels, public scorecards, and creator-hosted tournaments.",
+      "category": "consumer-ai-viral-50"
+    },
+    {
+      "id": "consumer-viral-neighborhood-swap-and-diy-visualizer",
+      "name": "Neighborhood Swap and DIY Visualizer",
+      "summary": "Show how thrift finds, used furniture, or swap items would look in your space before trading or buying.",
+      "category": "consumer-ai-viral-50"
+    }
+  ],
+  "personas": [
+    {
+      "id": "skeptical_pragmatist_riley",
+      "name": "Riley, 38, skeptical pragmatist",
+      "backstory": "Operator at a 50-person company. Burned by hyped tools that didn't deliver. Wants proof, not pitch. Reads Hacker News skeptically.",
+      "priorities": [
+        "concrete proof of value",
+        "low setup cost",
+        "respects my time"
+      ],
+      "turn_offs": [
+        "vague hype",
+        "feels like a demo not a product",
+        "another AI wrapper"
+      ],
+      "context": "Evaluates 1-2 new tools per quarter."
+    },
+    {
+      "id": "early_adopter_sam",
+      "name": "Sam, 29, early adopter",
+      "backstory": "Indie maker who follows new launches on X and Hacker News. Tries almost anything once if it sparks curiosity. Talks about new tools to friends.",
+      "priorities": [
+        "novel use of AI",
+        "shareable moment",
+        "fast time-to-magic"
+      ],
+      "turn_offs": [
+        "boring landing page",
+        "feels enterprise-y",
+        "no clear viral hook"
+      ],
+      "context": "Active on X and Discord. Writes a small newsletter."
+    }
+  ],
+  "models": [
+    {
+      "id": "claude-opus-4-7",
+      "provider": "cliproxyapi",
+      "model": "claude-opus-4-7",
+      "max_output_tokens": 1024
+    },
+    {
+      "id": "gpt-5-5",
+      "provider": "cliproxyapi",
+      "model": "gpt-5.5",
+      "max_output_tokens": 1024
+    },
+    {
+      "id": "deepseek-v4-flash",
+      "provider": "opencode-go",
+      "model": "deepseek-v4-flash",
+      "max_output_tokens": 1024
+    }
+  ],
+  "samples_per_cell": 1,
+  "questions": []
+}

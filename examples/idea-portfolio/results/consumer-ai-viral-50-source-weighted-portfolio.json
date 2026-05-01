@@ -1,0 +1,4763 @@
+{
+  "id": "consumer-ai-viral-50-source-weighted",
+  "name": "Consumer AI Viral 50 - Source Weighted",
+  "description": "Same 50 consumer AI viral ideas, with the user-provided author composite scores attached as idea-specific external evidence before simulation.",
+  "seed_base": 4242424242424242,
+  "population": {
+    "target_count": 10000,
+    "sample_size": 24
+  },
+  "segments": [
+    {
+      "id": "gen_z_social_creators",
+      "name": "Gen Z Social Creators",
+      "share_weight": 0.24,
+      "traits": {
+        "ai_openness": 0.86,
+        "habit_openness": 0.72,
+        "social_sharing": 0.92,
+        "spending_power": 0.46,
+        "trend_adoption": 0.88
+      },
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x",
+        "discord"
+      ],
+      "pains": [
+        "needs fresh identity loops",
+        "hates obvious ai slop"
+      ]
+    },
+    {
+      "id": "creator_operators",
+      "name": "Creator Operators",
+      "share_weight": 0.2,
+      "traits": {
+        "ai_openness": 0.92,
+        "habit_openness": 0.66,
+        "social_sharing": 0.82,
+        "spending_power": 0.74,
+        "trend_adoption": 0.78
+      },
+      "channels": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "newsletter"
+      ],
+      "pains": [
+        "needs monetizable output",
+        "needs faster production"
+      ]
+    },
+    {
+      "id": "local_business_owners",
+      "name": "Local Business Owners",
+      "share_weight": 0.16,
+      "traits": {
+        "ai_openness": 0.66,
+        "habit_openness": 0.54,
+        "social_sharing": 0.56,
+        "spending_power": 0.82,
+        "trend_adoption": 0.58
+      },
+      "channels": [
+        "instagram",
+        "google",
+        "facebook",
+        "tiktok"
+      ],
+      "pains": [
+        "needs customers now",
+        "has no time for content"
+      ]
+    },
+    {
+      "id": "parents_and_families",
+      "name": "Parents And Families",
+      "share_weight": 0.14,
+      "traits": {
+        "ai_openness": 0.58,
+        "habit_openness": 0.8,
+        "social_sharing": 0.7,
+        "spending_power": 0.76,
+        "trend_adoption": 0.52
+      },
+      "channels": [
+        "instagram",
+        "facebook",
+        "imessage",
+        "tiktok"
+      ],
+      "pains": [
+        "needs emotional keepsakes",
+        "needs trusted child-safe tools"
+      ]
+    },
+    {
+      "id": "gamers_and_builders",
+      "name": "Gamers And Builders",
+      "share_weight": 0.16,
+      "traits": {
+        "ai_openness": 0.9,
+        "habit_openness": 0.84,
+        "social_sharing": 0.78,
+        "spending_power": 0.62,
+        "trend_adoption": 0.74
+      },
+      "channels": [
+        "discord",
+        "tiktok",
+        "youtube",
+        "app_store"
+      ],
+      "pains": [
+        "wants playable creation",
+        "rejects shallow novelty"
+      ]
+    },
+    {
+      "id": "dating_app_fatigued",
+      "name": "Dating App Fatigued Adults",
+      "share_weight": 0.1,
+      "traits": {
+        "ai_openness": 0.54,
+        "habit_openness": 0.68,
+        "social_sharing": 0.62,
+        "spending_power": 0.7,
+        "trend_adoption": 0.62
+      },
+      "channels": [
+        "instagram",
+        "sms",
+        "events",
+        "tiktok"
+      ],
+      "pains": [
+        "wants irl connection",
+        "does not trust fake profiles"
+      ]
+    }
+  ],
+  "ideas": [
+    {
+      "id": "ugc-ad-twin",
+      "name": "UGC Ad Twin",
+      "summary": "Turn a product link, a few photos, and a creator/persona choice into native-looking short-video ads for sellers, creators, resellers, and DTC micro-brands.",
+      "category": "creative_media",
+      "target_segments": [
+        "creator_operators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "social_sharing": 1
+      },
+      "strengths": [
+        "creator monetization",
+        "video generation"
+      ],
+      "risks": [
+        "novelty decay"
+      ]
+    },
+    {
+      "id": "glow-up-coach",
+      "name": "Glow-Up Coach",
+      "summary": "AI beauty, hair, makeup, skincare, and outfit transformations with try-on storyboards, daily plans, product links, and social before/after cards.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "habit_openness": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "meme-to-motion-studio",
+      "name": "Meme-to-Motion Studio",
+      "summary": "Convert screenshots, memes, and reaction images into motion clips, voiceovers, remix chains, and export-ready TikTok/Reels/X posts.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "social_sharing": 1,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "voice agent",
+        "image generation"
+      ],
+      "risks": [
+        "novelty decay",
+        "trust and privacy sensitivity"
+      ]
+    },
+    {
+      "id": "photodump-director",
+      "name": "PhotoDump Director",
+      "summary": "Turn camera rolls into cinematic social mini-movies with scripts, cutdowns, subtitles, cover art, and trend-native 15/30/60-second edits.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "outfit-roulette",
+      "name": "Outfit Roulette",
+      "summary": "Scan a closet, weather, and calendar to generate daily outfits, visual try-on grids, and social \"rate my fit\" poll cards.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "habit_openness": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "pet-dub-universe",
+      "name": "Pet Dub Universe",
+      "summary": "Make a pet into a recurring character with consistent voice, expressions, episodic plots, captions, skit templates, and merch mockups.",
+      "category": "agentic_services",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "dating-profile-studio",
+      "name": "Dating Profile Studio",
+      "summary": "Optimize dating profiles with photo sequencing, prompt rewrites, opener suggestions, voice-note practice, mock conversations, and authenticity-first exports.",
+      "category": "agentic_services",
+      "target_segments": [
+        "dating_app_fatigued"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity"
+      ]
+    },
+    {
+      "id": "family-lore-studio",
+      "name": "Family Lore Studio",
+      "summary": "Transform family photos, voice notes, and text into narrated mini-documentaries, timelines, gentle restorations, videos, books, and family-sharing artifacts.",
+      "category": "agentic_services",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "voice agent",
+        "video generation",
+        "emotional utility"
+      ],
+      "risks": [
+        "novelty decay",
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "fan-trailer-generator",
+      "name": "Fan Trailer Generator",
+      "summary": "Turn prompts, original characters, or licensed-safe asset packs into \"coming soon\" trailers, posters, soundtrack moments, and fandom challenge exports.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "fridge-to-recipe-reel",
+      "name": "Fridge-to-Recipe Reel",
+      "summary": "Turn fridge scans into step-by-step meals, grocery substitutions, nutrition ranges, and auto-generated cooking reels or recipe cards.",
+      "category": "creative_media",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "room-remix",
+      "name": "Room Remix",
+      "summary": "Upload a room and get redesign options, mood variants, budget sliders, shoppable bundles, and social before/after comparison cards.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "local_business_owners"
+      ],
+      "channels": [
+        "instagram",
+        "shopify"
+      ],
+      "trait_weights": {
+        "spending_power": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "future-self-simulator",
+      "name": "Future Self Simulator",
+      "summary": "Visualize future versions of yourself across fitness, fashion, career, location, family, aging, and aspirational life-path scenarios.",
+      "category": "family",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "emotional utility"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "goal-accountability-montage",
+      "name": "Goal Accountability Montage",
+      "summary": "Turn streaks and habits into weekly montage recaps, proof cards, friend competitions, group leaderboards, and milestone celebration clips.",
+      "category": "social_irl",
+      "target_segments": [
+        "gen_z_social_creators",
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1,
+        "social_sharing": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "couple-compatibility-show",
+      "name": "Couple Compatibility Show",
+      "summary": "Convert couple questionnaires, voice notes, and photos into a playful game-show-style compatibility recap with private sharing and event packs.",
+      "category": "games",
+      "target_segments": [
+        "dating_app_fatigued",
+        "gamers_and_builders",
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "events"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "playable loop",
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "wedding-speech-studio",
+      "name": "Wedding Speech Studio",
+      "summary": "Create wedding speeches, roasts, rehearsal videos, timing feedback, cards, and keepsake outputs from memories and anecdotes.",
+      "category": "creative_media",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "video generation"
+      ],
+      "risks": [
+        "novelty decay",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "creator-comment-to-video-engine",
+      "name": "Creator Comment-to-Video Engine",
+      "summary": "Let fans leave prompts or comments and turn them into creator-style response videos with scripts, moderation, and creator approval.",
+      "category": "creative_media",
+      "target_segments": [
+        "creator_operators",
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "social_sharing": 1,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "creator monetization",
+        "video generation"
+      ],
+      "risks": [
+        "novelty decay"
+      ]
+    },
+    {
+      "id": "gift-maker",
+      "name": "Gift Maker",
+      "summary": "Transform chat logs, photos, and memories into personalized roasts, tribute reels, cards, mini-sites, and printable social gifts.",
+      "category": "creative_media",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "running-hype-clips",
+      "name": "Running Hype Clips",
+      "summary": "Turn run data, route maps, splits, and selfies into cinematic motivational edits with map animations, overlays, and race/event packs.",
+      "category": "social_irl",
+      "target_segments": [
+        "dating_app_fatigued"
+      ],
+      "channels": [
+        "events"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "workout-form-and-progress-coach",
+      "name": "Workout Form and Progress Coach",
+      "summary": "Combine form analysis, smart cues, exercise detection, and progress timelapse clips for gym-goers and home fitness users.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "personal-finance-money-story",
+      "name": "Personal Finance Money Story",
+      "summary": "Turn spending and saving behavior into story-driven recaps, money archetypes, anonymous comparison cards, and social savings challenges.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "friend-group-weekly-magazine",
+      "name": "Friend Group Weekly Magazine",
+      "summary": "Turn selected group-chat moments, photos, polls, and weekend highlights into a recurring magazine cover and recap issue.",
+      "category": "social_irl",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "habit_openness": 1,
+        "social_sharing": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "microlearning-quiz-battles",
+      "name": "Microlearning Quiz Battles",
+      "summary": "Generate 30-second quiz battles from any topic and let users challenge friends, creators, classrooms, or public audiences.",
+      "category": "social_irl",
+      "target_segments": [
+        "creator_operators",
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1
+      },
+      "strengths": [
+        "creator monetization"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "parenting-milestone-storyteller",
+      "name": "Parenting Milestone Storyteller",
+      "summary": "Turn child milestones into tasteful recap stories, timeline reels, family invites, prints, and annual parent-friendly memory bundles.",
+      "category": "creative_media",
+      "target_segments": [
+        "gen_z_social_creators",
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1
+      },
+      "strengths": [
+        "emotional utility"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "kids-storybook-studio",
+      "name": "Kids Storybook Studio",
+      "summary": "Make personalized children's books with consistent characters, illustrated pages, read-aloud audio, recurring series, and print bundles.",
+      "category": "agentic_services",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "screenshot-concierge",
+      "name": "Screenshot Concierge",
+      "summary": "Turn screenshots and saved posts into actionable plans, wishlists, shopping comparisons, trip boards, reminders, and shareable compare cards.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "local_business_owners"
+      ],
+      "channels": [
+        "shopify"
+      ],
+      "trait_weights": {
+        "social_sharing": 1,
+        "spending_power": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "beauty-routine-twin",
+      "name": "Beauty Routine Twin",
+      "summary": "Track skincare, cosmetics, and routines visually, then create progress reels, product organizers, week recaps, and cosmetic-not-diagnostic suggestions.",
+      "category": "creative_media",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "closet-commerce-copilot",
+      "name": "Closet Commerce Copilot",
+      "summary": "Use closet photos and screenshots to find gaps, dupes, resale opportunities, outfit packs, and shop-your-closet capsule plans.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "local_business_owners"
+      ],
+      "channels": [
+        "shopify"
+      ],
+      "trait_weights": {
+        "spending_power": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "dream-visualizer",
+      "name": "Dream Visualizer",
+      "summary": "Convert dream notes or voice memos into surreal visuals, mini-stories, style variants, printables, and a private creative journal.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "language-roleplay-selfie-tutor",
+      "name": "Language Roleplay Selfie Tutor",
+      "summary": "Put the learner into visual roleplay scenes and practice everyday scenarios with AI voice, corrections, cues, and travel packs.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "voice-journal-coach",
+      "name": "Voice Journal Coach",
+      "summary": "Transcribe voice journals into themes, progress arcs, weekly recaps, safety-aware reflection prompts, and optional polished share cards.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "habit_openness": 1,
+        "social_sharing": 1
+      },
+      "strengths": [
+        "voice agent"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "travel-alternate-self-and-planner",
+      "name": "Travel Alternate Self and Planner",
+      "summary": "Show yourself in destinations, itineraries, and aesthetics before booking, then generate trip boards and sample plans.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "party-icebreaker-generator",
+      "name": "Party Icebreaker Generator",
+      "summary": "Create personalized party quizzes, dares, who-is-most-likely cards, themed decks, and mobile/projector party modes.",
+      "category": "social_irl",
+      "target_segments": [
+        "dating_app_fatigued"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "local-event-social-planner",
+      "name": "Local Event Social Planner",
+      "summary": "Generate event itineraries, invite cards, group polls, social assets, and city weekend plans from local listings.",
+      "category": "social_irl",
+      "target_segments": [
+        "dating_app_fatigued",
+        "local_business_owners"
+      ],
+      "channels": [
+        "events"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "local demand"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "digital-clone-for-dm-replies",
+      "name": "Digital Clone for DM Replies",
+      "summary": "Train a safe personal reply twin for creator FAQs, intros, routine messages, dating replies, and approval-based multi-channel responses.",
+      "category": "social_irl",
+      "target_segments": [
+        "creator_operators",
+        "dating_app_fatigued"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "social_sharing": 1
+      },
+      "strengths": [
+        "creator monetization"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "hobby-coach-with-brag-clips",
+      "name": "Hobby Coach With Brag Clips",
+      "summary": "Coach and showcase progress in guitar, chess, cooking, dance, and other hobbies with feedback, weekly clips, and niche challenges.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "news-bias-mirror",
+      "name": "News Bias Mirror",
+      "summary": "Compare how different outlets frame the same story in side-by-side cards or videos with citations and confidence labels.",
+      "category": "creative_media",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "video generation"
+      ],
+      "risks": [
+        "novelty decay",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "study-sprint-storymaker",
+      "name": "Study Sprint Storymaker",
+      "summary": "Turn study sessions into animated recaps, quiz cards, flashcard decks, streak brag posts, and student leaderboard clips.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "personal-myth-generator",
+      "name": "Personal Myth Generator",
+      "summary": "Turn a user's tastes, photos, and prompts into a personal fantasy lore universe with archetype quiz, portraits, lore cards, and trailer.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "roast-and-compliment-trading-cards",
+      "name": "Roast and Compliment Trading Cards",
+      "summary": "Turn opt-in personality inputs into funny trading cards, friend comparisons, roast battles, squad decks, and branded packs.",
+      "category": "social_irl",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "creator-collab-graph",
+      "name": "Creator Collab Graph",
+      "summary": "Show creators who they should collaborate with based on audience/style overlap and generate pitch assets, intro decks, and marketplace leads.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "creator_operators",
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1,
+        "trend_adoption": 0.9
+      },
+      "strengths": [
+        "creator monetization"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "ai-debate-shorts",
+      "name": "AI Debate Shorts",
+      "summary": "Generate concise debate clips where users pick sides, cite sources, share their version, duet prompts, and build public argument threads.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1,
+        "social_sharing": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "resume-to-content-career-coach",
+      "name": "Resume-to-Content Career Coach",
+      "summary": "Convert a resume and goals into portfolio content, interview stories, career-brand assets, mock interviews, and LinkedIn post kits.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "moodboard-to-brand-kit",
+      "name": "Moodboard-to-Brand Kit",
+      "summary": "Turn a moodboard into name ideas, visual identity, colors, fonts, starter site, landing page, and social post templates.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "micro-podcast-clip-maker",
+      "name": "Micro-podcast Clip Maker",
+      "summary": "Turn voice notes or text into short social audio/video clips with motion graphics, captions, cover art, and summaries.",
+      "category": "agentic_services",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "voice agent",
+        "video generation"
+      ],
+      "risks": [
+        "novelty decay",
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "baby-name-universe",
+      "name": "Baby Name Universe",
+      "summary": "Generate name aesthetics, meanings, nursery moodboards, pronunciation audio, registry links, and family poll cards for expectant parents.",
+      "category": "family",
+      "target_segments": [
+        "parents_and_families"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "emotional utility"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "offline-private-bestie",
+      "name": "Offline Private Bestie",
+      "summary": "On-device private AI companion for journaling, notes, voice memories, local chat, document summarization, and paid local model packs.",
+      "category": "agentic_services",
+      "target_segments": [
+        "local_business_owners"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "strengths": [
+        "voice agent",
+        "local demand"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "deal-and-dupe-scout",
+      "name": "Deal and Dupe Scout",
+      "summary": "Find cheaper lookalikes or better-value alternatives from screenshots and saved products with price tracking and shareable deal cards.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "social_sharing": 1
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "fandom-trope-storyboard-studio",
+      "name": "Fandom Trope Storyboard Studio",
+      "summary": "Generate trope boards, scene cards, title cards, and original-character visual stories for fan creators and roleplayers.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "creator_operators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "social_sharing": 1
+      },
+      "strengths": [
+        "creator monetization"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "habit-league",
+      "name": "Habit League",
+      "summary": "Turn personal habits into seasonal leagues with team drafts, standings, weekly recap reels, public scorecards, and creator-hosted tournaments.",
+      "category": "creative_media",
+      "target_segments": [
+        "creator_operators"
+      ],
+      "channels": [
+        "app_store",
+        "instagram",
+        "tiktok"
+      ],
+      "trait_weights": {
+        "habit_openness": 1,
+        "social_sharing": 1
+      },
+      "strengths": [
+        "creator monetization"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "neighborhood-swap-and-diy-visualizer",
+      "name": "Neighborhood Swap and DIY Visualizer",
+      "summary": "Show how thrift finds, used furniture, or swap items would look in your space before trading or buying.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "gen_z_social_creators"
+      ],
+      "channels": [
+        "instagram"
+      ],
+      "trait_weights": {
+        "trend_adoption": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "tiktok_ig_viral_launch",
+      "name": "TikTok/IG Viral Launch",
+      "description": null,
+      "focus": "viral_launch",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x"
+      ],
+      "weight": 1,
+      "intensity": 1,
+      "trait_weights": {
+        "social_sharing": 1,
+        "trend_adoption": 0.8
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "social_commerce_conversion",
+      "name": "Social Commerce Conversion",
+      "description": null,
+      "focus": "social_commerce",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "shopify"
+      ],
+      "weight": 1,
+      "intensity": 1,
+      "trait_weights": {
+        "ai_openness": 0.4,
+        "spending_power": 0.9
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "novelty_decay_retention",
+      "name": "Novelty Decay Retention",
+      "description": null,
+      "focus": "retention",
+      "channels": [
+        "app_store",
+        "imessage",
+        "discord"
+      ],
+      "weight": 1,
+      "intensity": 1,
+      "trait_weights": {
+        "ai_openness": 0.5,
+        "habit_openness": 1
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "paid_offer_pressure",
+      "name": "Paid Offer Pressure",
+      "description": null,
+      "focus": "paid_conversion",
+      "channels": [
+        "landing_page",
+        "app_store",
+        "email"
+      ],
+      "weight": 1,
+      "intensity": 1,
+      "trait_weights": {
+        "spending_power": 1
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "tiny_team_build_speed",
+      "name": "Tiny Team Build Speed",
+      "description": null,
+      "focus": "build_speed",
+      "channels": [
+        "app_store",
+        "web",
+        "api"
+      ],
+      "weight": 1,
+      "intensity": 1,
+      "trait_weights": {
+        "ai_openness": 1
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "ai_slop_backlash",
+      "name": "AI Slop Backlash",
+      "description": null,
+      "focus": "authenticity_backlash",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x"
+      ],
+      "weight": 1,
+      "intensity": 1,
+      "trait_weights": {
+        "social_sharing": 0.5,
+        "trend_adoption": 0.5
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "community_referral_loop",
+      "name": "Community Referral Loop",
+      "description": null,
+      "focus": "community_referral",
+      "channels": [
+        "discord",
+        "imessage",
+        "instagram",
+        "events"
+      ],
+      "weight": 1,
+      "intensity": 1,
+      "trait_weights": {
+        "habit_openness": 0.7,
+        "social_sharing": 1
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "idea_id": null,
+      "metric": "viral_loop",
+      "source": "Public trend scan",
+      "note": "Short-form social remains the distribution layer for consumer launches.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "ai_unlock",
+      "source": "AI tooling scan",
+      "note": "Coding agents, image/video generation, voice, and browser agents lower launch cost.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "risk_resilience",
+      "source": "AI slop backlash",
+      "note": "Generated novelty alone decays quickly unless tied to human proof, identity, or utility.",
+      "value": 0.48,
+      "sample_size": null
+    },
+    {
+      "idea_id": null,
+      "metric": "willingness_to_pay",
+      "source": "Creator/social commerce benchmarks",
+      "note": "Creator, commerce, and utility workflows show stronger monetization than generic toys.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ugc-ad-twin",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 89/100 used as prior evidence for UGC Ad Twin.",
+      "value": 0.89,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ugc-ad-twin",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 89/100 used as prior evidence for UGC Ad Twin.",
+      "value": 0.89,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ugc-ad-twin",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 89/100 used as prior evidence for UGC Ad Twin.",
+      "value": 0.89,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ugc-ad-twin",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 89/100 used as prior evidence for UGC Ad Twin.",
+      "value": 0.89,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ugc-ad-twin",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 89/100 used as prior evidence for UGC Ad Twin.",
+      "value": 0.89,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ugc-ad-twin",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 89/100 used as prior evidence for UGC Ad Twin.",
+      "value": 0.89,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ugc-ad-twin",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 89/100 used as prior evidence for UGC Ad Twin.",
+      "value": 0.89,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ugc-ad-twin",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 89/100 used as prior evidence for UGC Ad Twin.",
+      "value": 0.89,
+      "sample_size": null
+    },
+    {
+      "idea_id": "glow-up-coach",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 87/100 used as prior evidence for Glow-Up Coach.",
+      "value": 0.87,
+      "sample_size": null
+    },
+    {
+      "idea_id": "glow-up-coach",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 87/100 used as prior evidence for Glow-Up Coach.",
+      "value": 0.87,
+      "sample_size": null
+    },
+    {
+      "idea_id": "glow-up-coach",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 87/100 used as prior evidence for Glow-Up Coach.",
+      "value": 0.87,
+      "sample_size": null
+    },
+    {
+      "idea_id": "glow-up-coach",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 87/100 used as prior evidence for Glow-Up Coach.",
+      "value": 0.87,
+      "sample_size": null
+    },
+    {
+      "idea_id": "glow-up-coach",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 87/100 used as prior evidence for Glow-Up Coach.",
+      "value": 0.87,
+      "sample_size": null
+    },
+    {
+      "idea_id": "glow-up-coach",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 87/100 used as prior evidence for Glow-Up Coach.",
+      "value": 0.87,
+      "sample_size": null
+    },
+    {
+      "idea_id": "glow-up-coach",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 87/100 used as prior evidence for Glow-Up Coach.",
+      "value": 0.87,
+      "sample_size": null
+    },
+    {
+      "idea_id": "glow-up-coach",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 87/100 used as prior evidence for Glow-Up Coach.",
+      "value": 0.87,
+      "sample_size": null
+    },
+    {
+      "idea_id": "meme-to-motion-studio",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 86/100 used as prior evidence for Meme-to-Motion Studio.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": "meme-to-motion-studio",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 86/100 used as prior evidence for Meme-to-Motion Studio.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": "meme-to-motion-studio",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 86/100 used as prior evidence for Meme-to-Motion Studio.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": "meme-to-motion-studio",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 86/100 used as prior evidence for Meme-to-Motion Studio.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": "meme-to-motion-studio",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 86/100 used as prior evidence for Meme-to-Motion Studio.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": "meme-to-motion-studio",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 86/100 used as prior evidence for Meme-to-Motion Studio.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": "meme-to-motion-studio",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 86/100 used as prior evidence for Meme-to-Motion Studio.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": "meme-to-motion-studio",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 86/100 used as prior evidence for Meme-to-Motion Studio.",
+      "value": 0.86,
+      "sample_size": null
+    },
+    {
+      "idea_id": "photodump-director",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 85/100 used as prior evidence for PhotoDump Director.",
+      "value": 0.85,
+      "sample_size": null
+    },
+    {
+      "idea_id": "photodump-director",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 85/100 used as prior evidence for PhotoDump Director.",
+      "value": 0.85,
+      "sample_size": null
+    },
+    {
+      "idea_id": "photodump-director",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 85/100 used as prior evidence for PhotoDump Director.",
+      "value": 0.85,
+      "sample_size": null
+    },
+    {
+      "idea_id": "photodump-director",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 85/100 used as prior evidence for PhotoDump Director.",
+      "value": 0.85,
+      "sample_size": null
+    },
+    {
+      "idea_id": "photodump-director",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 85/100 used as prior evidence for PhotoDump Director.",
+      "value": 0.85,
+      "sample_size": null
+    },
+    {
+      "idea_id": "photodump-director",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 85/100 used as prior evidence for PhotoDump Director.",
+      "value": 0.85,
+      "sample_size": null
+    },
+    {
+      "idea_id": "photodump-director",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 85/100 used as prior evidence for PhotoDump Director.",
+      "value": 0.85,
+      "sample_size": null
+    },
+    {
+      "idea_id": "photodump-director",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 85/100 used as prior evidence for PhotoDump Director.",
+      "value": 0.85,
+      "sample_size": null
+    },
+    {
+      "idea_id": "outfit-roulette",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 84/100 used as prior evidence for Outfit Roulette.",
+      "value": 0.84,
+      "sample_size": null
+    },
+    {
+      "idea_id": "outfit-roulette",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 84/100 used as prior evidence for Outfit Roulette.",
+      "value": 0.84,
+      "sample_size": null
+    },
+    {
+      "idea_id": "outfit-roulette",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 84/100 used as prior evidence for Outfit Roulette.",
+      "value": 0.84,
+      "sample_size": null
+    },
+    {
+      "idea_id": "outfit-roulette",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 84/100 used as prior evidence for Outfit Roulette.",
+      "value": 0.84,
+      "sample_size": null
+    },
+    {
+      "idea_id": "outfit-roulette",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 84/100 used as prior evidence for Outfit Roulette.",
+      "value": 0.84,
+      "sample_size": null
+    },
+    {
+      "idea_id": "outfit-roulette",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 84/100 used as prior evidence for Outfit Roulette.",
+      "value": 0.84,
+      "sample_size": null
+    },
+    {
+      "idea_id": "outfit-roulette",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 84/100 used as prior evidence for Outfit Roulette.",
+      "value": 0.84,
+      "sample_size": null
+    },
+    {
+      "idea_id": "outfit-roulette",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 84/100 used as prior evidence for Outfit Roulette.",
+      "value": 0.84,
+      "sample_size": null
+    },
+    {
+      "idea_id": "pet-dub-universe",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 83/100 used as prior evidence for Pet Dub Universe.",
+      "value": 0.83,
+      "sample_size": null
+    },
+    {
+      "idea_id": "pet-dub-universe",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 83/100 used as prior evidence for Pet Dub Universe.",
+      "value": 0.83,
+      "sample_size": null
+    },
+    {
+      "idea_id": "pet-dub-universe",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 83/100 used as prior evidence for Pet Dub Universe.",
+      "value": 0.83,
+      "sample_size": null
+    },
+    {
+      "idea_id": "pet-dub-universe",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 83/100 used as prior evidence for Pet Dub Universe.",
+      "value": 0.83,
+      "sample_size": null
+    },
+    {
+      "idea_id": "pet-dub-universe",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 83/100 used as prior evidence for Pet Dub Universe.",
+      "value": 0.83,
+      "sample_size": null
+    },
+    {
+      "idea_id": "pet-dub-universe",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 83/100 used as prior evidence for Pet Dub Universe.",
+      "value": 0.83,
+      "sample_size": null
+    },
+    {
+      "idea_id": "pet-dub-universe",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 83/100 used as prior evidence for Pet Dub Universe.",
+      "value": 0.83,
+      "sample_size": null
+    },
+    {
+      "idea_id": "pet-dub-universe",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 83/100 used as prior evidence for Pet Dub Universe.",
+      "value": 0.83,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dating-profile-studio",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 82/100 used as prior evidence for Dating Profile Studio.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dating-profile-studio",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 82/100 used as prior evidence for Dating Profile Studio.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dating-profile-studio",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 82/100 used as prior evidence for Dating Profile Studio.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dating-profile-studio",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 82/100 used as prior evidence for Dating Profile Studio.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dating-profile-studio",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 82/100 used as prior evidence for Dating Profile Studio.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dating-profile-studio",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 82/100 used as prior evidence for Dating Profile Studio.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dating-profile-studio",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 82/100 used as prior evidence for Dating Profile Studio.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dating-profile-studio",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 82/100 used as prior evidence for Dating Profile Studio.",
+      "value": 0.82,
+      "sample_size": null
+    },
+    {
+      "idea_id": "family-lore-studio",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 81/100 used as prior evidence for Family Lore Studio.",
+      "value": 0.81,
+      "sample_size": null
+    },
+    {
+      "idea_id": "family-lore-studio",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 81/100 used as prior evidence for Family Lore Studio.",
+      "value": 0.81,
+      "sample_size": null
+    },
+    {
+      "idea_id": "family-lore-studio",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 81/100 used as prior evidence for Family Lore Studio.",
+      "value": 0.81,
+      "sample_size": null
+    },
+    {
+      "idea_id": "family-lore-studio",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 81/100 used as prior evidence for Family Lore Studio.",
+      "value": 0.81,
+      "sample_size": null
+    },
+    {
+      "idea_id": "family-lore-studio",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 81/100 used as prior evidence for Family Lore Studio.",
+      "value": 0.81,
+      "sample_size": null
+    },
+    {
+      "idea_id": "family-lore-studio",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 81/100 used as prior evidence for Family Lore Studio.",
+      "value": 0.81,
+      "sample_size": null
+    },
+    {
+      "idea_id": "family-lore-studio",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 81/100 used as prior evidence for Family Lore Studio.",
+      "value": 0.81,
+      "sample_size": null
+    },
+    {
+      "idea_id": "family-lore-studio",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 81/100 used as prior evidence for Family Lore Studio.",
+      "value": 0.81,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fan-trailer-generator",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 80/100 used as prior evidence for Fan Trailer Generator.",
+      "value": 0.8,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fan-trailer-generator",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 80/100 used as prior evidence for Fan Trailer Generator.",
+      "value": 0.8,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fan-trailer-generator",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 80/100 used as prior evidence for Fan Trailer Generator.",
+      "value": 0.8,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fan-trailer-generator",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 80/100 used as prior evidence for Fan Trailer Generator.",
+      "value": 0.8,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fan-trailer-generator",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 80/100 used as prior evidence for Fan Trailer Generator.",
+      "value": 0.8,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fan-trailer-generator",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 80/100 used as prior evidence for Fan Trailer Generator.",
+      "value": 0.8,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fan-trailer-generator",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 80/100 used as prior evidence for Fan Trailer Generator.",
+      "value": 0.8,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fan-trailer-generator",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 80/100 used as prior evidence for Fan Trailer Generator.",
+      "value": 0.8,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fridge-to-recipe-reel",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 79/100 used as prior evidence for Fridge-to-Recipe Reel.",
+      "value": 0.79,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fridge-to-recipe-reel",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 79/100 used as prior evidence for Fridge-to-Recipe Reel.",
+      "value": 0.79,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fridge-to-recipe-reel",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 79/100 used as prior evidence for Fridge-to-Recipe Reel.",
+      "value": 0.79,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fridge-to-recipe-reel",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 79/100 used as prior evidence for Fridge-to-Recipe Reel.",
+      "value": 0.79,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fridge-to-recipe-reel",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 79/100 used as prior evidence for Fridge-to-Recipe Reel.",
+      "value": 0.79,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fridge-to-recipe-reel",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 79/100 used as prior evidence for Fridge-to-Recipe Reel.",
+      "value": 0.79,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fridge-to-recipe-reel",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 79/100 used as prior evidence for Fridge-to-Recipe Reel.",
+      "value": 0.79,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fridge-to-recipe-reel",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 79/100 used as prior evidence for Fridge-to-Recipe Reel.",
+      "value": 0.79,
+      "sample_size": null
+    },
+    {
+      "idea_id": "room-remix",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 78/100 used as prior evidence for Room Remix.",
+      "value": 0.78,
+      "sample_size": null
+    },
+    {
+      "idea_id": "room-remix",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 78/100 used as prior evidence for Room Remix.",
+      "value": 0.78,
+      "sample_size": null
+    },
+    {
+      "idea_id": "room-remix",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 78/100 used as prior evidence for Room Remix.",
+      "value": 0.78,
+      "sample_size": null
+    },
+    {
+      "idea_id": "room-remix",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 78/100 used as prior evidence for Room Remix.",
+      "value": 0.78,
+      "sample_size": null
+    },
+    {
+      "idea_id": "room-remix",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 78/100 used as prior evidence for Room Remix.",
+      "value": 0.78,
+      "sample_size": null
+    },
+    {
+      "idea_id": "room-remix",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 78/100 used as prior evidence for Room Remix.",
+      "value": 0.78,
+      "sample_size": null
+    },
+    {
+      "idea_id": "room-remix",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 78/100 used as prior evidence for Room Remix.",
+      "value": 0.78,
+      "sample_size": null
+    },
+    {
+      "idea_id": "room-remix",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 78/100 used as prior evidence for Room Remix.",
+      "value": 0.78,
+      "sample_size": null
+    },
+    {
+      "idea_id": "future-self-simulator",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 77/100 used as prior evidence for Future Self Simulator.",
+      "value": 0.77,
+      "sample_size": null
+    },
+    {
+      "idea_id": "future-self-simulator",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 77/100 used as prior evidence for Future Self Simulator.",
+      "value": 0.77,
+      "sample_size": null
+    },
+    {
+      "idea_id": "future-self-simulator",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 77/100 used as prior evidence for Future Self Simulator.",
+      "value": 0.77,
+      "sample_size": null
+    },
+    {
+      "idea_id": "future-self-simulator",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 77/100 used as prior evidence for Future Self Simulator.",
+      "value": 0.77,
+      "sample_size": null
+    },
+    {
+      "idea_id": "future-self-simulator",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 77/100 used as prior evidence for Future Self Simulator.",
+      "value": 0.77,
+      "sample_size": null
+    },
+    {
+      "idea_id": "future-self-simulator",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 77/100 used as prior evidence for Future Self Simulator.",
+      "value": 0.77,
+      "sample_size": null
+    },
+    {
+      "idea_id": "future-self-simulator",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 77/100 used as prior evidence for Future Self Simulator.",
+      "value": 0.77,
+      "sample_size": null
+    },
+    {
+      "idea_id": "future-self-simulator",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 77/100 used as prior evidence for Future Self Simulator.",
+      "value": 0.77,
+      "sample_size": null
+    },
+    {
+      "idea_id": "goal-accountability-montage",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 76/100 used as prior evidence for Goal Accountability Montage.",
+      "value": 0.76,
+      "sample_size": null
+    },
+    {
+      "idea_id": "goal-accountability-montage",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 76/100 used as prior evidence for Goal Accountability Montage.",
+      "value": 0.76,
+      "sample_size": null
+    },
+    {
+      "idea_id": "goal-accountability-montage",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 76/100 used as prior evidence for Goal Accountability Montage.",
+      "value": 0.76,
+      "sample_size": null
+    },
+    {
+      "idea_id": "goal-accountability-montage",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 76/100 used as prior evidence for Goal Accountability Montage.",
+      "value": 0.76,
+      "sample_size": null
+    },
+    {
+      "idea_id": "goal-accountability-montage",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 76/100 used as prior evidence for Goal Accountability Montage.",
+      "value": 0.76,
+      "sample_size": null
+    },
+    {
+      "idea_id": "goal-accountability-montage",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 76/100 used as prior evidence for Goal Accountability Montage.",
+      "value": 0.76,
+      "sample_size": null
+    },
+    {
+      "idea_id": "goal-accountability-montage",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 76/100 used as prior evidence for Goal Accountability Montage.",
+      "value": 0.76,
+      "sample_size": null
+    },
+    {
+      "idea_id": "goal-accountability-montage",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 76/100 used as prior evidence for Goal Accountability Montage.",
+      "value": 0.76,
+      "sample_size": null
+    },
+    {
+      "idea_id": "couple-compatibility-show",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 75/100 used as prior evidence for Couple Compatibility Show.",
+      "value": 0.75,
+      "sample_size": null
+    },
+    {
+      "idea_id": "couple-compatibility-show",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 75/100 used as prior evidence for Couple Compatibility Show.",
+      "value": 0.75,
+      "sample_size": null
+    },
+    {
+      "idea_id": "couple-compatibility-show",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 75/100 used as prior evidence for Couple Compatibility Show.",
+      "value": 0.75,
+      "sample_size": null
+    },
+    {
+      "idea_id": "couple-compatibility-show",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 75/100 used as prior evidence for Couple Compatibility Show.",
+      "value": 0.75,
+      "sample_size": null
+    },
+    {
+      "idea_id": "couple-compatibility-show",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 75/100 used as prior evidence for Couple Compatibility Show.",
+      "value": 0.75,
+      "sample_size": null
+    },
+    {
+      "idea_id": "couple-compatibility-show",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 75/100 used as prior evidence for Couple Compatibility Show.",
+      "value": 0.75,
+      "sample_size": null
+    },
+    {
+      "idea_id": "couple-compatibility-show",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 75/100 used as prior evidence for Couple Compatibility Show.",
+      "value": 0.75,
+      "sample_size": null
+    },
+    {
+      "idea_id": "couple-compatibility-show",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 75/100 used as prior evidence for Couple Compatibility Show.",
+      "value": 0.75,
+      "sample_size": null
+    },
+    {
+      "idea_id": "wedding-speech-studio",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 74/100 used as prior evidence for Wedding Speech Studio.",
+      "value": 0.74,
+      "sample_size": null
+    },
+    {
+      "idea_id": "wedding-speech-studio",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 74/100 used as prior evidence for Wedding Speech Studio.",
+      "value": 0.74,
+      "sample_size": null
+    },
+    {
+      "idea_id": "wedding-speech-studio",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 74/100 used as prior evidence for Wedding Speech Studio.",
+      "value": 0.74,
+      "sample_size": null
+    },
+    {
+      "idea_id": "wedding-speech-studio",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 74/100 used as prior evidence for Wedding Speech Studio.",
+      "value": 0.74,
+      "sample_size": null
+    },
+    {
+      "idea_id": "wedding-speech-studio",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 74/100 used as prior evidence for Wedding Speech Studio.",
+      "value": 0.74,
+      "sample_size": null
+    },
+    {
+      "idea_id": "wedding-speech-studio",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 74/100 used as prior evidence for Wedding Speech Studio.",
+      "value": 0.74,
+      "sample_size": null
+    },
+    {
+      "idea_id": "wedding-speech-studio",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 74/100 used as prior evidence for Wedding Speech Studio.",
+      "value": 0.74,
+      "sample_size": null
+    },
+    {
+      "idea_id": "wedding-speech-studio",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 74/100 used as prior evidence for Wedding Speech Studio.",
+      "value": 0.74,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-comment-to-video-engine",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 73/100 used as prior evidence for Creator Comment-to-Video Engine.",
+      "value": 0.73,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-comment-to-video-engine",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 73/100 used as prior evidence for Creator Comment-to-Video Engine.",
+      "value": 0.73,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-comment-to-video-engine",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 73/100 used as prior evidence for Creator Comment-to-Video Engine.",
+      "value": 0.73,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-comment-to-video-engine",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 73/100 used as prior evidence for Creator Comment-to-Video Engine.",
+      "value": 0.73,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-comment-to-video-engine",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 73/100 used as prior evidence for Creator Comment-to-Video Engine.",
+      "value": 0.73,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-comment-to-video-engine",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 73/100 used as prior evidence for Creator Comment-to-Video Engine.",
+      "value": 0.73,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-comment-to-video-engine",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 73/100 used as prior evidence for Creator Comment-to-Video Engine.",
+      "value": 0.73,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-comment-to-video-engine",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 73/100 used as prior evidence for Creator Comment-to-Video Engine.",
+      "value": 0.73,
+      "sample_size": null
+    },
+    {
+      "idea_id": "gift-maker",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 72/100 used as prior evidence for Gift Maker.",
+      "value": 0.72,
+      "sample_size": null
+    },
+    {
+      "idea_id": "gift-maker",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 72/100 used as prior evidence for Gift Maker.",
+      "value": 0.72,
+      "sample_size": null
+    },
+    {
+      "idea_id": "gift-maker",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 72/100 used as prior evidence for Gift Maker.",
+      "value": 0.72,
+      "sample_size": null
+    },
+    {
+      "idea_id": "gift-maker",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 72/100 used as prior evidence for Gift Maker.",
+      "value": 0.72,
+      "sample_size": null
+    },
+    {
+      "idea_id": "gift-maker",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 72/100 used as prior evidence for Gift Maker.",
+      "value": 0.72,
+      "sample_size": null
+    },
+    {
+      "idea_id": "gift-maker",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 72/100 used as prior evidence for Gift Maker.",
+      "value": 0.72,
+      "sample_size": null
+    },
+    {
+      "idea_id": "gift-maker",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 72/100 used as prior evidence for Gift Maker.",
+      "value": 0.72,
+      "sample_size": null
+    },
+    {
+      "idea_id": "gift-maker",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 72/100 used as prior evidence for Gift Maker.",
+      "value": 0.72,
+      "sample_size": null
+    },
+    {
+      "idea_id": "running-hype-clips",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 71/100 used as prior evidence for Running Hype Clips.",
+      "value": 0.71,
+      "sample_size": null
+    },
+    {
+      "idea_id": "running-hype-clips",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 71/100 used as prior evidence for Running Hype Clips.",
+      "value": 0.71,
+      "sample_size": null
+    },
+    {
+      "idea_id": "running-hype-clips",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 71/100 used as prior evidence for Running Hype Clips.",
+      "value": 0.71,
+      "sample_size": null
+    },
+    {
+      "idea_id": "running-hype-clips",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 71/100 used as prior evidence for Running Hype Clips.",
+      "value": 0.71,
+      "sample_size": null
+    },
+    {
+      "idea_id": "running-hype-clips",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 71/100 used as prior evidence for Running Hype Clips.",
+      "value": 0.71,
+      "sample_size": null
+    },
+    {
+      "idea_id": "running-hype-clips",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 71/100 used as prior evidence for Running Hype Clips.",
+      "value": 0.71,
+      "sample_size": null
+    },
+    {
+      "idea_id": "running-hype-clips",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 71/100 used as prior evidence for Running Hype Clips.",
+      "value": 0.71,
+      "sample_size": null
+    },
+    {
+      "idea_id": "running-hype-clips",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 71/100 used as prior evidence for Running Hype Clips.",
+      "value": 0.71,
+      "sample_size": null
+    },
+    {
+      "idea_id": "workout-form-and-progress-coach",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 70/100 used as prior evidence for Workout Form and Progress Coach.",
+      "value": 0.7,
+      "sample_size": null
+    },
+    {
+      "idea_id": "workout-form-and-progress-coach",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 70/100 used as prior evidence for Workout Form and Progress Coach.",
+      "value": 0.7,
+      "sample_size": null
+    },
+    {
+      "idea_id": "workout-form-and-progress-coach",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 70/100 used as prior evidence for Workout Form and Progress Coach.",
+      "value": 0.7,
+      "sample_size": null
+    },
+    {
+      "idea_id": "workout-form-and-progress-coach",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 70/100 used as prior evidence for Workout Form and Progress Coach.",
+      "value": 0.7,
+      "sample_size": null
+    },
+    {
+      "idea_id": "workout-form-and-progress-coach",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 70/100 used as prior evidence for Workout Form and Progress Coach.",
+      "value": 0.7,
+      "sample_size": null
+    },
+    {
+      "idea_id": "workout-form-and-progress-coach",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 70/100 used as prior evidence for Workout Form and Progress Coach.",
+      "value": 0.7,
+      "sample_size": null
+    },
+    {
+      "idea_id": "workout-form-and-progress-coach",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 70/100 used as prior evidence for Workout Form and Progress Coach.",
+      "value": 0.7,
+      "sample_size": null
+    },
+    {
+      "idea_id": "workout-form-and-progress-coach",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 70/100 used as prior evidence for Workout Form and Progress Coach.",
+      "value": 0.7,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-finance-money-story",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 69/100 used as prior evidence for Personal Finance Money Story.",
+      "value": 0.69,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-finance-money-story",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 69/100 used as prior evidence for Personal Finance Money Story.",
+      "value": 0.69,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-finance-money-story",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 69/100 used as prior evidence for Personal Finance Money Story.",
+      "value": 0.69,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-finance-money-story",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 69/100 used as prior evidence for Personal Finance Money Story.",
+      "value": 0.69,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-finance-money-story",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 69/100 used as prior evidence for Personal Finance Money Story.",
+      "value": 0.69,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-finance-money-story",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 69/100 used as prior evidence for Personal Finance Money Story.",
+      "value": 0.69,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-finance-money-story",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 69/100 used as prior evidence for Personal Finance Money Story.",
+      "value": 0.69,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-finance-money-story",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 69/100 used as prior evidence for Personal Finance Money Story.",
+      "value": 0.69,
+      "sample_size": null
+    },
+    {
+      "idea_id": "friend-group-weekly-magazine",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Friend Group Weekly Magazine.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "friend-group-weekly-magazine",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Friend Group Weekly Magazine.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "friend-group-weekly-magazine",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Friend Group Weekly Magazine.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "friend-group-weekly-magazine",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Friend Group Weekly Magazine.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "friend-group-weekly-magazine",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Friend Group Weekly Magazine.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "friend-group-weekly-magazine",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Friend Group Weekly Magazine.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "friend-group-weekly-magazine",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Friend Group Weekly Magazine.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "friend-group-weekly-magazine",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Friend Group Weekly Magazine.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "microlearning-quiz-battles",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Microlearning Quiz Battles.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "microlearning-quiz-battles",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Microlearning Quiz Battles.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "microlearning-quiz-battles",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Microlearning Quiz Battles.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "microlearning-quiz-battles",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Microlearning Quiz Battles.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "microlearning-quiz-battles",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Microlearning Quiz Battles.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "microlearning-quiz-battles",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Microlearning Quiz Battles.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "microlearning-quiz-battles",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Microlearning Quiz Battles.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "microlearning-quiz-battles",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 68/100 used as prior evidence for Microlearning Quiz Battles.",
+      "value": 0.68,
+      "sample_size": null
+    },
+    {
+      "idea_id": "parenting-milestone-storyteller",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Parenting Milestone Storyteller.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "parenting-milestone-storyteller",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Parenting Milestone Storyteller.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "parenting-milestone-storyteller",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Parenting Milestone Storyteller.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "parenting-milestone-storyteller",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Parenting Milestone Storyteller.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "parenting-milestone-storyteller",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Parenting Milestone Storyteller.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "parenting-milestone-storyteller",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Parenting Milestone Storyteller.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "parenting-milestone-storyteller",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Parenting Milestone Storyteller.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "parenting-milestone-storyteller",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Parenting Milestone Storyteller.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "kids-storybook-studio",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Kids Storybook Studio.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "kids-storybook-studio",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Kids Storybook Studio.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "kids-storybook-studio",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Kids Storybook Studio.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "kids-storybook-studio",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Kids Storybook Studio.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "kids-storybook-studio",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Kids Storybook Studio.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "kids-storybook-studio",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Kids Storybook Studio.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "kids-storybook-studio",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Kids Storybook Studio.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "kids-storybook-studio",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 67/100 used as prior evidence for Kids Storybook Studio.",
+      "value": 0.67,
+      "sample_size": null
+    },
+    {
+      "idea_id": "screenshot-concierge",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 66/100 used as prior evidence for Screenshot Concierge.",
+      "value": 0.66,
+      "sample_size": null
+    },
+    {
+      "idea_id": "screenshot-concierge",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 66/100 used as prior evidence for Screenshot Concierge.",
+      "value": 0.66,
+      "sample_size": null
+    },
+    {
+      "idea_id": "screenshot-concierge",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 66/100 used as prior evidence for Screenshot Concierge.",
+      "value": 0.66,
+      "sample_size": null
+    },
+    {
+      "idea_id": "screenshot-concierge",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 66/100 used as prior evidence for Screenshot Concierge.",
+      "value": 0.66,
+      "sample_size": null
+    },
+    {
+      "idea_id": "screenshot-concierge",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 66/100 used as prior evidence for Screenshot Concierge.",
+      "value": 0.66,
+      "sample_size": null
+    },
+    {
+      "idea_id": "screenshot-concierge",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 66/100 used as prior evidence for Screenshot Concierge.",
+      "value": 0.66,
+      "sample_size": null
+    },
+    {
+      "idea_id": "screenshot-concierge",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 66/100 used as prior evidence for Screenshot Concierge.",
+      "value": 0.66,
+      "sample_size": null
+    },
+    {
+      "idea_id": "screenshot-concierge",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 66/100 used as prior evidence for Screenshot Concierge.",
+      "value": 0.66,
+      "sample_size": null
+    },
+    {
+      "idea_id": "beauty-routine-twin",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Beauty Routine Twin.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "beauty-routine-twin",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Beauty Routine Twin.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "beauty-routine-twin",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Beauty Routine Twin.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "beauty-routine-twin",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Beauty Routine Twin.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "beauty-routine-twin",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Beauty Routine Twin.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "beauty-routine-twin",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Beauty Routine Twin.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "beauty-routine-twin",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Beauty Routine Twin.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "beauty-routine-twin",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Beauty Routine Twin.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "closet-commerce-copilot",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Closet Commerce Copilot.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "closet-commerce-copilot",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Closet Commerce Copilot.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "closet-commerce-copilot",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Closet Commerce Copilot.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "closet-commerce-copilot",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Closet Commerce Copilot.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "closet-commerce-copilot",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Closet Commerce Copilot.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "closet-commerce-copilot",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Closet Commerce Copilot.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "closet-commerce-copilot",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Closet Commerce Copilot.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "closet-commerce-copilot",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 65/100 used as prior evidence for Closet Commerce Copilot.",
+      "value": 0.65,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dream-visualizer",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Dream Visualizer.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dream-visualizer",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Dream Visualizer.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dream-visualizer",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Dream Visualizer.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dream-visualizer",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Dream Visualizer.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dream-visualizer",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Dream Visualizer.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dream-visualizer",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Dream Visualizer.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dream-visualizer",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Dream Visualizer.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "dream-visualizer",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Dream Visualizer.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "language-roleplay-selfie-tutor",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Language Roleplay Selfie Tutor.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "language-roleplay-selfie-tutor",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Language Roleplay Selfie Tutor.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "language-roleplay-selfie-tutor",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Language Roleplay Selfie Tutor.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "language-roleplay-selfie-tutor",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Language Roleplay Selfie Tutor.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "language-roleplay-selfie-tutor",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Language Roleplay Selfie Tutor.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "language-roleplay-selfie-tutor",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Language Roleplay Selfie Tutor.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "language-roleplay-selfie-tutor",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Language Roleplay Selfie Tutor.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "language-roleplay-selfie-tutor",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 64/100 used as prior evidence for Language Roleplay Selfie Tutor.",
+      "value": 0.64,
+      "sample_size": null
+    },
+    {
+      "idea_id": "voice-journal-coach",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Voice Journal Coach.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "voice-journal-coach",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Voice Journal Coach.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "voice-journal-coach",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Voice Journal Coach.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "voice-journal-coach",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Voice Journal Coach.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "voice-journal-coach",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Voice Journal Coach.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "voice-journal-coach",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Voice Journal Coach.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "voice-journal-coach",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Voice Journal Coach.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "voice-journal-coach",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Voice Journal Coach.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "travel-alternate-self-and-planner",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Travel Alternate Self and Planner.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "travel-alternate-self-and-planner",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Travel Alternate Self and Planner.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "travel-alternate-self-and-planner",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Travel Alternate Self and Planner.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "travel-alternate-self-and-planner",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Travel Alternate Self and Planner.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "travel-alternate-self-and-planner",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Travel Alternate Self and Planner.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "travel-alternate-self-and-planner",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Travel Alternate Self and Planner.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "travel-alternate-self-and-planner",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Travel Alternate Self and Planner.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "travel-alternate-self-and-planner",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 63/100 used as prior evidence for Travel Alternate Self and Planner.",
+      "value": 0.63,
+      "sample_size": null
+    },
+    {
+      "idea_id": "party-icebreaker-generator",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Party Icebreaker Generator.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "party-icebreaker-generator",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Party Icebreaker Generator.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "party-icebreaker-generator",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Party Icebreaker Generator.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "party-icebreaker-generator",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Party Icebreaker Generator.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "party-icebreaker-generator",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Party Icebreaker Generator.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "party-icebreaker-generator",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Party Icebreaker Generator.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "party-icebreaker-generator",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Party Icebreaker Generator.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "party-icebreaker-generator",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Party Icebreaker Generator.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "local-event-social-planner",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Local Event Social Planner.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "local-event-social-planner",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Local Event Social Planner.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "local-event-social-planner",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Local Event Social Planner.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "local-event-social-planner",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Local Event Social Planner.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "local-event-social-planner",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Local Event Social Planner.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "local-event-social-planner",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Local Event Social Planner.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "local-event-social-planner",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Local Event Social Planner.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "local-event-social-planner",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 62/100 used as prior evidence for Local Event Social Planner.",
+      "value": 0.62,
+      "sample_size": null
+    },
+    {
+      "idea_id": "digital-clone-for-dm-replies",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Digital Clone for DM Replies.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "digital-clone-for-dm-replies",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Digital Clone for DM Replies.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "digital-clone-for-dm-replies",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Digital Clone for DM Replies.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "digital-clone-for-dm-replies",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Digital Clone for DM Replies.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "digital-clone-for-dm-replies",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Digital Clone for DM Replies.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "digital-clone-for-dm-replies",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Digital Clone for DM Replies.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "digital-clone-for-dm-replies",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Digital Clone for DM Replies.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "digital-clone-for-dm-replies",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Digital Clone for DM Replies.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "hobby-coach-with-brag-clips",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Hobby Coach With Brag Clips.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "hobby-coach-with-brag-clips",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Hobby Coach With Brag Clips.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "hobby-coach-with-brag-clips",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Hobby Coach With Brag Clips.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "hobby-coach-with-brag-clips",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Hobby Coach With Brag Clips.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "hobby-coach-with-brag-clips",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Hobby Coach With Brag Clips.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "hobby-coach-with-brag-clips",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Hobby Coach With Brag Clips.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "hobby-coach-with-brag-clips",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Hobby Coach With Brag Clips.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "hobby-coach-with-brag-clips",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 61/100 used as prior evidence for Hobby Coach With Brag Clips.",
+      "value": 0.61,
+      "sample_size": null
+    },
+    {
+      "idea_id": "news-bias-mirror",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for News Bias Mirror.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "news-bias-mirror",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for News Bias Mirror.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "news-bias-mirror",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for News Bias Mirror.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "news-bias-mirror",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for News Bias Mirror.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "news-bias-mirror",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for News Bias Mirror.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "news-bias-mirror",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for News Bias Mirror.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "news-bias-mirror",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for News Bias Mirror.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "news-bias-mirror",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for News Bias Mirror.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "study-sprint-storymaker",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for Study Sprint Storymaker.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "study-sprint-storymaker",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for Study Sprint Storymaker.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "study-sprint-storymaker",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for Study Sprint Storymaker.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "study-sprint-storymaker",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for Study Sprint Storymaker.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "study-sprint-storymaker",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for Study Sprint Storymaker.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "study-sprint-storymaker",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for Study Sprint Storymaker.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "study-sprint-storymaker",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for Study Sprint Storymaker.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "study-sprint-storymaker",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 60/100 used as prior evidence for Study Sprint Storymaker.",
+      "value": 0.6,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-myth-generator",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Personal Myth Generator.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-myth-generator",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Personal Myth Generator.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-myth-generator",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Personal Myth Generator.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-myth-generator",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Personal Myth Generator.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-myth-generator",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Personal Myth Generator.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-myth-generator",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Personal Myth Generator.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-myth-generator",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Personal Myth Generator.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "personal-myth-generator",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Personal Myth Generator.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "roast-and-compliment-trading-cards",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Roast and Compliment Trading Cards.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "roast-and-compliment-trading-cards",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Roast and Compliment Trading Cards.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "roast-and-compliment-trading-cards",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Roast and Compliment Trading Cards.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "roast-and-compliment-trading-cards",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Roast and Compliment Trading Cards.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "roast-and-compliment-trading-cards",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Roast and Compliment Trading Cards.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "roast-and-compliment-trading-cards",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Roast and Compliment Trading Cards.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "roast-and-compliment-trading-cards",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Roast and Compliment Trading Cards.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "roast-and-compliment-trading-cards",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 59/100 used as prior evidence for Roast and Compliment Trading Cards.",
+      "value": 0.59,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-collab-graph",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for Creator Collab Graph.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-collab-graph",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for Creator Collab Graph.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-collab-graph",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for Creator Collab Graph.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-collab-graph",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for Creator Collab Graph.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-collab-graph",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for Creator Collab Graph.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-collab-graph",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for Creator Collab Graph.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-collab-graph",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for Creator Collab Graph.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "creator-collab-graph",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for Creator Collab Graph.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ai-debate-shorts",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for AI Debate Shorts.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ai-debate-shorts",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for AI Debate Shorts.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ai-debate-shorts",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for AI Debate Shorts.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ai-debate-shorts",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for AI Debate Shorts.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ai-debate-shorts",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for AI Debate Shorts.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ai-debate-shorts",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for AI Debate Shorts.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ai-debate-shorts",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for AI Debate Shorts.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "ai-debate-shorts",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 58/100 used as prior evidence for AI Debate Shorts.",
+      "value": 0.58,
+      "sample_size": null
+    },
+    {
+      "idea_id": "resume-to-content-career-coach",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Resume-to-Content Career Coach.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "resume-to-content-career-coach",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Resume-to-Content Career Coach.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "resume-to-content-career-coach",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Resume-to-Content Career Coach.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "resume-to-content-career-coach",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Resume-to-Content Career Coach.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "resume-to-content-career-coach",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Resume-to-Content Career Coach.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "resume-to-content-career-coach",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Resume-to-Content Career Coach.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "resume-to-content-career-coach",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Resume-to-Content Career Coach.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "resume-to-content-career-coach",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Resume-to-Content Career Coach.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "moodboard-to-brand-kit",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Moodboard-to-Brand Kit.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "moodboard-to-brand-kit",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Moodboard-to-Brand Kit.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "moodboard-to-brand-kit",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Moodboard-to-Brand Kit.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "moodboard-to-brand-kit",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Moodboard-to-Brand Kit.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "moodboard-to-brand-kit",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Moodboard-to-Brand Kit.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "moodboard-to-brand-kit",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Moodboard-to-Brand Kit.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "moodboard-to-brand-kit",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Moodboard-to-Brand Kit.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "moodboard-to-brand-kit",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 57/100 used as prior evidence for Moodboard-to-Brand Kit.",
+      "value": 0.57,
+      "sample_size": null
+    },
+    {
+      "idea_id": "micro-podcast-clip-maker",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Micro-podcast Clip Maker.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "micro-podcast-clip-maker",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Micro-podcast Clip Maker.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "micro-podcast-clip-maker",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Micro-podcast Clip Maker.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "micro-podcast-clip-maker",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Micro-podcast Clip Maker.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "micro-podcast-clip-maker",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Micro-podcast Clip Maker.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "micro-podcast-clip-maker",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Micro-podcast Clip Maker.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "micro-podcast-clip-maker",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Micro-podcast Clip Maker.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "micro-podcast-clip-maker",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Micro-podcast Clip Maker.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "baby-name-universe",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Baby Name Universe.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "baby-name-universe",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Baby Name Universe.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "baby-name-universe",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Baby Name Universe.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "baby-name-universe",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Baby Name Universe.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "baby-name-universe",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Baby Name Universe.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "baby-name-universe",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Baby Name Universe.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "baby-name-universe",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Baby Name Universe.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "baby-name-universe",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Baby Name Universe.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "offline-private-bestie",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Offline Private Bestie.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "offline-private-bestie",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Offline Private Bestie.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "offline-private-bestie",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Offline Private Bestie.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "offline-private-bestie",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Offline Private Bestie.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "offline-private-bestie",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Offline Private Bestie.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "offline-private-bestie",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Offline Private Bestie.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "offline-private-bestie",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Offline Private Bestie.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "offline-private-bestie",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 56/100 used as prior evidence for Offline Private Bestie.",
+      "value": 0.56,
+      "sample_size": null
+    },
+    {
+      "idea_id": "deal-and-dupe-scout",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Deal and Dupe Scout.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "deal-and-dupe-scout",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Deal and Dupe Scout.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "deal-and-dupe-scout",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Deal and Dupe Scout.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "deal-and-dupe-scout",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Deal and Dupe Scout.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "deal-and-dupe-scout",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Deal and Dupe Scout.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "deal-and-dupe-scout",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Deal and Dupe Scout.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "deal-and-dupe-scout",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Deal and Dupe Scout.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "deal-and-dupe-scout",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Deal and Dupe Scout.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fandom-trope-storyboard-studio",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Fandom Trope Storyboard Studio.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fandom-trope-storyboard-studio",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Fandom Trope Storyboard Studio.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fandom-trope-storyboard-studio",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Fandom Trope Storyboard Studio.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fandom-trope-storyboard-studio",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Fandom Trope Storyboard Studio.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fandom-trope-storyboard-studio",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Fandom Trope Storyboard Studio.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fandom-trope-storyboard-studio",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Fandom Trope Storyboard Studio.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fandom-trope-storyboard-studio",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Fandom Trope Storyboard Studio.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "fandom-trope-storyboard-studio",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Fandom Trope Storyboard Studio.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "habit-league",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Habit League.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "habit-league",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Habit League.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "habit-league",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Habit League.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "habit-league",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Habit League.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "habit-league",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Habit League.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "habit-league",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Habit League.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "habit-league",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Habit League.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "habit-league",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 55/100 used as prior evidence for Habit League.",
+      "value": 0.55,
+      "sample_size": null
+    },
+    {
+      "idea_id": "neighborhood-swap-and-diy-visualizer",
+      "metric": "market_pull",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 54/100 used as prior evidence for Neighborhood Swap and DIY Visualizer.",
+      "value": 0.54,
+      "sample_size": null
+    },
+    {
+      "idea_id": "neighborhood-swap-and-diy-visualizer",
+      "metric": "viral_loop",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 54/100 used as prior evidence for Neighborhood Swap and DIY Visualizer.",
+      "value": 0.54,
+      "sample_size": null
+    },
+    {
+      "idea_id": "neighborhood-swap-and-diy-visualizer",
+      "metric": "ai_unlock",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 54/100 used as prior evidence for Neighborhood Swap and DIY Visualizer.",
+      "value": 0.54,
+      "sample_size": null
+    },
+    {
+      "idea_id": "neighborhood-swap-and-diy-visualizer",
+      "metric": "consumer_clarity",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 54/100 used as prior evidence for Neighborhood Swap and DIY Visualizer.",
+      "value": 0.54,
+      "sample_size": null
+    },
+    {
+      "idea_id": "neighborhood-swap-and-diy-visualizer",
+      "metric": "willingness_to_pay",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 54/100 used as prior evidence for Neighborhood Swap and DIY Visualizer.",
+      "value": 0.54,
+      "sample_size": null
+    },
+    {
+      "idea_id": "neighborhood-swap-and-diy-visualizer",
+      "metric": "retention_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 54/100 used as prior evidence for Neighborhood Swap and DIY Visualizer.",
+      "value": 0.54,
+      "sample_size": null
+    },
+    {
+      "idea_id": "neighborhood-swap-and-diy-visualizer",
+      "metric": "distribution_fit",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 54/100 used as prior evidence for Neighborhood Swap and DIY Visualizer.",
+      "value": 0.54,
+      "sample_size": null
+    },
+    {
+      "idea_id": "neighborhood-swap-and-diy-visualizer",
+      "metric": "risk_resilience",
+      "source": "User-provided 2026 consumer AI report composite ranking",
+      "note": "Author composite score 54/100 used as prior evidence for Neighborhood Swap and DIY Visualizer.",
+      "value": 0.54,
+      "sample_size": null
+    }
+  ]
+}

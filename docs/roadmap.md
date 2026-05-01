@@ -2,6 +2,8 @@
 
 For the next-generation engine plan, see
 [`docs/v2-engine-roadmap.md`](/Users/randytorres/Projects/composure-sim/docs/v2-engine-roadmap.md).
+For the product-facing synthetic decision lab plan, see
+[`docs/decision-lab-roadmap.md`](/Users/randytorres/Projects/composure-sim/docs/decision-lab-roadmap.md).
 
 ## Goal
 

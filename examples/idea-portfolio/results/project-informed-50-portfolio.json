@@ -1,0 +1,2124 @@
+{
+  "id": "project-informed-50",
+  "name": "Project-Informed Portfolio 50",
+  "description": "Project-informed run grounded in Forge Engine, PARAGON, REALM, SAMAEL, AGON/The Escape, and Roviq Game Studio local docs.",
+  "seed_base": 3616518934833611000,
+  "population": {
+    "target_count": 10000,
+    "sample_size": 30
+  },
+  "segments": [
+    {
+      "id": "randy_founder_fit",
+      "name": "Randy Founder Fit",
+      "share_weight": 0.18,
+      "traits": {
+        "social_sharing": 0.68,
+        "trend_adoption": 0.7,
+        "spending_power": 0.7,
+        "habit_openness": 0.84,
+        "ai_openness": 0.95,
+        "technical_moat": 0.96,
+        "founder_fit": 1,
+        "worldbuilding": 0.9,
+        "mission_rehearsal": 0.86,
+        "cohort_identity": 0.88,
+        "native_ios": 0.94,
+        "cinematic_taste": 0.92
+      },
+      "channels": [
+        "github",
+        "x",
+        "founder_network",
+        "app_store",
+        "demo"
+      ],
+      "pains": [
+        "needs projects to compound",
+        "wants taste and systems to become one stack"
+      ]
+    },
+    {
+      "id": "systems_game_players",
+      "name": "Systems Game Players",
+      "share_weight": 0.2,
+      "traits": {
+        "social_sharing": 0.72,
+        "trend_adoption": 0.64,
+        "spending_power": 0.58,
+        "habit_openness": 0.88,
+        "ai_openness": 0.62,
+        "technical_moat": 0.62,
+        "founder_fit": 0.58,
+        "worldbuilding": 0.96,
+        "mission_rehearsal": 0.44,
+        "cohort_identity": 0.7,
+        "native_ios": 0.76,
+        "cinematic_taste": 0.84
+      },
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "tiktok"
+      ],
+      "pains": [
+        "wants worlds that remember",
+        "rejects shallow mobile grind"
+      ]
+    },
+    {
+      "id": "indie_ios_builders",
+      "name": "Indie iOS Builders",
+      "share_weight": 0.17,
+      "traits": {
+        "social_sharing": 0.64,
+        "trend_adoption": 0.72,
+        "spending_power": 0.72,
+        "habit_openness": 0.68,
+        "ai_openness": 0.9,
+        "technical_moat": 0.92,
+        "founder_fit": 0.82,
+        "worldbuilding": 0.58,
+        "mission_rehearsal": 0.42,
+        "cohort_identity": 0.52,
+        "native_ios": 0.98,
+        "cinematic_taste": 0.7
+      },
+      "channels": [
+        "github",
+        "x",
+        "app_store",
+        "developer_forums"
+      ],
+      "pains": [
+        "needs native game production leverage",
+        "hates web-feeling mobile apps"
+      ]
+    },
+    {
+      "id": "defense_operators",
+      "name": "Defense Operators And Evaluators",
+      "share_weight": 0.16,
+      "traits": {
+        "social_sharing": 0.34,
+        "trend_adoption": 0.44,
+        "spending_power": 0.9,
+        "habit_openness": 0.54,
+        "ai_openness": 0.66,
+        "technical_moat": 0.95,
+        "founder_fit": 0.78,
+        "worldbuilding": 0.46,
+        "mission_rehearsal": 0.98,
+        "cohort_identity": 0.5,
+        "native_ios": 0.48,
+        "cinematic_taste": 0.62
+      },
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "diu"
+      ],
+      "pains": [
+        "needs signed rehearsal before action",
+        "cannot trust black-box novelty"
+      ]
+    },
+    {
+      "id": "agon_members",
+      "name": "AGON Members",
+      "share_weight": 0.14,
+      "traits": {
+        "social_sharing": 0.58,
+        "trend_adoption": 0.54,
+        "spending_power": 0.68,
+        "habit_openness": 0.9,
+        "ai_openness": 0.62,
+        "technical_moat": 0.5,
+        "founder_fit": 0.74,
+        "worldbuilding": 0.56,
+        "mission_rehearsal": 0.52,
+        "cohort_identity": 0.98,
+        "native_ios": 0.68,
+        "cinematic_taste": 0.76
+      },
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "pains": [
+        "wants proof not promises",
+        "needs ritual accountability and durable identity"
+      ]
+    },
+    {
+      "id": "creator_operators",
+      "name": "Creator Operators",
+      "share_weight": 0.15,
+      "traits": {
+        "social_sharing": 0.84,
+        "trend_adoption": 0.8,
+        "spending_power": 0.74,
+        "habit_openness": 0.66,
+        "ai_openness": 0.9,
+        "technical_moat": 0.66,
+        "founder_fit": 0.64,
+        "worldbuilding": 0.7,
+        "mission_rehearsal": 0.42,
+        "cohort_identity": 0.66,
+        "native_ios": 0.58,
+        "cinematic_taste": 0.92
+      },
+      "channels": [
+        "tiktok",
+        "instagram",
+        "x",
+        "youtube",
+        "newsletter"
+      ],
+      "pains": [
+        "needs distinctive output",
+        "needs taste-preserving production speed"
+      ]
+    }
+  ],
+  "ideas": [
+    {
+      "id": "forge-game",
+      "name": "FORGE GAME",
+      "summary": "Prompt-to-playable native iOS game maker built on Forge's C++20 runtime, Swift gameplay/editor layer, direct Metal renderer, haptics/audio feedback stack, replay/debug hooks, and AI patch-review control plane.",
+      "category": "games",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "playable loop",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "paragon-vanguard-alpha",
+      "name": "PARAGON VANGUARD ALPHA",
+      "summary": "Mobile MMO superhero closed alpha with VANGUARD as the first playable faction, Public Trust, Court of Named People, identity exposure, rooftop arrival combat, civilian triage, and prestige drama as differentiation.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-vhaegor-proof",
+      "name": "REALM VHAEGOR PROOF",
+      "summary": "Ship the Phase 1 dragon proof path: egg discovery, hatching ritual, dragonrider bond, Dragon POV short session, battlefield consequence, and Vhaegor the Storm-Bringer as the named dragon target.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-breach-zero",
+      "name": "SAMAEL BREACH ZERO",
+      "summary": "Facility, ship, and compound rehearsal surface where evidence becomes STRATA world package, physics graph, VECTOR routes, SPECTER RF, MURMUR adversary/civilian behavior, and signed AAR.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "agon-the-first-watch",
+      "name": "AGON THE FIRST WATCH",
+      "summary": "100-man, 10-squad, 30-day Season 1 with $99 entry, Mission Card, Proof Feed, Locker Room, Captain orchestration, AGON Score, and Day-30 Pentathlon.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "roviq-forge-kit",
+      "name": "ROVIQ FORGE KIT",
+      "summary": "Shared adapter layer so PARAGON and REALM consume one Forge host bridge, one scene/runtime contract, and one gameplay/asset pipeline instead of drifting app-specific bridges.",
+      "category": "games",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "playable loop",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-core-sdk",
+      "name": "SAMAEL CORE SDK",
+      "summary": "Public module SDK and conformance harness for physics modules, capability tokens, signed artifacts, CAL declarations, and third-party module trust classes.",
+      "category": "social_irl",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "paragon-saint-caliber-forge-slice",
+      "name": "PARAGON SAINT CALIBER FORGE SLICE",
+      "summary": "First real Forge/Metal gameplay proof using Saint Caliber rooftop arrival, power configuration, combat HUD, hit feedback, and app-to-engine bridge.",
+      "category": "games",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "playable loop",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-court-and-whispers",
+      "name": "REALM COURT AND WHISPERS",
+      "summary": "Dense iOS strategy surface around Court of Named People, Loyalty/Honor/Ambition/Grudge, raven intel, planted deception, oath witnesses, succession threats, and hidden political state.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "agon-captain-os",
+      "name": "AGON CAPTAIN OS",
+      "summary": "Standalone operator/coach AI that runs recurring groups, posts daily check-ins, weekly recaps, mission previews, proof acknowledgments, quiet-member nudges, and leaderboard drops.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "agon-council-api",
+      "name": "AGON COUNCIL API",
+      "summary": "Seven archetypal AAR voices with strict 5-part format, lineage-grounded citations, operator review flow, and the clean Captain-versus-Council separation.",
+      "category": "agentic_services",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "voice agent",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "forge-premium-feel-lab",
+      "name": "FORGE PREMIUM FEEL LAB",
+      "summary": "Tooling and runtime assets for hit confirm, whiff, dodge, hurt, enemy windup, ambience, music state, haptic timing, thermal degradation, and content-backed feel diagnostics.",
+      "category": "creative_media",
+      "target_segments": [
+        "indie_ios_builders",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "github",
+        "app_store",
+        "developer_forums",
+        "x"
+      ],
+      "trait_weights": {
+        "native_ios": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.85,
+        "ai_openness": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "ai openness"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "paragon-identity-intel",
+      "name": "PARAGON IDENTITY INTEL",
+      "summary": "Superhero cover/exposure layer with secret identities, institutional surveillance, doxxing risk, faction intel, public trust cascades, and player-visible consequences.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-dance-of-the-realm",
+      "name": "REALM DANCE OF THE REALM",
+      "summary": "Monthly server-defining weekend event with cross-covenant teleports, scoring war, respite, retribution, cross-server invasions, and chronicles generated inside the game.",
+      "category": "games",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "playable loop",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-branchpoint",
+      "name": "SAMAEL BRANCHPOINT",
+      "summary": "Composure-sim productized as SAMAEL's Monte Carlo branch engine for scenario branching, counterfactual forks, sweeps, sensitivity, and signed replayable mission outcomes.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "the-annual-book",
+      "name": "THE ANNUAL BOOK",
+      "summary": "Physical AGON cohort archive with verified missions, squad stats, founder letters, member pages, Pentathlon scorecards, and artifact economy.",
+      "category": "agentic_services",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "paragon-crisis-cycle",
+      "name": "PARAGON CRISIS CYCLE",
+      "summary": "Server-level superhero event architecture for Tier-0 emergence, faction war declaration, public trust collapse, power decay crisis, and cinematic consequences.",
+      "category": "social_irl",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-daily-raven",
+      "name": "REALM DAILY RAVEN",
+      "summary": "In-world procedural newspaper and chronicle that turns oaths, battles, betrayals, dragon sightings, marriages, and court deaths into daily server storytelling.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-accuracy-ledger",
+      "name": "SAMAEL ACCURACY LEDGER",
+      "summary": "Signed provenance chain for world packages, geometry, material claims, route confidence, scenario lineage, and AAR auditability.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "forge-editor-desktop",
+      "name": "FORGE EDITOR DESKTOP",
+      "summary": "Swift editor workflow with document model, command system, undo/redo, hierarchy, inspector, viewport, console shell, and on-device game tuning.",
+      "category": "games",
+      "target_segments": [
+        "indie_ios_builders",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "github",
+        "app_store",
+        "developer_forums",
+        "x"
+      ],
+      "trait_weights": {
+        "native_ios": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.85,
+        "ai_openness": 0.7
+      },
+      "strengths": [
+        "playable loop",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "ai openness"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "paragon-safety-charter-os",
+      "name": "PARAGON SAFETY CHARTER OS",
+      "summary": "Moderation and safety operations product for voice, Chronicles, suicide-content escalation, doxxing, faction abuse, appeals, and solo-beta policy enforcement.",
+      "category": "agentic_services",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "voice agent",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-war-room-voice",
+      "name": "REALM WAR ROOM VOICE",
+      "summary": "Built-in alliance/covenant voice, live march overlays, context-tagged battle calls, rally formation, theater map, and replayable coordination history.",
+      "category": "agentic_services",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "voice agent",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-strata-forge",
+      "name": "SAMAEL STRATA FORGE",
+      "summary": "World-building subsystem that ingests documents, scans, manual edits, and sensor hints, reconciles conflicts, records ledger provenance, and emits signed mission world packages.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "agon-proof-feed",
+      "name": "AGON PROOF FEED",
+      "summary": "Receipt-only squad feed with photo, GPS, HealthKit, screenshots, 60-second voice memos, structural proof checks, and no performative public feed.",
+      "category": "agentic_services",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "voice agent",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "trust and privacy sensitivity"
+      ]
+    },
+    {
+      "id": "roviq-studio-stack",
+      "name": "ROVIQ STUDIO STACK",
+      "summary": "License Forge, Airspace, Sentinel, and Composure as a small-studio tech stack for systems-deep narrative games with AI-native asset and cinematic pipelines.",
+      "category": "games",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "playable loop",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "paragon-six-faction-sim",
+      "name": "PARAGON SIX FACTION SIM",
+      "summary": "Original superhero universe with VANGUARD, SANCTUARY, DEPARTMENT 9, UNDERGROUND, OBSIDIAN, and HALCYON, each with a distinct moral compromise and gameplay loop.",
+      "category": "games",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "playable loop",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-family-crypt",
+      "name": "REALM FAMILY CRYPT",
+      "summary": "Procedural multi-generational memory surface where dead named characters, family lineage, oaths, betrayals, and dragon records accumulate as permanent prestige.",
+      "category": "family",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "emotional utility",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "agon-pentathlon-live",
+      "name": "AGON PENTATHLON LIVE",
+      "summary": "Regional or synchronized Day-30 competition with bodyweight gauntlet, puzzle gauntlet, Lichess bracket, cold exposure cap, squad service hour, and founders patch.",
+      "category": "family",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "samael-flight-omen",
+      "name": "SAMAEL FLIGHT OMEN",
+      "summary": "Aviation cockpit surface for tactical moving map, DDIL resilience, route preservation, aircraft authority under disconnect, and existing DIU OMEN pursuit.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "forge-ai-control-plane",
+      "name": "FORGE AI CONTROL PLANE",
+      "summary": "Context engine, structured tools, patch routing, review loops, provider adapters, Meshy orchestration, and AI-services integration for engine development.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "indie_ios_builders",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "github",
+        "app_store",
+        "developer_forums",
+        "x"
+      ],
+      "trait_weights": {
+        "native_ios": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.85,
+        "ai_openness": 0.7
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "ai openness"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "paragon-event-feed-chronicles",
+      "name": "PARAGON EVENT FEED CHRONICLES",
+      "summary": "Server narrative voice that turns player actions, faction politics, deaths, investigations, and crises into authored-feeling live history.",
+      "category": "agentic_services",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "voice agent",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-mandate-engine",
+      "name": "REALM MANDATE ENGINE",
+      "summary": "Mechanics-as-morality system with Mandate of Heaven, Spirit Ward, Composure Curve, Oathbreaker penalties, anti-whale constraints, and attacker viability.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-range-live",
+      "name": "SAMAEL RANGE LIVE",
+      "summary": "Directed-energy test environment for beam path simulation, thermal coupling, atmospheric turbulence, safety envelopes, and post-test analysis.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "agon-order",
+      "name": "AGON ORDER",
+      "summary": "Long-arc post-cohort identity layer with stages, Naming Day, Annual Book, founder artifacts, and multi-season membership continuity.",
+      "category": "agentic_services",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "paragon-power-decay",
+      "name": "PARAGON POWER DECAY",
+      "summary": "Superhero power-cost system where abilities decay, public trust changes, corporate contracts bite, and player choices become moral liabilities.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-dragon-pov",
+      "name": "REALM DRAGON POV",
+      "summary": "Forge full-scene 3D flight at 60fps with bond state, dragon mood, abilities, battlefield relevance, and marquee technical flex.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-specter-console",
+      "name": "SAMAEL SPECTER CONSOLE",
+      "summary": "RF, spectrum, EW, emissions, propagation, jamming, geolocation, and pattern-of-life module as an operator-facing rehearsal view.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "forge-appstore-factory",
+      "name": "FORGE APPSTORE FACTORY",
+      "summary": "Apple build/sign/deploy/archive/upload pipeline, runtime diagnostics, release evidence, device profiling, and App Store copy/assets for generated games.",
+      "category": "games",
+      "target_segments": [
+        "indie_ios_builders",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "github",
+        "app_store",
+        "developer_forums",
+        "x"
+      ],
+      "trait_weights": {
+        "native_ios": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.85,
+        "ai_openness": 0.7
+      },
+      "strengths": [
+        "playable loop",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "ai openness"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "paragon-court-of-named-people",
+      "name": "PARAGON COURT OF NAMED PEOPLE",
+      "summary": "Character system where every hero, asset, whistleblower, senator, or villain has Loyalty, Honor, Trait, Ambition, Grudge, leverage, and permanent death.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-oath-diplomacy",
+      "name": "REALM OATH DIPLOMACY",
+      "summary": "Formal treaty surface with oath proposals, witnesses, expiration, visible break costs, faith implications, house standing, and betrayal consequences.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "agon-fathers",
+      "name": "AGON FATHERS",
+      "summary": "90-day cohort for new dads using AGON's Captain, Proof Feed, Brotherhood scoring, daily micro-missions, and sober operator tone.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "samael-vector-routes",
+      "name": "SAMAEL VECTOR ROUTES",
+      "summary": "Movement, exposure profile, timing distribution, deconfliction, route confidence, and cost-surface module for facilities, airspace, and range domains.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "needs live-market validation"
+      ]
+    },
+    {
+      "id": "paragon-war-room-voice",
+      "name": "PARAGON WAR ROOM VOICE",
+      "summary": "Faction coordination surface for voice, influence nodes, skirmish UI, crisis-cycle planning, alliances, and daily intel pulls.",
+      "category": "agentic_services",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "voice agent",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "trust and privacy sensitivity",
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-maester-library",
+      "name": "REALM MAESTER LIBRARY",
+      "summary": "Research, lore, raven cages, Dragonlore/Faithlore trees, candle-lit living scene, and knowledge-of-power progression.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "forge-game-feel-benchmark",
+      "name": "FORGE GAME FEEL BENCHMARK",
+      "summary": "Public benchmark suite showing native iOS motion, controls, haptics, thermal truth, draw-call residency, and repeated-entity scale.",
+      "category": "games",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "playable loop",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "agon-atlas",
+      "name": "AGON ATLAS",
+      "summary": "Slow canon platform for reading, listening, watching, cohort-visible marginalia, Daily Passage, and serious anti-TikTok taste formation.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "agon_members",
+        "randy_founder_fit",
+        "creator_operators"
+      ],
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage",
+        "app_store"
+      ],
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.9,
+        "founder_fit": 0.75,
+        "cinematic_taste": 0.7,
+        "social_sharing": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "cohort identity",
+        "habit openness",
+        "founder fit",
+        "cinematic taste",
+        "social sharing"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "samael-murmur-lab",
+      "name": "SAMAEL MURMUR LAB",
+      "summary": "Synthetic adversary, civilian panic/cooperation, sensor failure, and behavior modeling module for mission rehearsal and disaster/crisis simulation.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "defense_operators",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "demo",
+        "defense_procurement",
+        "operator_network",
+        "github"
+      ],
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "risk_resilience": 0.5
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "paragon-prestige-episodes",
+      "name": "PARAGON PRESTIGE EPISODES",
+      "summary": "AI-cinematic weekly episodes where VANGUARD/HALCYON/UNDERGROUND events drive faction state and players see their server's story dramatized.",
+      "category": "social_irl",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "realm-covenant-os",
+      "name": "REALM COVENANT OS",
+      "summary": "4-tier covenant hierarchy with shared buildings, seasonal prestige, daimyo/generals/officers/vassals, help loops, and visible oath culture.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "systems_game_players",
+        "randy_founder_fit"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "native_ios": 0.8,
+        "technical_moat": 0.8,
+        "founder_fit": 0.8,
+        "cinematic_taste": 0.8
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "worldbuilding",
+        "native ios",
+        "technical moat",
+        "founder fit",
+        "cinematic taste"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    },
+    {
+      "id": "the-roviq-universe",
+      "name": "THE ROVIQ UNIVERSE",
+      "summary": "A connected house of PARAGON, REALM, AGON, SAMAEL, Forge, Airspace, Sentinel, and Composure with one recognizable taste and reusable systems.",
+      "category": "consumer_ai",
+      "target_segments": [
+        "randy_founder_fit",
+        "systems_game_players",
+        "indie_ios_builders"
+      ],
+      "channels": [
+        "app_store",
+        "discord",
+        "github",
+        "x"
+      ],
+      "trait_weights": {
+        "worldbuilding": 1,
+        "technical_moat": 0.9,
+        "founder_fit": 0.9,
+        "native_ios": 0.7,
+        "cinematic_taste": 0.9
+      },
+      "strengths": [
+        "clear consumer wedge",
+        "mission rehearsal",
+        "technical moat",
+        "founder fit",
+        "risk resilience"
+      ],
+      "risks": [
+        "higher build complexity"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "founder_project_gravity",
+      "name": "Founder Project Gravity",
+      "focus": "build_speed",
+      "channels": [
+        "github",
+        "founder_network",
+        "demo"
+      ],
+      "weight": 1.25,
+      "intensity": 1,
+      "trait_weights": {
+        "founder_fit": 1,
+        "technical_moat": 0.8,
+        "cinematic_taste": 0.5
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "native_shipability",
+      "name": "Native iOS Shipability",
+      "focus": "build_speed",
+      "channels": [
+        "app_store",
+        "github",
+        "developer_forums"
+      ],
+      "weight": 1,
+      "intensity": 1,
+      "trait_weights": {
+        "native_ios": 1,
+        "technical_moat": 0.8,
+        "founder_fit": 0.7
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "deep_world_retention",
+      "name": "Deep World Retention",
+      "focus": "retention",
+      "channels": [
+        "app_store",
+        "discord",
+        "youtube"
+      ],
+      "weight": 1.05,
+      "intensity": 1,
+      "trait_weights": {
+        "worldbuilding": 1,
+        "habit_openness": 0.8,
+        "cinematic_taste": 0.6
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "defense_rehearsal_credibility",
+      "name": "Defense Rehearsal Credibility",
+      "focus": "paid_conversion",
+      "channels": [
+        "defense_procurement",
+        "operator_network",
+        "diu",
+        "demo"
+      ],
+      "weight": 0.95,
+      "intensity": 1,
+      "trait_weights": {
+        "mission_rehearsal": 1,
+        "technical_moat": 0.9,
+        "risk_resilience": 0.4
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "cohort_identity_loop",
+      "name": "Cohort Identity Loop",
+      "focus": "community_referral",
+      "channels": [
+        "x",
+        "substack",
+        "discord",
+        "imessage"
+      ],
+      "weight": 0.95,
+      "intensity": 1,
+      "trait_weights": {
+        "cohort_identity": 1,
+        "habit_openness": 0.8,
+        "cinematic_taste": 0.4
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "public_viral_proof",
+      "name": "Public Viral Proof",
+      "focus": "viral_launch",
+      "channels": [
+        "x",
+        "tiktok",
+        "instagram",
+        "youtube"
+      ],
+      "weight": 0.9,
+      "intensity": 1,
+      "trait_weights": {
+        "social_sharing": 1,
+        "cinematic_taste": 0.7,
+        "trend_adoption": 0.7
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    },
+    {
+      "id": "platform_reuse_moat",
+      "name": "Platform Reuse Moat",
+      "focus": "build_speed",
+      "channels": [
+        "github",
+        "demo",
+        "enterprise_sales"
+      ],
+      "weight": 1.1,
+      "intensity": 1,
+      "trait_weights": {
+        "technical_moat": 1,
+        "founder_fit": 0.8,
+        "native_ios": 0.5,
+        "mission_rehearsal": 0.5
+      },
+      "metrics": [
+        "market_pull",
+        "viral_loop",
+        "build_speed",
+        "ai_unlock",
+        "consumer_clarity",
+        "willingness_to_pay",
+        "retention_fit",
+        "distribution_fit",
+        "founder_fit",
+        "risk_resilience"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "metric": "founder_fit",
+      "source": "Local project scan",
+      "note": "Recent active repos show unusually high existing asset density around Forge, PARAGON, REALM, SAMAEL, and AGON.",
+      "value": 0.9,
+      "sample_size": 6
+    },
+    {
+      "metric": "build_speed",
+      "source": "Local project scan",
+      "note": "Several candidates already have screen tickets, architecture docs, runtime surfaces, or working crates.",
+      "value": 0.78,
+      "sample_size": 6
+    },
+    {
+      "metric": "retention_fit",
+      "source": "Local project scan",
+      "note": "World, cohort, replay, and chronicle loops are stronger than one-shot novelty loops.",
+      "value": 0.72,
+      "sample_size": 6
+    },
+    {
+      "metric": "risk_resilience",
+      "source": "Project reality check",
+      "note": "Defense and MMO ideas have high ambition and procurement/community risk despite stronger moat.",
+      "value": 0.54,
+      "sample_size": 6
+    }
+  ]
+}
